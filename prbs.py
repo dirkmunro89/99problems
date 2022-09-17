@@ -113,8 +113,14 @@ def mods(prob):
         from prob.pNtop_eoc import simu
         from prob.pNtop_eoc import caml
         from subs.eocdual import eoc as subs
+    elif prob == 'Ntop_swei_duy8':
+        from prob.pNtop_swei_duy8 import init
+        from prob.pNtop_swei_duy8 import apar
+        from prob.pNtop_swei_duy8 import simu
+        from prob.pNtop_swei_duy8 import caml
+        from prob.pNtop_swei_duy8 import subs
     else:
-        print('User defined; looking for problem modules in prob.py')
+        print('Running user defined from temp.py ...')
         from temp import init
         from temp import apar
         from temp import simu
