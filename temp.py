@@ -56,7 +56,7 @@ def init():
  
     # Max and min stiffness
     Emin=0e-9; Emax=1.0
-    gv=-9.81/1e4
+    gv=-9.81/1e3
 
     # dofs
     ndof = 2*(nelx+1)*(nely+1)
