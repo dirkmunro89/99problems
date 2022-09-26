@@ -12,7 +12,7 @@ def con(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
 #
     x=x_dual(d, n, m, x_k, g, dg, d_l, d_u)
 #
-    dq = np.sum(np.where(dg[0]>0.,dg[0]*(x-x_k),-dg[0]*(1e0/x-1e0/x_k)*(x_k)**2e0))
+    dq = np.sum(np.where(dg[0]>0.,dg[0]*(x_k-x),-dg[0]*(1e0/x_k-1e0/x)*(x_k)**2e0))
 #
     return x,d,dq
 #
