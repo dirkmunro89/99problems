@@ -1,0 +1,1 @@
+implement subproblem object with method to retrieve and modify move limit

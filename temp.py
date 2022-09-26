@@ -191,14 +191,14 @@ def simu(n,m,x,aux):
         dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
 #
     g[0]=obj
-    g[1]=np.sum(x)-volfrac_up*n
-    g[2]=-np.sum(x)+volfrac_lo*n
+    g[1]=np.sum(x)/n-volfrac_up
+    g[2]=-np.sum(x)/n+volfrac_lo
 #
 #   print(np.sum(x)/n)
 #
     dg[0][:] = dc
-    dg[1][:] = dv
-    dg[2][:] = -dv
+    dg[1][:] = dv/n
+    dg[2][:] = -dv/n
 #
     return g, dg
 #
