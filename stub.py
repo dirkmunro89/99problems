@@ -1,7 +1,7 @@
 #
 import numpy as np
 #
-class stub:
+class Stub:
 #   instantiate with copies of data (dont return pointers)
     def __init__(self,k,x_k,x_d,mov,d_l,d_u,g_k,dg_k,L_k,U_k,c_x):
         self._k = k

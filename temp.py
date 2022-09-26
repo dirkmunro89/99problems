@@ -16,11 +16,13 @@ def apar():
 #   
     mov=0.5
     asf=[0.7,1.1]
-#       
+#
+    enf=True
+#
     kmx=200
     cnv=[1e-6,1e-6]
 #       
-    return mov, asf, kmx, cnv
+    return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
@@ -33,8 +35,10 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
         L=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k - asf[0]*(x_1 - L_k), x_k - asf[1]*(x_1 - L_k))
         U=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k + asf[0]*(U_k - x_1), x_k + asf[1]*(U_k - x_1))
 #
-    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
-    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
+    L=-1e8*np.ones_like(x_k)
+    U=1e8*np.ones_like(x_k)
+    d_l = np.maximum(np.maximum(x_k-mov*(x_u-x_l),x_l),L)
+    d_u = np.minimum(np.minimum(x_k+mov*(x_u-x_l),x_u),U)
 #
     return c_x,L,U,d_l,d_u
 #
