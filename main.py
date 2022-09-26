@@ -1,10 +1,6 @@
 #
 import sys
 #
-debug = 0
-#
-from functools import partial
-#
 import logging as log
 lvl=log.INFO; fmt='%(message)s'; hdl = [log.FileHandler('history.log',mode='w'),log.StreamHandler()]
 log.basicConfig(level=lvl,format=fmt,handlers=hdl)
@@ -110,7 +106,6 @@ def loop(init,apar,simu,caml,subs):
         rest=0
         if k == 0: prto.append((g_k[0],v_k,k))
         else:
-            print(k,g_k[0],v_k)
             if g_k[0] < min([p[0] for p in prto]) or v_k < min([p[1] for p in prto]):
                 df = g_k[0] - g_1[0]
 #               print('g_k',g_k[0])
@@ -120,17 +115,9 @@ def loop(init,apar,simu,caml,subs):
                 #is not at least 10% of predicted decrease, then something not cool, we try again
                     #htype
                     #restore
-                    if 1 == debug:
-                        mov=mov*0.7
-                        x_k[:]=x_1
-                        g_k[:]=g_1
-                        dg_k[:]=dg_1
-                        v_k=max(g_k[1:])
-#                   print('restore1')
-                    else:
-                        mov=sub1.chg(0.7,x_l,x_u)
-                        [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=sub1.get()
-                        v_k=max(max(g_k[1:]),-1e8)
+                    mov=sub1.chg(0.7,x_l,x_u)
+                    [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=sub1.get()
+                    v_k=max(max(g_k[1:]),-1e8)
 #                   print('retreiving sub from k =', s_k)
                     rest=2
                 else: # update the filter and continue
@@ -145,17 +132,10 @@ def loop(init,apar,simu,caml,subs):
                     mov=mov*1.1
             else: #if not accepted by filter, try again
                 #restore
-                if 1 == debug:
-                    mov=mov*0.7
-                    x_k[:]=x_1
-                    g_k[:]=g_1
-                    dg_k[:]=dg_1
-                    v_k=max(g_k[1:])
-                else:
-                    mov=sub1.chg(0.7,x_l,x_u)
-                    [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=sub1.get()
-                    v_k=max(max(g_k[1:]),-1e8)
-                    print('1 getting at ...', s_k,np.sum(x_k))
+                mov=sub1.chg(0.7,x_l,x_u)
+                [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=sub1.get()
+                v_k=max(max(g_k[1:]),-1e8)
+#               print('1 getting at ...', s_k,np.sum(x_k))
                 rest=1
 #
         h.append(list(g_k)); bdd=np.count_nonzero(x_k-x_l<1e-6)+np.count_nonzero(x_u-x_k<1e-6)
@@ -169,17 +149,13 @@ def loop(init,apar,simu,caml,subs):
 #
         x_0[:]=x_k ## possible to remove?
 #
-        if 1 == debug:
+        if rest==0:
             [c_x,L,U,d_l,d_u] = caml(k, x_k, dg_k, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov)
             L_k[:]=L; U_k[:]=U
-        else:
-            if rest==0:
-                [c_x,L,U,d_l,d_u] = caml(k, x_k, dg_k, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov)
-                L_k[:]=L; U_k[:]=U
-                sub1=stub(k,x_k,x_d,mov,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
-                print('setting at ...', np.sum(x_k))
+            sub1=stub(k,x_k,x_d,mov,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
+#           print('setting at ...', np.sum(x_k))
 #
-        print('...',mov,np.sum(x_k))
+#       print('...',mov,np.sum(x_k))
         [x,d,dq] = subs(n,m,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
 #
         x_k[:]=x; x_d[:]=d; x_2[:]=x_1; x_1[:]=x_0 #possible to move x_k=x to back and say x_1=x_0?
