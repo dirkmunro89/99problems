@@ -19,7 +19,7 @@ def apar():
 #
     enf=True
 #
-    kmx=200
+    kmx=1000
     cnv=[1e-6,1e-6]
 #       
     return mov, asf, enf, kmx, cnv
@@ -54,9 +54,12 @@ def init():
     ft=1 # ft==0 -> sens, ft==1 -> dens
  
     n = nelx*nely; m = 2
-    x_l = np.ones(n,dtype=float)*0.2
+    x_l = np.ones(n,dtype=float)*2e-1
+#   x_l[0]=1.
     x_u = np.ones(n,dtype=float)
     x_k = volfrac_0*np.ones(n,dtype=float)
+    x_k = np.ones(n,dtype=float)
+#   x_k[0]=1.
  
     # Max and min stiffness
     Emin=0e-9; Emax=1.0
