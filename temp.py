@@ -9,6 +9,8 @@ import cvxopt; import cvxopt.cholmod
 # specify subsolver here
 #
 from subs.condual import con as subs
+#from subs.t2dual import t2d as subs
+#from subs.t2dual import t2d as subs
 #
 # specify problem and algorithmic parameters here
 #
@@ -26,7 +28,7 @@ def apar():
 #
 def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.zeros_like(dg)
+    c_x=np.ones_like(dg)*1e-6
 #
     if k<=1:
         L = x_k-mov*(x_u-x_l)
@@ -35,10 +37,14 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
         L=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k - asf[0]*(x_1 - L_k), x_k - asf[1]*(x_1 - L_k))
         U=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k + asf[0]*(U_k - x_1), x_k + asf[1]*(U_k - x_1))
 #
-    L=-1e8*np.ones_like(x_k)
-    U=1e8*np.ones_like(x_k)
-    d_l = np.maximum(np.maximum(x_k-mov*(x_u-x_l),x_l),L)
-    d_u = np.minimum(np.minimum(x_k+mov*(x_u-x_l),x_u),U)
+#   c_x=np.where(dg < 0, -2./np.maximum(x_k-L,1e-6)*dg, 2./np.maximum(U-x_k,1e-6)*dg)
+#
+#   L=-1e8*np.ones_like(x_k)
+#   U=1e8*np.ones_like(x_k)
+#   d_l = np.maximum(np.maximum(x_k-mov*(x_u-x_l),x_l),L)
+#   d_u = np.minimum(np.minimum(x_k+mov*(x_u-x_l),x_u),U)
+    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
+    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
 #
     return c_x,L,U,d_l,d_u
 #
@@ -47,23 +53,24 @@ def init():
     nelx=20
     nely=20
     volfrac_lo=0.01
-    volfrac_0=0.8
+    volfrac_0=.8
     volfrac_up=0.8
     rmin=1.1
-    penal=2.0
+    penal=2.#2.0
     ft=1 # ft==0 -> sens, ft==1 -> dens
  
     n = nelx*nely; m = 2
     x_l = np.ones(n,dtype=float)*2e-1
-#   x_l[0]=1.
     x_u = np.ones(n,dtype=float)
     x_k = volfrac_0*np.ones(n,dtype=float)
-    x_k = np.ones(n,dtype=float)
-#   x_k[0]=1.
- 
+
     # Max and min stiffness
-    Emin=0e-9; Emax=1.0
-    gv=-9.81/1e3
+    Emin=0e0; Emax=1.0
+    gv=-9.81/1e3*np.ones_like(x_k)
+
+#   s=3
+#   for q in range(s):
+#       x_l[q*nelx:q*nelx+s]=1
 
     # dofs
     ndof = 2*(nelx+1)*(nely+1)
@@ -109,7 +116,9 @@ def init():
     # BC's and support
     dofs=np.arange(2*(nelx+1)*(nely+1))
     ndofy=2*(nely+1)
-    fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 2 , ndof - 1]))
+    ndofx=2*(nelx+1)
+    fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 2, ndof - 1]))
+#   fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 1]))
     free=np.setdiff1d(dofs,fixed)
 
     # Solution and RHS vectors
@@ -129,9 +138,14 @@ def init():
     fig.show()
 #
     aux=[nelx,nely,volfrac_lo,volfrac_0,volfrac_up,rmin,penal,ft,Emax,Emin,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig]
+        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,x_u,x_l]
 #
     return n,m,x_l,x_u,x_k,aux
+#
+def xPena(muc,penal,xPhys):
+    return np.where(xPhys < muc, xPhys*muc**(penal-1e0), xPhys**penal)
+def dxPena(muc,penal,xPhys):
+    return np.where(xPhys < muc, muc**(penal-1e0), penal*xPhys**(penal-1)) 
 #
 def simu(n,m,x,aux):
 #
@@ -144,7 +158,7 @@ def simu(n,m,x,aux):
     dv=np.ones(n,dtype=float)
 #
     [nelx,nely,volfrac_lo,volfrac_0,volfrac_up,rmin,penal,ft,Emax,Emin,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig]=aux
+        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,x_u,x_l]=aux
 #
     # Filter design variables
     if ft==0:   xPhys[:]=x
@@ -156,21 +170,17 @@ def simu(n,m,x,aux):
     fig.canvas.flush_events()
     plt.savefig('topo.eps')
 #
-#   muc=0.25
-#   xPena = np.where(xPhys < muc, xPhys*muc**(penal-1e0), xPhys**penal   )
-#   dxPena = np.where(xPhys < muc, muc**(penal-1e0), penal*xPhys**(penal-1)   )
-#
+    qenal=1.0
+    muc=0.#25
     # Setup and solve FE problem
-#   sK=((KE.flatten()[np.newaxis]).T*((xPena)*(Emax-Emin))).flatten(order='F')
-#   sK=((KE.flatten()[np.newaxis]).T*(Emin+(xPena)*(Emax-Emin))).flatten(order='F')
-#   sK=((KE.flatten()[np.newaxis]).T*((xPena)*(Emax))).flatten(order='F')
-    sK=((KE.flatten()[np.newaxis]).T*((xPhys)**penal*(Emax))).flatten(order='F')
+    sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,penal,xPhys)*(Emax-Emin))).flatten(order='F')
     K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()
     # Remove constrained dofs from matrix and convert to coo
     K = deleterowcol(K,fixed,fixed).tocoo()
     # Set self-weight load
     f_tmp=np.zeros(ndof)
-    np.add.at(f_tmp, edofMat[:, 1::2].flatten(), np.kron(xPhys, gv * np.ones(4)/4. ))
+#   np.add.at(f_tmp, edofMat[:, 1::2].flatten(), np.kron(xPhys * gv,  np.ones(4)/4. ))
+    np.add.at(f_tmp, edofMat[:, 1::2].flatten(),np.kron(xPena(muc,qenal,xPhys)* gv, np.ones(4)/4. ))
     f_apl = f.copy()
     f_apl[:,0] += f_tmp
     # Solve system 
@@ -181,14 +191,12 @@ def simu(n,m,x,aux):
 
     # Objective and sensitivity
     ce[:] = (np.dot(u[edofMat].reshape(nelx*nely,8),KE)*u[edofMat].reshape(nelx*nely,8) ).sum(1)
-#   obj = ( (xPena*(Emax))*ce ).sum()
-#   obj = ( (Emin+xPena*(Emax-Emin))*ce ).sum()
-    obj = ( (xPhys**penal*(Emax))*ce ).sum()
-#   dc[:] = (-dxPena*(Emax))*ce
-#   dc[:] = (-dxPena*(Emax-Emin))*ce
-    dc[:] = (-penal*xPhys**(penal-1)*(Emax))*ce
-    dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4.
-    dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4.
+#   obj = ( (Emin + xPhys**penal*(Emax-Emin))*ce ).sum()
+    obj = ( (Emin + xPena(muc,penal,xPhys)*(Emax-Emin))*ce ).sum()
+#   dc[:] = (-penal*xPhys**(penal-1)*(Emax-Emin))*ce
+    dc[:] = -dxPena(muc,penal,xPhys)*(Emax-Emin)*ce
+    dc[:] += 2. * gv * dxPena(muc,qenal,xPhys) * u[edofMat[:,1],0] * 1./4.; dc[:] += 2. * gv * dxPena(muc,qenal,xPhys) * u[edofMat[:,3],0] * 1./4.
+    dc[:] += 2. * gv * dxPena(muc,qenal,xPhys) * u[edofMat[:,5],0] * 1./4.; dc[:] += 2. * gv * dxPena(muc,qenal,xPhys) * u[edofMat[:,7],0] * 1./4.
     dv[:] = np.ones(nely*nelx)
     # Sensitivity filtering:
     if ft==0:
@@ -197,15 +205,15 @@ def simu(n,m,x,aux):
         dc[:] = np.asarray(H*(dc[np.newaxis].T/Hs))[:,0]
         dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
 #
-    g[0]=obj
+    g[0]=obj#/n
     g[1]=np.sum(x)/n-volfrac_up
     g[2]=-np.sum(x)/n+volfrac_lo
+#   g[3] = 4.*np.sum((x_u-x)*(x-x_l))/n -1e6
 #
-#   print(np.sum(x)/n)
-#
-    dg[0][:] = dc
+    dg[0][:] = dc#/n
     dg[1][:] = dv/n
     dg[2][:] = -dv/n
+#   dg[3][:] = 4.*((x_u-x)-(x-x_l))/n
 #
     return g, dg
 #
