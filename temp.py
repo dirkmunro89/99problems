@@ -50,17 +50,18 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
 def init():
 #
-    nelx=20
-    nely=20
-    volfrac_lo=0.01
-    volfrac_0=.8
-    volfrac_up=0.8
-    rmin=1.1
-    penal=2.#2.0
+    mm=3
+    nelx=20*mm
+    nely=20*mm
+    volfrac_lo=0.01#0.2
+    volfrac_0=1.#.2
+    volfrac_up=1.
+    rmin=1.1*mm
+    penal=3.#2.0
     ft=1 # ft==0 -> sens, ft==1 -> dens
  
     n = nelx*nely; m = 2
-    x_l = np.ones(n,dtype=float)*2e-1
+    x_l = np.ones(n,dtype=float)*1e-3
     x_u = np.ones(n,dtype=float)
     x_k = volfrac_0*np.ones(n,dtype=float)
 
@@ -165,13 +166,13 @@ def simu(n,m,x,aux):
     elif ft==1:    xPhys[:]=np.asarray(H*x[np.newaxis].T/Hs)[:,0]
 #
     # Plot to screen and save
-    im.set_array(-xPhys.reshape((nelx,nely)).T)
+    im.set_array(-x.reshape((nelx,nely)).T)
     fig.canvas.draw()
     fig.canvas.flush_events()
     plt.savefig('topo.eps')
 #
     qenal=1.0
-    muc=0.#25
+    muc=0.25
     # Setup and solve FE problem
     sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,penal,xPhys)*(Emax-Emin))).flatten(order='F')
     K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()
@@ -205,12 +206,12 @@ def simu(n,m,x,aux):
         dc[:] = np.asarray(H*(dc[np.newaxis].T/Hs))[:,0]
         dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
 #
-    g[0]=obj#/n
+    g[0]=obj/n
     g[1]=np.sum(x)/n-volfrac_up
     g[2]=-np.sum(x)/n+volfrac_lo
-#   g[3] = 4.*np.sum((x_u-x)*(x-x_l))/n -1e6
+#   g[3] = 4.*np.sum((x_u-x)*(x-x_l))/n -1e-1
 #
-    dg[0][:] = dc#/n
+    dg[0][:] = dc/n
     dg[1][:] = dv/n
     dg[2][:] = -dv/n
 #   dg[3][:] = 4.*((x_u-x)-(x-x_l))/n

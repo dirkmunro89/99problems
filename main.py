@@ -40,10 +40,10 @@ def loop(init,apar,simu,caml,subs):
             else:
                 cont=prto.pas(g_1[0],g_k[0],v_k,dq)
                 if cont:
-                    mov=mov*1.1
+                    mov=mov*2.0
                     prto.add(g_k[0],v_k)
                 else:
-                    mov=stub.chg(0.7,x_l,x_u)
+                    mov=stub.chg(0.5,x_l,x_u)
                     [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=stub.get()
         else:
             if k == 0: prto.add(g_k[0],v_k)
@@ -54,13 +54,13 @@ def loop(init,apar,simu,caml,subs):
 #
         if not str(test).strip(): itr=str(cont)[0]
         else: itr=str(test)[0]
-        h.append(list(g_k)); bdd=np.count_nonzero(x_k-x_l<1e-6)+np.count_nonzero(x_u-x_k<1e-6)
+        h.append(list(g_k)); bdd=np.count_nonzero(x_k-x_l<1e-6)/n+np.count_nonzero(x_u-x_k<1e-6)/n
         if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)
-        log.info('%3d%3s%14.3e%9.0e%7i%11.1e%11.1e'%\
+        log.info('%3d%3s%14.3e%9.0e%7.2f%11.1e%11.1e'%\
             (k, itr, g_k[0], v_k, bdd, d_xi, d_xe))#,flush=True)
 #
         if cont and k>0: 
-            if d_xi<cnv[0] or d_xe<cnv[1]: break
+            if d_xi<cnv[0] or d_xe<cnv[1] or mov < 1e-8: break
 #
         if cont:
             [c_x,L,U,d_l,d_u] = caml(k, x_k, dg_k, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov)

@@ -5,7 +5,7 @@ class Prto:
 #
     def __init__(self):
         self.frnt = []
-        self.sgma = 1e-1
+        self.sgma = 1e-6#1
         self.gama = 1e-5
         self.beta =  1.-self.gama
 #
