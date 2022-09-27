@@ -16,10 +16,10 @@ from subs.t2dual import t2d as subs
 #
 def apar():
 #   
-    mov=0.2
+    mov=0.1
     asf=[0.7,1.1]
 #
-    enf='c-a'
+    enf='t-r'
 #
     kmx=1000
     cnv=[1e-2,1e-2]
@@ -28,9 +28,9 @@ def apar():
 #
 def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
+#   c_x=-2e0*(dg)/x_k
     c_x=2e0*np.absolute(dg)/x_k
-    c_x=-2e0*(dg)/x_k
-    c_x[1:]=1.e-3
+    c_x[1:]=0e0
 #
     c_x=np.maximum(c_x,1e-3)
 #
@@ -48,12 +48,12 @@ def init():
     nelx=2*20*mm
     nelx=20*mm
     nely=20*mm
-    volfrac_lo=0.1#1#0.2
+    volfrac_lo=0.1#0.2
     volfrac_lo=0.2#1#0.2
-    volfrac_0=1.#.2
+    volfrac_0=.5
     volfrac_up=1.
-    rmin=1.1*mm
-    penal=3.#3.0
+    rmin=1.1*mm#1.1
+    penal=4.#3.0
     ft=1 # ft==0 -> sens, ft==1 -> dens
  
     n = nelx*nely; m = 2
@@ -66,7 +66,7 @@ def init():
     gv=-9.81/1e3*np.ones_like(x_k)
 
 #   for q in range(mm):
-#       x_l[q*nelx:q*nelx+mm]=1
+#       x_l[q*nelx:q*nelx+mm]=1.
 
     # dofs
     ndof = 2*(nelx+1)*(nely+1)
@@ -84,47 +84,49 @@ def init():
     iK = np.kron(edofMat,np.ones((8,1))).flatten()
     jK = np.kron(edofMat,np.ones((1,8))).flatten()    
 
-#   d_ext=ceil(rmin)
-#   nelx_ext=nelx+d_ext
-#   nely_ext=nely+2*d_ext
+    d_ext=int(np.ceil(rmin))
+    nelx_ext=nelx+d_ext
+    nely_ext=nely+2*d_ext
 
     # Filter: Build (and assemble) the index+data vectors for the coo matrix format
-    nfilter=int(nelx*nely*((2*(np.ceil(rmin)-1)+1)**2))
-#   nfilter=int(nelx_ext*nely_ext*((2*(np.ceil(rmin)-1)+1)**2))
+#   nfilter=int(nelx*nely*((2*(np.ceil(rmin)-1)+1)**2))
+    nfilter=int(nelx_ext*nely_ext*((2*(np.ceil(rmin)-1)+1)**2))
     iH = np.zeros(nfilter)
     jH = np.zeros(nfilter)
     sH = np.zeros(nfilter)
     cc=0
-    for i in range(nelx):
-#   for i in range(nelx_ext):
-        for j in range(nely):
-#       for j in range(nely_ext):
-            row=i*nely+j
-#           row=i*nely_ext+j
+#   for i in range(nelx):
+    for i in range(nelx_ext):
+#       for j in range(nely):
+        for j in range(nely_ext):
+#           row=i*nely+j
+            row=i*nely_ext+j
             kk1=int(np.maximum(i-(np.ceil(rmin)-1),0))
-            kk2=int(np.minimum(i+np.ceil(rmin),nelx))
+            kk2=int(np.minimum(i+np.ceil(rmin),nelx_ext))
+#           kk2=int(np.minimum(i+np.ceil(rmin),nelx))
             ll1=int(np.maximum(j-(np.ceil(rmin)-1),0))
-            ll2=int(np.minimum(j+np.ceil(rmin),nely))
+            ll2=int(np.minimum(j+np.ceil(rmin),nely_ext))
+#           ll2=int(np.minimum(j+np.ceil(rmin),nely))
             for k in range(kk1,kk2):
                 for l in range(ll1,ll2):
-                    col=k*nely+l
-#                   col=k*nely_ext+l
+#                   col=k*nely+l
+                    col=k*nely_ext+l
                     fac=rmin-np.sqrt(((i-k)*(i-k)+(j-l)*(j-l)))
                     iH[cc]=row
                     jH[cc]=col
                     sH[cc]=np.maximum(0.0,fac)
                     cc=cc+1
     # Finalize assembly and convert to csc format
-    H=coo_matrix((sH,(iH,jH)),shape=(nelx*nely,nelx*nely)).tocsc()    
-#   H=coo_matrix((sH,(iH,jH)),shape=(nelx_ext*nely_ext,nelx_ext*nely_ext)).tocsc()    
+#   H=coo_matrix((sH,(iH,jH)),shape=(nelx*nely,nelx*nely)).tocsc()    
+    H=coo_matrix((sH,(iH,jH)),shape=(nelx_ext*nely_ext,nelx_ext*nely_ext)).tocsc()    
     Hs=H.sum(1)
 
     # BC's and support
     dofs=np.arange(2*(nelx+1)*(nely+1))
     ndofy=2*(nely+1)
     ndofx=2*(nelx+1)
-    fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 2, ndof - 1]))
 #   fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 1]))
+    fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 2, ndof - 1]))
     free=np.setdiff1d(dofs,fixed)
 
     # Solution and RHS vectors
@@ -144,7 +146,7 @@ def init():
     fig.show()
 #
     aux=[nelx,nely,volfrac_lo,volfrac_0,volfrac_up,rmin,penal,ft,Emax,Emin,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,x_u,x_l]
+        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,x_u,x_l,d_ext,nelx_ext,nely_ext]
 #
     return n,m,x_l,x_u,x_k,aux
 #
@@ -166,20 +168,29 @@ def simu(n,m,x,aux):
     dv=np.ones(n,dtype=float)
 #
     [nelx,nely,volfrac_lo,volfrac_0,volfrac_up,rmin,penal,ft,Emax,Emin,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,x_u,x_l]=aux
+        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,x_u,x_l,d_ext,nelx_ext,nely_ext]=aux
+#
+    tmp=x.reshape(nelx,nely)
+    x_ext=np.zeros((nelx_ext,nely_ext))
+    x_ext[:nelx,d_ext:nely_ext-d_ext]=tmp
+    x_ext[nelx-d_ext:,nely+d_ext:]=1.
+    x_ext[nelx:,nely:nely+d_ext]=1.
+    x_ext=x_ext.flatten()
 #
     # Filter design variables
     if ft==0:   xPhys[:]=x
-    elif ft==1:    xPhys[:]=np.asarray(H*x[np.newaxis].T/Hs)[:,0]
+#   elif ft==1:    xPhys[:]=np.asarray(H*x[np.newaxis].T/Hs)[:,0]
+    elif ft==1:    xPhys[:]=np.asarray(H*x_ext[np.newaxis].T/Hs)[:,0].reshape(nelx_ext,nely_ext)[0:nelx,d_ext:nely_ext-d_ext].flatten()
 #
     # Plot to screen and save
-    im.set_array(-x.reshape((nelx,nely)).T)
+    im.set_array(-x_ext.reshape((nelx_ext,nely_ext)).T)
+#   im.set_array(-xPhys.reshape((nelx,nely)).T)
     fig.canvas.draw()
     fig.canvas.flush_events()
     plt.savefig('topo.eps')
 #
     qenal=1.0
-    muc=1e-1#1e-1
+    muc=1e-2
     # Setup and solve FE problem
     sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,penal,xPhys)*(Emax-Emin))).flatten(order='F')
     K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()
@@ -206,12 +217,25 @@ def simu(n,m,x,aux):
     dc[:] += 2. * gv * dxPena(muc,qenal,xPhys) * u[edofMat[:,1],0] * 1./4.; dc[:] += 2. * gv * dxPena(muc,qenal,xPhys) * u[edofMat[:,3],0] * 1./4.
     dc[:] += 2. * gv * dxPena(muc,qenal,xPhys) * u[edofMat[:,5],0] * 1./4.; dc[:] += 2. * gv * dxPena(muc,qenal,xPhys) * u[edofMat[:,7],0] * 1./4.
     dv[:] = np.ones(nely*nelx)
+
     # Sensitivity filtering:
     if ft==0:
         dc[:] = np.asarray((H*(x*dc))[np.newaxis].T/Hs)[:,0] / np.maximum(0.001,x)
     elif ft==1:
-        dc[:] = np.asarray(H*(dc[np.newaxis].T/Hs))[:,0]
-        dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
+#       dc[:] = np.asarray(H*(dc[np.newaxis].T/Hs))[:,0]
+#       dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
+
+        tmp1=dc.reshape(nelx,nely)
+        tmp2=np.zeros((nelx_ext,nely_ext))
+        tmp2[0:nelx,d_ext:nely_ext-d_ext]=tmp1
+        tmp3=tmp2.flatten()
+        dc[:]=np.asarray(H*(tmp3[np.newaxis].T/Hs))[:,0].reshape(nelx_ext,nely_ext)[0:nelx,d_ext:nely_ext-d_ext].flatten()
+
+        tmp1=dv.reshape(nelx,nely)
+        tmp2=np.zeros((nelx_ext,nely_ext))
+        tmp2[0:nelx,d_ext:nely_ext-d_ext]=tmp1
+        tmp3=tmp2.flatten()
+        dv[:]=np.asarray(H*(tmp3[np.newaxis].T/Hs))[:,0].reshape(nelx_ext,nely_ext)[0:nelx,d_ext:nely_ext-d_ext].flatten()
 #
     g[0]=obj/n
     g[1]=np.sum(x)/n-volfrac_up
