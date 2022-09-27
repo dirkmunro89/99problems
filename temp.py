@@ -8,41 +8,35 @@ import cvxopt; import cvxopt.cholmod
 #
 # specify subsolver here
 #
-from subs.condual import con as subs
-#from subs.t2dual import t2d as subs
+#from subs.condual import con as subs
+from subs.t2dual import t2d as subs
 #from subs.t2dual import t2d as subs
 #
 # specify problem and algorithmic parameters here
 #
 def apar():
 #   
-    mov=0.5
+    mov=0.2
     asf=[0.7,1.1]
 #
-    enf=True
+    enf='c-a'
 #
     kmx=1000
-    cnv=[1e-6,1e-6]
+    cnv=[1e-2,1e-2]
 #       
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.ones_like(dg)*1e-6
+    c_x=2e0*np.absolute(dg)/x_k
+    c_x=-2e0*(dg)/x_k
+    c_x[1:]=1.e-3
 #
-    if k<=1:
-        L = x_k-mov*(x_u-x_l)
-        U = x_k+mov*(x_u-x_l)
-    else:
-        L=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k - asf[0]*(x_1 - L_k), x_k - asf[1]*(x_1 - L_k))
-        U=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k + asf[0]*(U_k - x_1), x_k + asf[1]*(U_k - x_1))
+    c_x=np.maximum(c_x,1e-3)
 #
-#   c_x=np.where(dg < 0, -2./np.maximum(x_k-L,1e-6)*dg, 2./np.maximum(U-x_k,1e-6)*dg)
+    L=x_k
+    U=x_k
 #
-#   L=-1e8*np.ones_like(x_k)
-#   U=1e8*np.ones_like(x_k)
-#   d_l = np.maximum(np.maximum(x_k-mov*(x_u-x_l),x_l),L)
-#   d_u = np.minimum(np.minimum(x_k+mov*(x_u-x_l),x_u),U)
     d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
     d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
 #
@@ -51,13 +45,15 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 def init():
 #
     mm=3
+    nelx=2*20*mm
     nelx=20*mm
     nely=20*mm
-    volfrac_lo=0.01#0.2
+    volfrac_lo=0.1#1#0.2
+    volfrac_lo=0.2#1#0.2
     volfrac_0=1.#.2
     volfrac_up=1.
     rmin=1.1*mm
-    penal=3.#2.0
+    penal=3.#3.0
     ft=1 # ft==0 -> sens, ft==1 -> dens
  
     n = nelx*nely; m = 2
@@ -69,9 +65,8 @@ def init():
     Emin=0e0; Emax=1.0
     gv=-9.81/1e3*np.ones_like(x_k)
 
-#   s=3
-#   for q in range(s):
-#       x_l[q*nelx:q*nelx+s]=1
+#   for q in range(mm):
+#       x_l[q*nelx:q*nelx+mm]=1
 
     # dofs
     ndof = 2*(nelx+1)*(nely+1)
@@ -89,15 +84,23 @@ def init():
     iK = np.kron(edofMat,np.ones((8,1))).flatten()
     jK = np.kron(edofMat,np.ones((1,8))).flatten()    
 
+#   d_ext=ceil(rmin)
+#   nelx_ext=nelx+d_ext
+#   nely_ext=nely+2*d_ext
+
     # Filter: Build (and assemble) the index+data vectors for the coo matrix format
     nfilter=int(nelx*nely*((2*(np.ceil(rmin)-1)+1)**2))
+#   nfilter=int(nelx_ext*nely_ext*((2*(np.ceil(rmin)-1)+1)**2))
     iH = np.zeros(nfilter)
     jH = np.zeros(nfilter)
     sH = np.zeros(nfilter)
     cc=0
     for i in range(nelx):
+#   for i in range(nelx_ext):
         for j in range(nely):
+#       for j in range(nely_ext):
             row=i*nely+j
+#           row=i*nely_ext+j
             kk1=int(np.maximum(i-(np.ceil(rmin)-1),0))
             kk2=int(np.minimum(i+np.ceil(rmin),nelx))
             ll1=int(np.maximum(j-(np.ceil(rmin)-1),0))
@@ -105,6 +108,7 @@ def init():
             for k in range(kk1,kk2):
                 for l in range(ll1,ll2):
                     col=k*nely+l
+#                   col=k*nely_ext+l
                     fac=rmin-np.sqrt(((i-k)*(i-k)+(j-l)*(j-l)))
                     iH[cc]=row
                     jH[cc]=col
@@ -112,6 +116,7 @@ def init():
                     cc=cc+1
     # Finalize assembly and convert to csc format
     H=coo_matrix((sH,(iH,jH)),shape=(nelx*nely,nelx*nely)).tocsc()    
+#   H=coo_matrix((sH,(iH,jH)),shape=(nelx_ext*nely_ext,nelx_ext*nely_ext)).tocsc()    
     Hs=H.sum(1)
 
     # BC's and support
@@ -144,9 +149,11 @@ def init():
     return n,m,x_l,x_u,x_k,aux
 #
 def xPena(muc,penal,xPhys):
-    return np.where(xPhys < muc, xPhys*muc**(penal-1e0), xPhys**penal)
+    return muc*xPhys + (1-muc)*xPhys**penal
+#   return np.where(xPhys < muc, xPhys*muc**(penal-1e0), xPhys**penal)
 def dxPena(muc,penal,xPhys):
-    return np.where(xPhys < muc, muc**(penal-1e0), penal*xPhys**(penal-1)) 
+    return muc + penal*(1-muc)*xPhys**(penal-1.)
+#   return np.where(xPhys < muc, muc**(penal-1e0), penal*xPhys**(penal-1)) 
 #
 def simu(n,m,x,aux):
 #
@@ -172,7 +179,7 @@ def simu(n,m,x,aux):
     plt.savefig('topo.eps')
 #
     qenal=1.0
-    muc=0.25
+    muc=1e-1#1e-1
     # Setup and solve FE problem
     sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,penal,xPhys)*(Emax-Emin))).flatten(order='F')
     K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()

@@ -8,7 +8,7 @@ log.basicConfig(level=lvl,format=fmt,handlers=hdl)
 import numpy as np
 from prbs import mods
 from stub import Stub
-from prto import Prto
+from enfc import Enfc
 #
 def loop(init,apar,simu,caml,subs):
 #
@@ -26,7 +26,7 @@ def loop(init,apar,simu,caml,subs):
     log.info(('%3s%3s%14s%9s%7s%11s%11s')%\
         ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||'))#,flush=True)
 #
-    prto = Prto()
+    enfc = Enfc()
 #
     while k<kmx:
 #
@@ -35,21 +35,31 @@ def loop(init,apar,simu,caml,subs):
         v_k=max(g_k[1:])
 #
         cont=True; test=' '
-        if enf:
-            if k == 0: prto.add(g_k[0],v_k)
+        if enf == 't-r':
+            if k == 0: enfc.par_add(g_k[0],v_k,k)
             else:
-                cont=prto.pas(g_1[0],g_k[0],v_k,dq)
+                cont=enfc.par_pas(g_1[0],g_k[0],v_k,dq)
                 if cont:
                     mov=mov*2.0
-                    prto.add(g_k[0],v_k)
+                    enfc.par_add(g_k[0],v_k,k)
                 else:
-                    mov=stub.chg(0.5,x_l,x_u)
+                    mov=stub.set_mov(0.5,x_l,x_u)
                     [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=stub.get()
+        elif enf == 'c-a':
+            if k == 0: enfc.par_add(g_k[0],v_k,k)
+            else:
+                cont=enfc.con_pas(g_1,g_k,q_k)
+                if cont:
+                    test=enfc.par_pas(g_1[0],g_k[0],v_k,dq)
+                    if test: enfc.par_add(g_k[0],v_k,k)
+                else:
+                    [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=stub.get()
+                    c_x[:]=stub.set_crv(2.,g_k,q_k)
         else:
-            if k == 0: prto.add(g_k[0],v_k)
+            if k == 0: enfc.par_add(g_k[0],v_k,k)
             else: 
-                test=prto.pas(g_1[0],g_k[0],v_k,dq)
-                if test: prto.add(g_k[0],v_k)
+                test=enfc.par_pas(g_1[0],g_k[0],v_k,dq)
+                if test: enfc.par_add(g_k[0],v_k,k)
         v_k=max(g_k[1:])
 #
         if not str(test).strip(): itr=str(cont)[0]
@@ -60,15 +70,16 @@ def loop(init,apar,simu,caml,subs):
             (k, itr, g_k[0], v_k, bdd, d_xi, d_xe))#,flush=True)
 #
         if cont and k>0: 
-            if d_xi<cnv[0] or d_xe<cnv[1] or mov < 1e-8: break
+            if d_xi<cnv[0] or d_xe<cnv[1]: break
+        if mov<1e-8: break
 #
         if cont:
-            [c_x,L,U,d_l,d_u] = caml(k, x_k, dg_k, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov)
+            [c_x,L,U,d_l,d_u] = caml(k,x_k,dg_k,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
             L_k[:]=L; U_k[:]=U
-            if enf: stub=Stub(k,x_k,x_d,mov,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
+            if enf == 't-r' or enf == 'c-a': stub=Stub(k,x_k,x_d,mov,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
 #
         x_0[:]=x_k 
-        [x,d,dq] = subs(n,m,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
+        [x,d,dq,q_k] = subs(n,m,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
         x_k[:]=x; x_d[:]=d
 #
         if cont:
@@ -76,7 +87,7 @@ def loop(init,apar,simu,caml,subs):
 #
         k=k+1
 #
-    prto.plt(g_k[0],v_k)
+    enfc.par_plt()
 #
     return h
 #

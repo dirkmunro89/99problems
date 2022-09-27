@@ -1,7 +1,8 @@
 #
+import numpy as np
 import matplotlib.pyplot as plt
 #
-class Prto:
+class Enfc:
 #
     def __init__(self):
         self.frnt = []
@@ -9,7 +10,17 @@ class Prto:
         self.gama = 1e-5
         self.beta =  1.-self.gama
 #
-    def pas(self,f_1,f_k,v_k,dq):
+    def con_pas(self,g_1,g_k,q_k):
+        # if feasible descent
+        if g_k[0] < g_1[0] and max(g_k[1:])<=0.:
+            return True
+        # conservative
+        elif all(np.greater(q_k,g_k-1e-6)):
+            return True
+        else:
+            return False
+#
+    def par_pas(self,f_1,f_k,v_k,dq):
         beta=self.beta
         gama=self.gama
         sgma=self.sgma
@@ -23,25 +34,27 @@ class Prto:
                 return True
         else: return False
 #
-    def add(self,f_k,v_k):
+    def par_add(self,f_k,v_k,k):
         frnt=self.frnt
-        frnt.append((f_k,v_k)); frnt=sorted(frnt,key=lambda x:-x[0]); tmp=[]
+        frnt.append((f_k,v_k,k)); frnt=sorted(frnt,key=lambda x:-x[0]); tmp=[]
         for p in frnt:
             if f_k >= p[0] or v_k >= p[1]: tmp.append(p)
         self.frnt=tmp
 #
-    def plt(self,f_k,v_k):
+    def par_plt(self):
         plt.clf()
+        z=[itm[2] for itm in self.frnt]; size=list(30.*np.array(z)/max(z)+20.)
         x=[itm[1] for itm in self.frnt]
         y=[itm[0] for itm in self.frnt]
         plt.grid()
-        plt.plot(x, y, color='g', linewidth=0.5)
+        plt.plot(x, y, color='black', linewidth=.1)
         plt.xlabel("Vio.")
         plt.ylabel("Obj.")
-        plt.scatter(x,y,marker='+',s=15,linewidths=0.5,color='b')
-        plt.scatter(v_k,f_k,marker='o',s=15,linewidths=0.5,color='r',zorder=10)
+        plt.scatter(x,y,c=z,marker='o',s=size,linewidths=0.5,alpha=1.0,zorder=5)
         plt.rcParams['axes.autolimit_mode'] = 'round_numbers'
         plt.rcParams['axes.axisbelow'] = True
+        plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        plt.colorbar()
         plt.savefig('prto.eps')
         plt.close()
 #
