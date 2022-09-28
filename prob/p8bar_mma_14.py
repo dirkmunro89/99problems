@@ -16,11 +16,13 @@ def apar():
 #   
     mov=2.
     asf=[1/4,4/1]
-#       
+#  
+    enf='none'
+#     
     kmx=9
     cnv=[1e-6,1e-6]
 #       
-    return mov, asf, kmx, cnv
+    return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #

@@ -19,7 +19,7 @@ def apar():
     mov=0.1
     asf=[0.7,1.1]
 #
-    enf='t-r'
+    enf='c-a'
 #
     kmx=1000
     cnv=[1e-2,1e-2]
@@ -32,7 +32,10 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     c_x=2e0*np.absolute(dg)/x_k
     c_x[1:]=0e0
 #
-    c_x=np.maximum(c_x,1e-3)
+    c_x=np.maximum(c_x,1e-6)
+#
+#   LP
+#   c_x[:]=1e-6
 #
     L=x_k
     U=x_k
@@ -45,15 +48,15 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 def init():
 #
     mm=3
-    nelx=2*20*mm
     nelx=20*mm
+    nelx=2*20*mm
     nely=20*mm
     volfrac_lo=0.1#0.2
     volfrac_lo=0.2#1#0.2
     volfrac_0=.5
     volfrac_up=1.
     rmin=1.1*mm#1.1
-    penal=4.#3.0
+    penal=4.#4.0
     ft=1 # ft==0 -> sens, ft==1 -> dens
  
     n = nelx*nely; m = 2
@@ -125,8 +128,8 @@ def init():
     dofs=np.arange(2*(nelx+1)*(nely+1))
     ndofy=2*(nely+1)
     ndofx=2*(nelx+1)
-#   fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 1]))
-    fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 2, ndof - 1]))
+    fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 1]))
+#   fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 2, ndof - 1]))
     free=np.setdiff1d(dofs,fixed)
 
     # Solution and RHS vectors

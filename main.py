@@ -21,7 +21,7 @@ def loop(init,apar,simu,caml,subs):
     k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
     x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
-    L=np.zeros_like(x_k); U=np.zeros_like(x_k)
+    L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n))
 #
     log.info(('%3s%3s%14s%9s%7s%11s%11s')%\
         ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||'))#,flush=True)
@@ -40,7 +40,7 @@ def loop(init,apar,simu,caml,subs):
             else:
                 cont=enfc.par_pas(g_1[0],g_k[0],v_k,dq)
                 if cont:
-                    mov=mov*1.1
+                    mov=mov#*1.1
                     enfc.par_add(g_k[0],v_k,k)
                 else:
                     mov=stub.set_mov(0.7,x_l,x_u)
@@ -70,8 +70,10 @@ def loop(init,apar,simu,caml,subs):
             (k, itr, g_k[0], v_k, bdd, d_xi, d_xe))#,flush=True)
 #
         if cont and k>0: 
-            if d_xi<cnv[0] or d_xe<cnv[1]: break
-        if mov<1e-8: break
+            if d_xi<cnv[0] or d_xe<cnv[1]: log.info('Convergence and Termination'); break
+        if mov<1e-8 or np.count_nonzero(c_x>1e8): 
+            [_,_] = simu(n,m,x_k,aux)
+            log.info('Enforced Termination'); break
 #
         if cont:
             [c_x,L,U,d_l,d_u] = caml(k,x_k,dg_k,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
@@ -88,6 +90,7 @@ def loop(init,apar,simu,caml,subs):
         k=k+1
 #
     enfc.par_plt()
+    enfc.cnv_plt(h)
 #
     return h
 #

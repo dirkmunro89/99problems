@@ -22,7 +22,11 @@ def mma(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
 #
     x=x_dual(d, n, m, r, p, q, d_l, d_u, L, U)
 #
-    return x,d
+#   tmp np.sum(p/(U-x_k),axis=1)+np.sum(q/(x_k-L),axis=1)-np.sum(p/(U-x),axis=1)-np.sum(q/(x-L),axis=1)
+    q_k=r+np.sum(p/(U-x),axis=1)+np.sum(q/(x-L),axis=1)
+    dq=g[0]-q_k[0]
+#
+    return x,d,dq,q_k
 #
 # primal variables in terms of dual variables 
 #
@@ -39,7 +43,7 @@ def x_dual(x_d, n, m, r, p, q, d_l, d_u, L, U):
 def mma_dual(x_d, n, m, r, p, q, d_l, d_u, L, U):
 #
     x=x_dual(x_d, n, m, r, p, q, d_l, d_u, L, U)
-    W=r[0]+np.sum(p[0]/(U-x)+np.dot(x_d,p[1:])/(U-x))+np.sum(q[0]/(U-x)+np.dot(x_d,q[1:])/(x-L)) \
+    W=r[0]+np.sum(p[0]/(U-x)+np.dot(x_d,p[1:])/(U-x))+np.sum(q[0]/(x-L)+np.dot(x_d,q[1:])/(x-L)) \
         -np.dot(x_d,-r[1:])
 #
     return -W
