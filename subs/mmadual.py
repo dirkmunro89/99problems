@@ -24,9 +24,9 @@ def mma(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
 #
 #   tmp np.sum(p/(U-x_k),axis=1)+np.sum(q/(x_k-L),axis=1)-np.sum(p/(U-x),axis=1)-np.sum(q/(x-L),axis=1)
     q_k=r+np.sum(p/(U-x),axis=1)+np.sum(q/(x-L),axis=1)
-    dq=g[0]-q_k[0]
+#   dq=g[0]-q_k[0]
 #
-    return x,d,dq,q_k
+    return x,d,q_k
 #
 # primal variables in terms of dual variables 
 #

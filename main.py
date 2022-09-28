@@ -38,19 +38,19 @@ def loop(init,apar,simu,caml,subs):
         if enf == 't-r':
             if k == 0: enfc.par_add(g_k[0],v_k,k)
             else:
-                cont=enfc.par_pas(g_1[0],g_k[0],v_k,dq)
+                cont=enfc.par_pas(g_1[0],g_k[0],v_k,q_k[0])
                 if cont:
-                    mov=mov#*1.1
+                    mov=mov*1.1
                     enfc.par_add(g_k[0],v_k,k)
                 else:
-                    mov=stub.set_mov(0.7,x_l,x_u)
+                    mov=stub.set_mov(0.5,x_l,x_u)
                     [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'c-a':
             if k == 0: enfc.par_add(g_k[0],v_k,k)
             else:
                 cont=enfc.con_pas(g_1,g_k,q_k)
                 if cont:
-                    test=enfc.par_pas(g_1[0],g_k[0],v_k,dq)
+                    test=enfc.par_pas(g_1[0],g_k[0],v_k,q_k[0])
                     if test: enfc.par_add(g_k[0],v_k,k)
                 else:
                     [s_k,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x]=stub.get()
@@ -58,7 +58,7 @@ def loop(init,apar,simu,caml,subs):
         else:
             if k == 0: enfc.par_add(g_k[0],v_k,k)
             else: 
-                test=enfc.par_pas(g_1[0],g_k[0],v_k,dq)
+                test=enfc.par_pas(g_1[0],g_k[0],v_k,q_k[0])
                 if test: enfc.par_add(g_k[0],v_k,k)
         v_k=max(g_k[1:])
 #
@@ -81,7 +81,7 @@ def loop(init,apar,simu,caml,subs):
             if enf == 't-r' or enf == 'c-a': stub=Stub(k,x_k,x_d,mov,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
 #
         x_0[:]=x_k 
-        [x,d,dq,q_k] = subs(n,m,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
+        [x,d,q_k] = subs(n,m,x_k,x_d,d_l,d_u,g_k,dg_k,L_k,U_k,c_x)
         x_k[:]=x; x_d[:]=d
 #
         if cont:

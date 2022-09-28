@@ -15,10 +15,10 @@ def eoc(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
 #
 #   tmp=np.dot(dg,(x_k-x)*(x_k/(x+1e-6)))
     q_k=g+np.dot(dg,(x - x_k)*(x_k/(x+1e-6)))
-    dq=g[0]-q_k[0]
+#   dq=g[0]-q_k[0]
 #   print(tmp,dq)
 #
-    return x,d,dq,q_k
+    return x,d,q_k
 #
 # primal variables in terms of dual variables 
 #

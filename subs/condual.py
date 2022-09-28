@@ -18,10 +18,10 @@ def con(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
     for i in range(m+1):
         q_k[i] = q_k[i] + np.sum(np.where(dg[i]>0.,dg[i]*(x-x_k),-dg[i]*(1e0/x-1e0/x_k)*(x_k)**2e0))
 #
-    dq=g[0]-q_k[0]
+#   dq=g[0]-q_k[0]
 #   print(g-q_k,dq)
 #
-    return x,d,dq,q_k
+    return x,d,q_k
 #
 # CONLIN: x in terms of dual variables 
 #
