@@ -72,6 +72,7 @@ class Enfc:
         plt.rcParams['axes.axisbelow'] = True
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.colorbar()
+        plt.grid(linestyle='dotted')
         plt.savefig('prto.eps')
         plt.close()
 #
@@ -95,21 +96,23 @@ class Enfc:
 #
         plt.clf()
         plt.grid()
-        plt.plot(range(len(f)), f, color='black', linewidth=1.)
+        plt.plot(range(len(f)), f, color='black', linewidth=2.)
         plt.xlabel("k")
         plt.ylabel("Obj.")
         plt.xlim(0,len(f))
-        plt.xticks(range(len(f)))
+#       plt.xticks(range(len(f)))
+        plt.grid(linestyle='dotted')
         plt.savefig('conf'+ext)
         plt.close()
 #
         plt.clf()
         plt.grid()
-        plt.plot(range(len(v)), v, color='black', linewidth=1.)
+        plt.plot(range(len(v)), v, color='black', linewidth=2.)
         plt.xlabel("k")
         plt.ylabel("Obj.")
         plt.xlim(0,len(v))
-        plt.xticks(range(len(v)))
+#       plt.xticks(range(len(v)))
+        plt.grid(linestyle='dotted')
         plt.savefig('conv'+ext)
         plt.close()
 #
