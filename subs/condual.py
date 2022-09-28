@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.optimize import minimize
 #
-def con(n,m,k,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
+def con(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
 #
     bds=[[1e-6,1e8] for i in range(m)]; tup_bds=tuple(bds)
     sol=minimize(con_dual,x_d,args=(n,m,x_k,g,dg,d_l,d_u), \
@@ -12,7 +12,16 @@ def con(n,m,k,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
 #
     x=x_dual(d, n, m, x_k, g, dg, d_l, d_u)
 #
-    return x,d
+#   dq = -np.sum(np.where(dg[0]>0.,dg[0]*(x-x_k),-dg[0]*(1e0/x-1e0/x_k)*(x_k)**2e0))
+#   dq = dq + np.sum(np.where(dg[0]>0.,dg[0]*(x_k-x_k),-dg[0]*(1e0/x_k-1e0/x_k)*(x_k)**2e0))
+    q_k=g.copy()
+    for i in range(m+1):
+        q_k[i] = q_k[i] + np.sum(np.where(dg[i]>0.,dg[i]*(x-x_k),-dg[i]*(1e0/x-1e0/x_k)*(x_k)**2e0))
+#
+#   dq=g[0]-q_k[0]
+#   print(g-q_k,dq)
+#
+    return x,d,q_k
 #
 # CONLIN: x in terms of dual variables 
 #
@@ -71,4 +80,3 @@ def dcon_dual(x_d, n, m, x_k, g, dg, dx_l, dx_u):
 #
     return -dW
 #
-

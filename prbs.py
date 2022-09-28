@@ -48,7 +48,7 @@ def mods(prob):
         from prob.p2bar import apar
         from prob.p2bar import simu
         from prob.p2bar import caml
-        from subs.dlpml import dlp as subs
+        from subs.t2dual import t2d as subs
     elif '8bar_mma_34' in prob: #tested
         from prob.p8bar_mma_34 import init
         from prob.p8bar_mma_34 import apar

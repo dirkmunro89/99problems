@@ -23,10 +23,12 @@ def apar():
     mov=0.2
     asf=[0.7,1.1]
 #
+    enf='none'
+#
     kmx=10
     cnv=[1e-6,1e-6]
 #
-    return mov, asf, kmx, cnv
+    return mov, asf, enf, kmx, cnv
 #
 def init():
 #
