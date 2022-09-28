@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 *.eps
+*.pgf
 
 # C extensions
 *.so
