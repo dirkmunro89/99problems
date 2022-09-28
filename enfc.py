@@ -16,7 +16,7 @@ class Enfc:
     def con_pas(self,g_1,g_k,q_k):
         # if feasible descent
         gama=self.gama
-        if g_k[0] + gama/10.*g_k[0] < g_1[0] and max(g_k[1:])<=0.:
+        if g_k[0] + gama*g_k[0]/10. < g_1[0] and max(g_k[1:])<=0.:
             return True
         # conservative
         elif all(np.greater(q_k,g_k)):
@@ -29,7 +29,7 @@ class Enfc:
         gama=self.gama
         sgma=self.sgma
         frnt=self.frnt
-        if f_k+gama*(v_k+1./10.*f_k)<min([p[0] for p in frnt]) or v_k<beta*min([p[1] for p in frnt]):
+        if f_k+gama*(v_k+f_k)<min([p[0] for p in frnt]) or v_k<beta*min([p[1] for p in frnt]):
             df = f_1 - f_k # actual descent
             dq = f_1 - p_k # approximated descent
             if df < sgma*dq and dq > 0: # approx has descended / predicted a descent, 

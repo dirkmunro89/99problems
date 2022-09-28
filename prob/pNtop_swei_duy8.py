@@ -16,11 +16,13 @@ def apar():
 #   
     mov=0.5
     asf=[0.7,1.1]
-#       
+#  
+    enf='none' # run with none and with t-r
+#     
     kmx=200
-    cnv=[1e-6,1e-6]
+    cnv=[1e-2,1e-2]
 #       
-    return mov, asf, kmx, cnv
+    return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
@@ -33,8 +35,12 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
         L=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k - asf[0]*(x_1 - L_k), x_k - asf[1]*(x_1 - L_k))
         U=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k + asf[0]*(U_k - x_1), x_k + asf[1]*(U_k - x_1))
 #
+#   run with and without L and U based aml
+#
     d_l = np.maximum(np.maximum(x_k-mov*(x_u-x_l),x_l),L)
     d_u = np.minimum(np.minimum(x_k+mov*(x_u-x_l),x_u),U)
+#   d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
+#   d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
 #
     return c_x,L,U,d_l,d_u
 #
@@ -43,7 +49,7 @@ def init():
     nelx=20
     nely=20
     volfrac_lo=0.01
-    volfrac_0=0.8
+    volfrac_0=1.0
     volfrac_up=0.8
     rmin=1.1
     penal=2.0
@@ -149,14 +155,7 @@ def simu(n,m,x,aux):
     fig.canvas.flush_events()
     plt.savefig('topo.eps')
 #
-#   muc=0.25
-#   xPena = np.where(xPhys < muc, xPhys*muc**(penal-1e0), xPhys**penal   )
-#   dxPena = np.where(xPhys < muc, muc**(penal-1e0), penal*xPhys**(penal-1)   )
-#
     # Setup and solve FE problem
-#   sK=((KE.flatten()[np.newaxis]).T*((xPena)*(Emax-Emin))).flatten(order='F')
-#   sK=((KE.flatten()[np.newaxis]).T*(Emin+(xPena)*(Emax-Emin))).flatten(order='F')
-#   sK=((KE.flatten()[np.newaxis]).T*((xPena)*(Emax))).flatten(order='F')
     sK=((KE.flatten()[np.newaxis]).T*((xPhys)**penal*(Emax))).flatten(order='F')
     K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()
     # Remove constrained dofs from matrix and convert to coo
@@ -174,11 +173,7 @@ def simu(n,m,x,aux):
 
     # Objective and sensitivity
     ce[:] = (np.dot(u[edofMat].reshape(nelx*nely,8),KE)*u[edofMat].reshape(nelx*nely,8) ).sum(1)
-#   obj = ( (xPena*(Emax))*ce ).sum()
-#   obj = ( (Emin+xPena*(Emax-Emin))*ce ).sum()
     obj = ( (xPhys**penal*(Emax))*ce ).sum()
-#   dc[:] = (-dxPena*(Emax))*ce
-#   dc[:] = (-dxPena*(Emax-Emin))*ce
     dc[:] = (-penal*xPhys**(penal-1)*(Emax))*ce
     dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4.
     dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4.
@@ -193,8 +188,6 @@ def simu(n,m,x,aux):
     g[0]=obj
     g[1]=np.sum(x)/n-volfrac_up
     g[2]=-np.sum(x)/n+volfrac_lo
-#
-    print(np.sum(x)/n)
 #
     dg[0][:] = dc
     dg[1][:] = dv/n
