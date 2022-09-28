@@ -17,7 +17,7 @@ def apar():
     mov=0.5
     asf=[0.7,1.1]
 #  
-    enf='none' # run with none and with t-r
+    enf='t-r' # run with none and with t-r
 #     
     kmx=200
     cnv=[1e-2,1e-2]
@@ -37,10 +37,10 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
 #   run with and without L and U based aml
 #
-    d_l = np.maximum(np.maximum(x_k-mov*(x_u-x_l),x_l),L)
-    d_u = np.minimum(np.minimum(x_k+mov*(x_u-x_l),x_u),U)
-#   d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
-#   d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
+#   d_l = np.maximum(np.maximum(x_k-mov*(x_u-x_l),x_l),L)
+#   d_u = np.minimum(np.minimum(x_k+mov*(x_u-x_l),x_u),U)
+    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
+    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
 #
     return c_x,L,U,d_l,d_u
 #
