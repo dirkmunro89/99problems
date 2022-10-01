@@ -16,14 +16,12 @@ def apar():
     mov=0.1
     asf=[0.7,1.1]
 #
-    enf='c-a'
+    enf='t-r'
 #
     kmx=1000
     cnv=[1e-2,1e-2]
-#
-    glo=2
-#
-    return mov, asf, enf, kmx, cnv, glo
+#       
+    return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
@@ -47,6 +45,7 @@ def init():
 #
     mm=3
     nelx=20*mm
+    nelx=2*20*mm
     nely=20*mm
     v_l = 0.2
     v_0 = 0.5
@@ -71,7 +70,8 @@ def init():
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-#
+    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
+
     # Set load
     frc=[(1,0)]
 #

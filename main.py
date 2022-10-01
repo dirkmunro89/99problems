@@ -5,21 +5,25 @@ import logging as log
 lvl=log.INFO; fmt='%(message)s'; hdl = [log.FileHandler('history.log',mode='w'),log.StreamHandler()]
 log.basicConfig(level=lvl,format=fmt,handlers=hdl)
 #
+import random
 import numpy as np
 from prbs import mods
 from stub import Stub
 from enfc import Enfc
 #
-def loop(init,apar,simu,caml,subs):
+def loop(init,apar,simu,caml,subs,glo):
 #
     [n,m,x_l,x_u,x_k,aux]=init()
 #
-    x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
-#
     [mov,asf,enf,kmx,cnv]=apar()
 #
+    if glo:
+        for i in range(n): x_k[i]=random.uniform(x_l[i],x_u[i])
+#
+    x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
+#
     mov0=mov; k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
-    x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
+    x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n))
 #
@@ -72,7 +76,7 @@ def loop(init,apar,simu,caml,subs):
         if k>0 and cont : 
             if d_xi<cnv[0] or d_xe<cnv[1]: log.info('Termination on Convergence criteria'); break
         if k>0 and mov<cnv[0]:# or np.count_nonzero(c_x>1e8): 
-            [_,_] = simu(n,m,x_k,aux)
+            [g_k,_] = simu(n,m,x_k,aux)
             log.info('Enforced Termination; excessively reduced trust-region'); break
         if k>0 and np.amax(c_x)>1e16:
             log.info('Enforced Termination; excessive conservatism'); break
@@ -94,13 +98,16 @@ def loop(init,apar,simu,caml,subs):
     enfc.par_plt()
     enfc.cnv_plt(h)
 #
-    return h
+    if glo: return x_i, x_k, g_k
+    else: return h
 #
 def main(prob):
 #
+    glo=False
     log.info(prob)
     [init,apar,simu,caml,subs]=mods(prob)
-    h=loop(init,apar,simu,caml,subs)
+    h=loop(init,apar,simu,caml,subs,glo)
+#
     return h
 #
 if __name__ == "__main__":
@@ -108,5 +115,10 @@ if __name__ == "__main__":
     if len(sys.argv)>1: prob = sys.argv[1]
     else: prob='user'
     [init,apar,simu,caml,subs]=mods(prob)
-    h=loop(init,apar,simu,caml,subs)
+#
+    glo=10
+#
+    for g in range(glo):
+        [x_i,x_k,g_k]=loop(init,apar,simu,caml,subs,glo)
+        np.savez_compressed('glo_%d.npz'%g, x_i=x_i, x_k=x_k, g_k=g_k)
 #
