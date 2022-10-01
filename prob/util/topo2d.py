@@ -6,65 +6,10 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 import cvxopt; import cvxopt.cholmod
 #
-# specify subsolver here
+def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,muc,Emin,Emax,gv,vis):
 #
-from subs.condual import con as subs
-#
-# specify problem and algorithmic parameters here
-#
-def apar():
-#   
-    mov=0.5
-    asf=[0.7,1.1]
-#  
-    enf='none' # run with none and with t-r
-#     
-    kmx=200
-    cnv=[1e-2,1e-2]
-#       
-    return mov, asf, enf, kmx, cnv
-#
-def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
-#
-    c_x=np.zeros_like(dg)
-#
-    if k<=1:
-        L = x_k-mov*(x_u-x_l)
-        U = x_k+mov*(x_u-x_l)
-    else:
-        L=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k - asf[0]*(x_1 - L_k), x_k - asf[1]*(x_1 - L_k))
-        U=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k + asf[0]*(U_k - x_1), x_k + asf[1]*(U_k - x_1))
-#
-#   run with and without L and U based aml
-#
-    d_l = np.maximum(np.maximum(x_k-mov*(x_u-x_l),x_l),L)
-    d_u = np.minimum(np.minimum(x_k+mov*(x_u-x_l),x_u),U)
-#   d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
-#   d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
-#
-    return c_x,L,U,d_l,d_u
-#
-def init():
-#
-    nelx=20
-    nely=20
-    volfrac_lo=0.01
-    volfrac_0=1.0
-    volfrac_up=0.8
-    rmin=1.1
-    penal=2.0
-    ft=1 # ft==0 -> sens, ft==1 -> dens
- 
-    n = nelx*nely; m = 2
-    x_l = np.ones(n,dtype=float)*0.2
-    x_u = np.ones(n,dtype=float)
-    x_k = volfrac_0*np.ones(n,dtype=float)
- 
-    # Max and min stiffness
-    Emin=0e-9; Emax=1.0
-    gv=-9.81/1e3
-
     # dofs
+    nelm=nelx*nely
     ndof = 2*(nelx+1)*(nely+1)
 
     # FE: Build the index vectors for the for coo matrix format.
@@ -81,34 +26,33 @@ def init():
     jK = np.kron(edofMat,np.ones((1,8))).flatten()    
 
     # Filter: Build (and assemble) the index+data vectors for the coo matrix format
-    nfilter=int(nelx*nely*((2*(np.ceil(rmin)-1)+1)**2))
+    nfilter=int(felx*fely*((2*(np.ceil(rmin)-1)+1)**2))
     iH = np.zeros(nfilter)
     jH = np.zeros(nfilter)
     sH = np.zeros(nfilter)
     cc=0
-    for i in range(nelx):
-        for j in range(nely):
-            row=i*nely+j
+    for i in range(felx):
+        for j in range(fely):
+            row=i*fely+j
             kk1=int(np.maximum(i-(np.ceil(rmin)-1),0))
-            kk2=int(np.minimum(i+np.ceil(rmin),nelx))
+            kk2=int(np.minimum(i+np.ceil(rmin),felx))
             ll1=int(np.maximum(j-(np.ceil(rmin)-1),0))
-            ll2=int(np.minimum(j+np.ceil(rmin),nely))
+            ll2=int(np.minimum(j+np.ceil(rmin),fely))
             for k in range(kk1,kk2):
                 for l in range(ll1,ll2):
-                    col=k*nely+l
+                    col=k*fely+l
                     fac=rmin-np.sqrt(((i-k)*(i-k)+(j-l)*(j-l)))
                     iH[cc]=row
                     jH[cc]=col
                     sH[cc]=np.maximum(0.0,fac)
                     cc=cc+1
     # Finalize assembly and convert to csc format
-    H=coo_matrix((sH,(iH,jH)),shape=(nelx*nely,nelx*nely)).tocsc()    
+    H=coo_matrix((sH,(iH,jH)),shape=(felx*fely,felx*fely)).tocsc()    
     Hs=H.sum(1)
 
     # BC's and support
     dofs=np.arange(2*(nelx+1)*(nely+1))
-    ndofy=2*(nely+1)
-    fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 2 , ndof - 1]))
+#   fixed=np.union1d(dofs[0:2*(nely+1):2],np.array([2*(nelx+1)*(nely+1)-1]))
     free=np.setdiff1d(dofs,fixed)
 
     # Solution and RHS vectors
@@ -116,47 +60,63 @@ def init():
     u=np.zeros((ndof,1))
 
     # Set load
-    f[1,0]=0
+    f[[i[0] for i in force],0]=[i[1] for i in force]
 
-    xPhys=np.ones(n,dtype=float)*volfrac_0
+    xPhys=np.ones(nelm,dtype=float)*v_0
 
     # Initialize plot and plot the initial design
-    plt.ion()
-    fig,ax = plt.subplots()
-    im = ax.imshow(-xPhys.reshape((nelx,nely)).T, cmap='gray',\
-    interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
-    fig.show()
+    if vis:
+        plt.ion(); fig,ax = plt.subplots()
+        pad=np.argwhere(xPadd <= -1).flatten()
+        tmp=xPadd.copy(); tmp[pad]=xPhys
+        im = ax.imshow(-tmp.reshape((felx,fely)).T, cmap='gray',\
+        interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
+    else:
+        fig=0; im=0
 #
-    aux=[nelx,nely,volfrac_lo,volfrac_0,volfrac_up,rmin,penal,ft,Emax,Emin,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig]
+    aux=[nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,muc,Emin,Emax,gv,\
+        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,vis]
 #
-    return n,m,x_l,x_u,x_k,aux
+    return aux
 #
-def simu(n,m,x,aux):
+def xPena(muc,penal,xPhys):
+    return muc*xPhys + (1-muc)*xPhys**penal
+def dxPena(muc,penal,xPhys):
+    return muc + penal*(1-muc)*xPhys**(penal-1.)
 #
-    g = np.zeros((m + 1), dtype=float)
-    dg = np.zeros((m + 1, n), dtype=float)
+def topo2d_simu(n,m,x,aux):
 #
     ce=np.zeros(n,dtype=float)
     dc=np.zeros(n,dtype=float)
     xPhys=np.zeros(n,dtype=float)
     dv=np.ones(n,dtype=float)
 #
-    [nelx,nely,volfrac_lo,volfrac_0,volfrac_up,rmin,penal,ft,Emax,Emin,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig]=aux
+    [nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,muc,Emin,Emax,gv,\
+        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,vis]=aux
+#
+    if np.count_nonzero(xPadd <= -1) != len(x):
+        print('Filter padding error')
+        stop
+#
+    pad=np.argwhere(xPadd <= -1).flatten()
 #
     # Filter design variables
     if ft==0:   xPhys[:]=x
-    elif ft==1:    xPhys[:]=np.asarray(H*x[np.newaxis].T/Hs)[:,0]
+    elif ft==1: 
+        tmp=xPadd.copy(); tmp[pad]=x
+        xPhys[:]=np.asarray(H*tmp[np.newaxis].T/Hs)[:,0][pad] ###
 #
-    # Plot to screen and save
-    im.set_array(-xPhys.reshape((nelx,nely)).T)
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-    plt.savefig('topo.eps')
+    if vis:
+        # Plot to screen and save
+        tmp=xPadd.copy(); tmp[pad]=x
+        im.set_array(-tmp.reshape((felx,fely)).T)
+#       im.set_array(-tmp.reshape((felx,fely)).T)
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+        plt.savefig('topo.eps')
 #
     # Setup and solve FE problem
-    sK=((KE.flatten()[np.newaxis]).T*((xPhys)**penal*(Emax))).flatten(order='F')
+    sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,pen,xPhys)*(Emax-Emin))).flatten(order='F')
     K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()
     # Remove constrained dofs from matrix and convert to coo
     K = deleterowcol(K,fixed,fixed).tocoo()
@@ -173,8 +133,8 @@ def simu(n,m,x,aux):
 
     # Objective and sensitivity
     ce[:] = (np.dot(u[edofMat].reshape(nelx*nely,8),KE)*u[edofMat].reshape(nelx*nely,8) ).sum(1)
-    obj = ( (xPhys**penal*(Emax))*ce ).sum()
-    dc[:] = (-penal*xPhys**(penal-1)*(Emax))*ce
+    obj = ( (Emin+xPena(muc,pen,xPhys)*(Emax-Emin))*ce ).sum()
+    dc[:] = -dxPena(muc,pen,xPhys)*(Emax-Emin)*ce
     dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4.
     dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4.
     dv[:] = np.ones(nely*nelx)
@@ -182,18 +142,13 @@ def simu(n,m,x,aux):
     if ft==0:
         dc[:] = np.asarray((H*(x*dc))[np.newaxis].T/Hs)[:,0] / np.maximum(0.001,x)
     elif ft==1:
-        dc[:] = np.asarray(H*(dc[np.newaxis].T/Hs))[:,0]
-        dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
+        tmp=np.zeros_like(xPadd)
+        tmp[pad]=dc; dc[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
+        tmp[pad]=dv; dv[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
 #
-    g[0]=obj
-    g[1]=np.sum(x)/n-volfrac_up
-    g[2]=-np.sum(x)/n+volfrac_lo
+    v=np.sum(x) #should volume be calculated as sum of xPhys...?
 #
-    dg[0][:] = dc
-    dg[1][:] = dv/n
-    dg[2][:] = -dv/n
-#
-    return g, dg
+    return obj,dc,v,dv
 #
 #element stiffness matrix
 def lk():

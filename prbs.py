@@ -119,6 +119,12 @@ def mods(prob):
         from prob.pNtop_swei_duy8 import simu
         from prob.pNtop_swei_duy8 import caml
         from prob.pNtop_swei_duy8 import subs
+    elif prob == 'Ntop_swei_enf1':
+        from prob.pNtop_swei_enf1 import init
+        from prob.pNtop_swei_enf1 import apar
+        from prob.pNtop_swei_enf1 import simu
+        from prob.pNtop_swei_enf1 import caml
+        from prob.pNtop_swei_enf1 import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init
