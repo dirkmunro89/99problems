@@ -24,9 +24,9 @@ def apar():
 #       
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.zeros_like(dg)
+    c_x=np.zeros_like(df)
 #
     if k<=1:
         L = x_k-mov*(x_u-x_l)
@@ -44,7 +44,7 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     return c_x,L,U,d_l,d_u
 #
-def init():
+def init(g):
 #
     nelx=20
     nely=20
@@ -132,10 +132,10 @@ def init():
 #
     return n,m,x_l,x_u,x_k,aux
 #
-def simu(n,m,x,aux):
+def simu(n,m,x,aux,g):
 #
-    g = np.zeros((m + 1), dtype=float)
-    dg = np.zeros((m + 1, n), dtype=float)
+    f = np.zeros((m + 1), dtype=float)
+    df = np.zeros((m + 1, n), dtype=float)
 #
     ce=np.zeros(n,dtype=float)
     dc=np.zeros(n,dtype=float)
@@ -185,15 +185,15 @@ def simu(n,m,x,aux):
         dc[:] = np.asarray(H*(dc[np.newaxis].T/Hs))[:,0]
         dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
 #
-    g[0]=obj
-    g[1]=np.sum(x)/n-volfrac_up
-    g[2]=-np.sum(x)/n+volfrac_lo
+    f[0]=obj
+    f[1]=np.sum(x)/n-volfrac_up
+    f[2]=-np.sum(x)/n+volfrac_lo
 #
-    dg[0][:] = dc
-    dg[1][:] = dv/n
-    dg[2][:] = -dv/n
+    df[0][:] = dc
+    df[1][:] = dv/n
+    df[2][:] = -dv/n
 #
-    return g, dg
+    return f, df
 #
 #element stiffness matrix
 def lk():

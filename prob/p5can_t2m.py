@@ -1,7 +1,7 @@
 #
 import numpy as np
 #
-def init():
+def init(g):
 #
     n = 5; m = 1
     x_k = 5.*np.ones(n,dtype=float)
@@ -24,9 +24,9 @@ def apar():
 #
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.zeros_like(dg)
+    c_x=np.zeros_like(df)
 #
     if k<=1:
         L = x_k-0.5*(x_u-x_l)
@@ -40,7 +40,7 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #   U = np.maximum(U, x_k+1e-5*(x_u-x_l))
 #   U = np.minimum(U, x_k+1e+2*(x_u-x_l))
 #
-    c_x=np.where(dg < 0, -2/(x_k-L)*dg, 2/(U-x_k)*dg)
+    c_x=np.where(df < 0, -2/(x_k-L)*df, 2/(U-x_k)*df)
 #
     d_l = np.maximum(L, x_l)
     d_u = np.minimum(U, x_u)
@@ -50,20 +50,20 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     return c_x,L,U,d_l,d_u
 #
-def simu(n,m,x,aux):
+def simu(n,m,x,aux,g):
 #
     c1 = 0.0624
     c2 = np.array([61, 37, 19, 7, 1], dtype=float)
 #
-    g = np.zeros((m + 1), dtype=float)
-    g[0] = c1 * np.sum(x)
-    g[1] = np.dot(c2, 1 / x ** 3) - 1
+    f = np.zeros((m + 1), dtype=float)
+    f[0] = c1 * np.sum(x)
+    f[1] = np.dot(c2, 1 / x ** 3) - 1
 #
-    dg = np.zeros((m + 1, n), dtype=float)
-    dg[0][:] = c1
-    dg[1][:] = -3 * c2 / x ** 4
+    df = np.zeros((m + 1, n), dtype=float)
+    df[0][:] = c1
+    df[1][:] = -3 * c2 / x ** 4
 #
-    return g, dg
+    return f, df
 #
 
 

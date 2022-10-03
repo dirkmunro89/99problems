@@ -19,6 +19,14 @@ test:
 docs:
 	sphinx-build -b html docs/source/ docs/build/
 
+.PHONY: clean
+clean:
+	rm -f *.log
+	rm -f *.npz
+	rm -f *.eps
+	rm -f *.pdf
+	rm -f *.pgf
+
 .PHONY: docsclean
 docsclean:
 	rm -rf docs/build/

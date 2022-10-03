@@ -119,30 +119,30 @@ def mods(prob):
         from prob.pNtop_swei_duy8 import simu
         from prob.pNtop_swei_duy8 import caml
         from prob.pNtop_swei_duy8 import subs
-    elif prob == 'Ntop_swei_enf1':
-        from prob.pNtop_swei_enf1 import init
-        from prob.pNtop_swei_enf1 import apar
-        from prob.pNtop_swei_enf1 import simu
-        from prob.pNtop_swei_enf1 import caml
-        from prob.pNtop_swei_enf1 import subs
-    elif prob == 'Ntop_swei_enf2':
-        from prob.pNtop_swei_enf2 import init
-        from prob.pNtop_swei_enf2 import apar
-        from prob.pNtop_swei_enf2 import simu
-        from prob.pNtop_swei_enf2 import caml
-        from prob.pNtop_swei_enf2 import subs
-    elif prob == 'Ntop_swei_enf3':
-        from prob.pNtop_swei_enf3 import init
-        from prob.pNtop_swei_enf3 import apar
-        from prob.pNtop_swei_enf3 import simu
-        from prob.pNtop_swei_enf3 import caml
-        from prob.pNtop_swei_enf3 import subs
-    elif prob == 'Ntop_swei_enf4':
-        from prob.pNtop_swei_enf4 import init
-        from prob.pNtop_swei_enf4 import apar
-        from prob.pNtop_swei_enf4 import simu
-        from prob.pNtop_swei_enf4 import caml
-        from prob.pNtop_swei_enf4 import subs
+    elif prob == 'Ntop_swei_enf1a':
+        from prob.pNtop_swei_enf1a import init
+        from prob.pNtop_swei_enf1a import apar
+        from prob.pNtop_swei_enf1a import simu
+        from prob.pNtop_swei_enf1a import caml
+        from prob.pNtop_swei_enf1a import subs
+    elif prob == 'Ntop_swei_enf1b':
+        from prob.pNtop_swei_enf1b import init
+        from prob.pNtop_swei_enf1b import apar
+        from prob.pNtop_swei_enf1b import simu
+        from prob.pNtop_swei_enf1b import caml
+        from prob.pNtop_swei_enf1b import subs
+    elif prob == 'Ntop_swei_enf2a':
+        from prob.pNtop_swei_enf2a import init
+        from prob.pNtop_swei_enf2a import apar
+        from prob.pNtop_swei_enf2a import simu
+        from prob.pNtop_swei_enf2a import caml
+        from prob.pNtop_swei_enf2a import subs
+    elif prob == 'Ntop_swei_enf2b':
+        from prob.pNtop_swei_enf2b import init
+        from prob.pNtop_swei_enf2b import apar
+        from prob.pNtop_swei_enf2b import simu
+        from prob.pNtop_swei_enf2b import caml
+        from prob.pNtop_swei_enf2b import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init

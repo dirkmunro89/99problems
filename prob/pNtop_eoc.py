@@ -3,9 +3,9 @@ import numpy as np
 from prob.util.topo2d import topo2d_init
 from prob.util.topo2d import topo2d_simu
 #
-def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=0e0*np.absolute(dg)/x_k
+    c_x=0e0*np.absolute(df)/x_k
 #
     L=x_k
     U=x_k
@@ -27,15 +27,13 @@ def apar():
 #
     return mov, asf, enf, kmx, cnv
 #
-def init():
+def init(g):
 #
     nelx = 180
     nely = 60
     v_l = 0.0
     v_0 = 0.4
     v_u = 0.4
-#
-    vis=False
 #
     ft = 1
     rmin = 5.4
@@ -68,25 +66,25 @@ def init():
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #
-    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,muc,Emin,Emax,gv,vis)
+    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,muc,Emin,Emax,gv,g)
 #
     return n,m,x_l,x_u,x_k,aux
 #
-def simu(n,m,x,aux):
+def simu(n,m,x,aux,g):
 #
-    g = np.zeros((m + 1), dtype=float)
-    dg = np.zeros((m + 1, n), dtype=float)
+    f = np.zeros((m + 1), dtype=float)
+    df = np.zeros((m + 1, n), dtype=float)
 #
-    [c,dc,v,dv]=topo2d_simu(n,m,x,aux)
+    [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
     v_l=aux[2]
     v_u=aux[4]
 #
-    g[0]=c
-    g[1]=v/n-v_u
+    f[0]=c
+    f[1]=v/n-v_u
 #
-    dg[0][:] = dc
-    dg[1][:] = dv/n
+    df[0][:] = dc
+    df[1][:] = dv/n
 #
-    return g, dg
+    return f, df
 #

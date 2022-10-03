@@ -1,7 +1,7 @@
 #
 import numpy as np
 #
-def init():
+def init(g):
 #
     n = 8; m = 16
     x_k = 400 * np.ones((n), dtype=float)
@@ -24,9 +24,9 @@ def apar():
 #       
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.zeros_like(dg)
+    c_x=np.zeros_like(df)
 #
     d_l = np.maximum(x_k/mov,x_l)
     d_u = np.minimum(mov*x_k,x_u)
@@ -36,22 +36,22 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     return c_x,L,U,d_l,d_u
 #
-def simu(n,m,x,aux):
+def simu(n,m,x,aux,g):
 #
-    g=np.zeros((1+m),dtype=float)
-    dg = np.zeros((m + 1, n), dtype=float)
+    f=np.zeros((1+m),dtype=float)
+    df = np.zeros((m + 1, n), dtype=float)
 #
-    g=func(n,m,x)
+    f=func(n,m,x)
 #
     dx=1e-4
     for i in range(n):
         x0 = x[i]
         x[i] += dx
-        gd = func(n,m,x)
+        fd = func(n,m,x)
         x[i] = x0
-        dg[:, i] = (gd - g) / dx
+        df[:, i] = (fd - f) / dx
 #
-    return g, dg
+    return f, df
 #
 def func(n,m,x):
 #
@@ -143,11 +143,11 @@ def func(n,m,x):
 #       gen stress (WHICH IS A LOAD!!!)
         sig[e]=  S[e]*eps[e]/A[e]
 #
-    g=np.zeros((1+m),dtype=np.float64)
+    f=np.zeros((1+m),dtype=np.float64)
     for e in range(n_elm):
-        g[0]=g[0]+x_p[e]*L[e]/128211.
-        g[e+1] = sig[e] -100e0
-        g[e+1+8] = -sig[e] -100e0
+        f[0]=f[0]+x_p[e]*L[e]/128211.
+        f[e+1] = sig[e] -100e0
+        f[e+1+8] = -sig[e] -100e0
 #
-    return g
+    return f
 #

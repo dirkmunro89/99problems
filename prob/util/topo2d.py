@@ -6,7 +6,7 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 import cvxopt; import cvxopt.cholmod
 #
-def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,muc,Emin,Emax,gv,vis):
+def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,muc,Emin,Emax,gv,g):
 #
     # dofs
     nelm=nelx*nely
@@ -51,7 +51,7 @@ def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,mu
     Hs=H.sum(1)
 
     # BC's and support
-    dofs=np.arange(2*(nelx+1)*(nely+1))
+    dofs=np.arange(ndof)
 #   fixed=np.union1d(dofs[0:2*(nely+1):2],np.array([2*(nelx+1)*(nely+1)-1]))
     free=np.setdiff1d(dofs,fixed)
 
@@ -62,20 +62,17 @@ def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,mu
     # Set load
     f[[i[0] for i in force],0]=[i[1] for i in force]
 
-    xPhys=np.ones(nelm,dtype=float)*v_0
-
-    # Initialize plot and plot the initial design
-    if vis:
+#
+    print(g)
+    if g <= 0 and g > -2:
         plt.ion(); fig,ax = plt.subplots()
-        pad=np.argwhere(xPadd <= -1).flatten()
-        tmp=xPadd.copy(); tmp[pad]=xPhys
-        im = ax.imshow(-tmp.reshape((felx,fely)).T, cmap='gray',\
+        im = ax.imshow(-np.zeros(nelm).reshape((nelx,nely)).T, cmap='gray',\
         interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
     else:
         fig=0; im=0
 #
     aux=[nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,muc,Emin,Emax,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,vis]
+        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,fig,im]
 #
     return aux
 #
@@ -84,7 +81,7 @@ def xPena(muc,penal,xPhys):
 def dxPena(muc,penal,xPhys):
     return muc + penal*(1-muc)*xPhys**(penal-1.)
 #
-def topo2d_simu(n,m,x,aux):
+def topo2d_simu(n,m,x,aux,vis):
 #
     ce=np.zeros(n,dtype=float)
     dc=np.zeros(n,dtype=float)
@@ -92,7 +89,7 @@ def topo2d_simu(n,m,x,aux):
     dv=np.ones(n,dtype=float)
 #
     [nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,muc,Emin,Emax,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig,vis]=aux
+        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,fig,im]=aux
 #
     if np.count_nonzero(xPadd <= -1) != len(x):
         print('Filter padding error')
@@ -106,14 +103,19 @@ def topo2d_simu(n,m,x,aux):
         tmp=xPadd.copy(); tmp[pad]=x
         xPhys[:]=np.asarray(H*tmp[np.newaxis].T/Hs)[:,0][pad] ###
 #
-    if vis:
-        # Plot to screen and save
-        tmp=xPadd.copy(); tmp[pad]=x
-        im.set_array(-tmp.reshape((felx,fely)).T)
-#       im.set_array(-tmp.reshape((felx,fely)).T)
+    if fig and im:
+        im.set_array(-x.reshape((nelx,nely)).T)
         fig.canvas.draw()
         fig.canvas.flush_events()
-        plt.savefig('topo.eps')
+        plt.savefig('topology.eps')
+    else:
+        if vis > 0:
+            fig,ax = plt.subplots()
+            im = ax.imshow(-x.reshape((nelx,nely)).T, cmap='gray',\
+            interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
+            plt.savefig('topo_%d.eps'%vis)
+            plt.close()
+
 #
     # Setup and solve FE problem
     sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,pen,xPhys)*(Emax-Emin))).flatten(order='F')

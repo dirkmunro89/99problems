@@ -16,16 +16,16 @@ def apar():
     mov=0.1
     asf=[0.7,1.1]
 #
-    enf='t-r'
+    enf='c-a'
 #
     kmx=1000
     cnv=[1e-2,1e-2]
 #       
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(dg)/x_k
+    c_x=2e0*np.absolute(df)/x_k
     c_x[1:]=0e0
 #
     c_x=np.maximum(c_x,1e-6)
@@ -33,6 +33,7 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #   LP
 #   c_x[:]=1e-6
 #
+#   if k<=1:
     L = x_k#-mov*(x_u-x_l)
     U = x_k#+mov*(x_u-x_l)
 #
@@ -41,16 +42,15 @@ def caml(k, x_k, dg, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     return c_x,L,U,d_l,d_u
 #
-def init():
+def init(g):
 #
     mm=3
     nelx=20*mm
+    nelx=2*20*mm
     nely=20*mm
     v_l = 0.2
-    v_0 = 0.5
+    v_0 = 0.6
     v_u = 1.0
-#
-    vis=True
 #
     ft = 1
     rmin = 1.2*mm
@@ -69,7 +69,8 @@ def init():
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-#
+    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
+
     # Set load
     frc=[(1,0)]
 #
@@ -83,30 +84,30 @@ def init():
     x_l = np.ones(n,dtype=float)*1e-3
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
-#   for i in range(n):
-#       x_k[i]=random.uniform(0,1)
 #
-    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,muc,Emin,Emax,gv,vis)
+    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,muc,Emin,Emax,gv,g)
 #
     return n,m,x_l,x_u,x_k,aux
 #
-def simu(n,m,x,aux):
+def simu(n,m,x,aux,g):
 #
     v_l=aux[2]
     v_u=aux[4]
 #
-    g = np.zeros((m + 1), dtype=float)
-    dg = np.zeros((m + 1, n), dtype=float)
+    f = np.zeros((m + 1), dtype=float)
+    df = np.zeros((m + 1, n), dtype=float)
 #
-    [c,dc,v,dv]=topo2d_simu(n,m,x,aux)
+    if g < 0: vis=True
+    else: vis=False
+    [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g) #vis and g; only save last...?
 #
-    g[0]=c/n
-    g[1]=v/n-v_u
-    g[2]=-v/n+v_l
+    f[0]=c/n
+    f[1]=v/n-v_u
+    f[2]=-v/n+v_l
 #
-    dg[0][:] = dc/n
-    dg[1][:] = dv/n
-    dg[2][:] = -dv/n
+    df[0][:] = dc/n
+    df[1][:] = dv/n
+    df[2][:] = -dv/n
 #
-    return g, dg
+    return f, df
 #
