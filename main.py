@@ -136,7 +136,7 @@ if __name__ == "__main__":
 #   1 to do one standard run with a random start (test of mult start)
 #   X to do X random multi-starts
 #
-    gmx=2
+    gmx=1
 #
     if gmx == 0:    #standard run
         h=loop(init,apar,simu,caml,subs,-1)

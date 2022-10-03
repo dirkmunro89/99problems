@@ -19,7 +19,7 @@ def apar():
     enf='t-r'
 #
     kmx=1000
-    cnv=[1e-2,1e-2]
+    cnv=[1e-3,1e-3]
 #       
     return mov, asf, enf, kmx, cnv
 #
@@ -51,7 +51,7 @@ def init(g):
     v_u = 1.0
 #
     ft = 1
-    rmin = 1.2*mm
+    rmin = 2.*mm
     dext=int(np.ceil(rmin))
     felx = nelx+dext
     fely = nely+2*dext
