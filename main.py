@@ -81,17 +81,14 @@ def loop(init,apar,simu,caml,subs,g):
 #
         if k>0 and cont : 
             if d_xi<cnv[0] or d_xe<cnv[1]: 
-                [f_k,_] = simu(n,m,x_k,aux,g)
                 log.write('Termination on Convergence criteria\n')
                 if not g > 0: print('Termination on Convergence criteria')
                 break
         if k>0 and mov<cnv[0]:
-            [f_k,_] = simu(n,m,x_k,aux,g)
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
         if k>0 and np.amax(c_x)>1e16:
-            [f_k,_] = simu(n,m,x_k,aux,g)
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
@@ -109,11 +106,11 @@ def loop(init,apar,simu,caml,subs,g):
 #
         k=k+1
 #
+    [f_k,_] = simu(n,m,x_k,aux,g)
     log.close()
-#
     if g > 0: 
         np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k)
-        return h[-1][0],max(h[-1][1:])
+        return k,h[-1][0],max(h[-1][1:])
     else: 
         enfc.par_plt(); enfc.cnv_plt(h)
         return h
@@ -136,7 +133,7 @@ if __name__ == "__main__":
 #   1 to do one standard run with a random start (test of mult start)
 #   X to do X random multi-starts
 #
-    gmx=1
+    gmx=0
 #
     if gmx == 0:    #standard run
         h=loop(init,apar,simu,caml,subs,-1)
@@ -145,7 +142,7 @@ if __name__ == "__main__":
     elif gmx>1:     #multi-starts
         fopt=1e8; gopt=0
         for g in range(1,gmx+1):
-            [f_s,v_s]=loop(init,apar,simu,caml,subs,g)
+            [k_s,f_s,v_s]=loop(init,apar,simu,caml,subs,g)
             if f_s < fopt and v_s<1e-3: fopt=f_s; gopt=g
             print("done")
         print(g,fopt)

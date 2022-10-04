@@ -63,7 +63,6 @@ def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,mu
     f[[i[0] for i in force],0]=[i[1] for i in force]
 
 #
-    print(g)
     if g <= 0 and g > -2:
         plt.ion(); fig,ax = plt.subplots()
         im = ax.imshow(-np.zeros(nelm).reshape((nelx,nely)).T, cmap='gray',\
@@ -148,7 +147,7 @@ def topo2d_simu(n,m,x,aux,vis):
         tmp[pad]=dc; dc[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
         tmp[pad]=dv; dv[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
 #
-    v=np.sum(x) #should volume be calculated as sum of xPhys...?
+    v=np.sum(xPhys) 
 #
     return obj,dc,v,dv
 #

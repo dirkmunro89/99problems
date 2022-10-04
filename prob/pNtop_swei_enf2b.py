@@ -84,7 +84,7 @@ def init(g):
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #
-    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,muc,Emin,Emax,gv)
+    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,muc,Emin,Emax,gv,g)
 #
     return n,m,x_l,x_u,x_k,aux
 #

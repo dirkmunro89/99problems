@@ -33,7 +33,6 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #   LP
 #   c_x[:]=1e-6
 #
-#   if k<=1:
     L = x_k#-mov*(x_u-x_l)
     U = x_k#+mov*(x_u-x_l)
 #
@@ -97,9 +96,7 @@ def simu(n,m,x,aux,g):
     f = np.zeros((m + 1), dtype=float)
     df = np.zeros((m + 1, n), dtype=float)
 #
-    if g < 0: vis=True
-    else: vis=False
-    [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g) #vis and g; only save last...?
+    [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
     f[0]=c/n
     f[1]=v/n-v_u

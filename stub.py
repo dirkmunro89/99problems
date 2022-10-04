@@ -27,7 +27,7 @@ class Stub:
     def set_crv(self,fct,g_k,q_k):
         c_x=self._c_x.copy()
         for i in range(len(g_k)):
-            if q_k[i] < g_k[i]: c_x[i]=c_x[i]*fct
+            if q_k[i] <= g_k[i]: c_x[i]=c_x[i]*fct
         self._c_x = c_x.copy()
         return c_x
 #   retrieve a copy of the current instantiationn (dont return pointers)
