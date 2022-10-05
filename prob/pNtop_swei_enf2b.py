@@ -18,7 +18,7 @@ def apar():
 #
     enf='t-r'
 #
-    kmx=1000
+    kmx=2000
     cnv=[1e-2,1e-2]
 #       
     return mov, asf, enf, kmx, cnv
@@ -47,12 +47,12 @@ def init(g):
     nelx=20*mm
     nelx=2*20*mm
     nely=20*mm
-    v_l = 0.2
+    v_l = 0.1
     v_0 = 0.6
     v_u = 1.0
 #
     ft = 1
-    rmin = 1.2*mm
+    rmin = 1.1*mm
     dext=int(np.ceil(rmin))
     felx = nelx+dext
     fely = nely+2*dext
@@ -74,7 +74,7 @@ def init(g):
     frc=[(1,0)]
 #
     pen = 3.0
-    muc = 1e-2
+    muc = 1e-3
     Emin = 0e0; Emax=1.0
     gv = -9.81/800/mm
 #
@@ -99,12 +99,12 @@ def simu(n,m,x,aux,g):
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
     f[0]=c/n
-    f[1]=v/n-v_u
-    f[2]=-v/n+v_l
+    f[1]=v/n/v_u-1.
+    f[2]=-v/n/v_l+1.
 #
     df[0][:] = dc/n
-    df[1][:] = dv/n
-    df[2][:] = -dv/n
+    df[1][:] = dv/n/v_u
+    df[2][:] = -dv/n/v_l
 #
     return f, df
 #

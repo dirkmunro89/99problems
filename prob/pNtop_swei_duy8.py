@@ -1,10 +1,7 @@
 #
 import numpy as np
-from scipy.sparse import coo_matrix, csc_matrix
-from scipy.sparse.linalg import spsolve
-from matplotlib import colors
-import matplotlib.pyplot as plt
-import cvxopt; import cvxopt.cholmod
+from prob.util.topo2d import topo2d_init
+from prob.util.topo2d import topo2d_simu
 #
 # specify subsolver here
 #
@@ -48,174 +45,62 @@ def init(g):
 #
     nelx=20
     nely=20
-    volfrac_lo=0.01
-    volfrac_0=1.0
-    volfrac_up=0.8
-    rmin=1.1
-    penal=2.0
-    ft=1 # ft==0 -> sens, ft==1 -> dens
- 
-    n = nelx*nely; m = 2
-    x_l = np.ones(n,dtype=float)*0.2
-    x_u = np.ones(n,dtype=float)
-    x_k = volfrac_0*np.ones(n,dtype=float)
- 
-    # Max and min stiffness
-    Emin=0e-9; Emax=1.0
-    gv=-9.81/1e3
-
-    # dofs
-    ndof = 2*(nelx+1)*(nely+1)
-
-    # FE: Build the index vectors for the for coo matrix format.
-    KE=lk()
-    edofMat=np.zeros((nelx*nely,8),dtype=int)
-    for elx in range(nelx):
-        for ely in range(nely):
-            el = ely+elx*nely
-            n1=(nely+1)*elx+ely
-            n2=(nely+1)*(elx+1)+ely
-            edofMat[el,:]=np.array([2*n1+2, 2*n1+3, 2*n2+2, 2*n2+3,2*n2, 2*n2+1, 2*n1, 2*n1+1])
-    # Construct the index pointers for the coo format
-    iK = np.kron(edofMat,np.ones((8,1))).flatten()
-    jK = np.kron(edofMat,np.ones((1,8))).flatten()    
-
-    # Filter: Build (and assemble) the index+data vectors for the coo matrix format
-    nfilter=int(nelx*nely*((2*(np.ceil(rmin)-1)+1)**2))
-    iH = np.zeros(nfilter)
-    jH = np.zeros(nfilter)
-    sH = np.zeros(nfilter)
-    cc=0
-    for i in range(nelx):
-        for j in range(nely):
-            row=i*nely+j
-            kk1=int(np.maximum(i-(np.ceil(rmin)-1),0))
-            kk2=int(np.minimum(i+np.ceil(rmin),nelx))
-            ll1=int(np.maximum(j-(np.ceil(rmin)-1),0))
-            ll2=int(np.minimum(j+np.ceil(rmin),nely))
-            for k in range(kk1,kk2):
-                for l in range(ll1,ll2):
-                    col=k*nely+l
-                    fac=rmin-np.sqrt(((i-k)*(i-k)+(j-l)*(j-l)))
-                    iH[cc]=row
-                    jH[cc]=col
-                    sH[cc]=np.maximum(0.0,fac)
-                    cc=cc+1
-    # Finalize assembly and convert to csc format
-    H=coo_matrix((sH,(iH,jH)),shape=(nelx*nely,nelx*nely)).tocsc()    
-    Hs=H.sum(1)
-
-    # BC's and support
-    dofs=np.arange(2*(nelx+1)*(nely+1))
-    ndofy=2*(nely+1)
-    fixed = np.union1d(dofs[0:ndofy:2],np.array([ndof - 2 , ndof - 1]))
-    free=np.setdiff1d(dofs,fixed)
-
-    # Solution and RHS vectors
-    f=np.zeros((ndof,1))
-    u=np.zeros((ndof,1))
-
-    # Set load
-    f[1,0]=0
-
-    xPhys=np.ones(n,dtype=float)*volfrac_0
-
-    # Initialize plot and plot the initial design
-    plt.ion()
-    fig,ax = plt.subplots()
-    im = ax.imshow(-xPhys.reshape((nelx,nely)).T, cmap='gray',\
-    interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
-    fig.show()
+    v_l=0.01
+    v_0=1.0
+    v_u=0.8
 #
-    aux=[nelx,nely,volfrac_lo,volfrac_0,volfrac_up,rmin,penal,ft,Emax,Emin,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig]
+    ft = 1
+    rmin=1.1
+    felx = nelx#+dext
+    fely = nely#+2*dext
+#
+    xPadd=np.zeros((nelx,nely),dtype=float)
+    tmp=-1*np.ones((nelx,nely),dtype=float)
+    xPadd[:nelx,:fely]=tmp
+    xPadd[nelx:,nely:]=1.
+    xPadd[nelx:,nely:nely]=1.
+    xPadd=xPadd.flatten()
+#
+    # BC's and support
+    ndof=2*(nelx+1)*(nely+1)
+    dofs=np.arange(2*(nelx+1)*(nely+1))
+    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
+#
+    # Set load
+    frc=[(1,0)]
+#
+    pen = 2.0
+    muc = 0.
+    Emin = 0e0; Emax=1.0
+    gv = -9.81/800/1.
+#
+    n = nelx*nely
+    m = 2
+    x_l = np.ones(n,dtype=float)*2e-1
+    x_u = np.ones(n,dtype=float)
+    x_k = v_0*np.ones(n,dtype=float)
+#
+    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,muc,Emin,Emax,gv,g)
 #
     return n,m,x_l,x_u,x_k,aux
 #
 def simu(n,m,x,aux,g):
 #
+    v_l=aux[2]
+    v_u=aux[4]
+#
     f = np.zeros((m + 1), dtype=float)
     df = np.zeros((m + 1, n), dtype=float)
 #
-    ce=np.zeros(n,dtype=float)
-    dc=np.zeros(n,dtype=float)
-    xPhys=np.zeros(n,dtype=float)
-    dv=np.ones(n,dtype=float)
+    [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    [nelx,nely,volfrac_lo,volfrac_0,volfrac_up,rmin,penal,ft,Emax,Emin,gv,\
-        ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,im,fig]=aux
+    f[0]=c/n
+    f[1]=v/n/v_u-1.
+    f[2]=-v/n/v_l+1.
 #
-    # Filter design variables
-    if ft==0:   xPhys[:]=x
-    elif ft==1:    xPhys[:]=np.asarray(H*x[np.newaxis].T/Hs)[:,0]
-#
-    # Plot to screen and save
-    im.set_array(-xPhys.reshape((nelx,nely)).T)
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-    plt.savefig('topo.eps')
-#
-    # Setup and solve FE problem
-    sK=((KE.flatten()[np.newaxis]).T*((xPhys)**penal*(Emax))).flatten(order='F')
-    K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()
-    # Remove constrained dofs from matrix and convert to coo
-    K = deleterowcol(K,fixed,fixed).tocoo()
-    # Set self-weight load
-    f_tmp=np.zeros(ndof)
-    np.add.at(f_tmp, edofMat[:, 1::2].flatten(), np.kron(xPhys, gv * np.ones(4)/4. ))
-    f_apl = f.copy()
-    f_apl[:,0] += f_tmp
-    # Solve system 
-    K = cvxopt.spmatrix(K.data,K.row.astype(int),K.col.astype(int))
-    B = cvxopt.matrix(f_apl[free,0])
-    cvxopt.cholmod.linsolve(K,B)
-    u[free,0]=np.array(B)[:,0]
-
-    # Objective and sensitivity
-    ce[:] = (np.dot(u[edofMat].reshape(nelx*nely,8),KE)*u[edofMat].reshape(nelx*nely,8) ).sum(1)
-    obj = ( (xPhys**penal*(Emax))*ce ).sum()
-    dc[:] = (-penal*xPhys**(penal-1)*(Emax))*ce
-    dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4.
-    dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4.
-    dv[:] = np.ones(nely*nelx)
-    # Sensitivity filtering:
-    if ft==0:
-        dc[:] = np.asarray((H*(x*dc))[np.newaxis].T/Hs)[:,0] / np.maximum(0.001,x)
-    elif ft==1:
-        dc[:] = np.asarray(H*(dc[np.newaxis].T/Hs))[:,0]
-        dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
-#
-    f[0]=obj
-    f[1]=np.sum(x)/n-volfrac_up
-    f[2]=-np.sum(x)/n+volfrac_lo
-#
-    df[0][:] = dc
-    df[1][:] = dv/n
-    df[2][:] = -dv/n
+    df[0][:] = dc/n
+    df[1][:] = dv/n/v_u
+    df[2][:] = -dv/n/v_l
 #
     return f, df
-#
-#element stiffness matrix
-def lk():
-    E=1
-    nu=0.3
-    k=np.array([1/2-nu/6,1/8+nu/8,-1/4-nu/12,-1/8+3*nu/8,-1/4+nu/12,-1/8-nu/8,nu/6,1/8-3*nu/8])
-    KE = E/(1-nu**2)*np.array([ [k[0], k[1], k[2], k[3], k[4], k[5], k[6], k[7]],
-    [k[1], k[0], k[7], k[6], k[5], k[4], k[3], k[2]],
-    [k[2], k[7], k[0], k[5], k[6], k[3], k[4], k[1]],
-    [k[3], k[6], k[5], k[0], k[7], k[2], k[1], k[4]],
-    [k[4], k[5], k[6], k[7], k[0], k[1], k[2], k[3]],
-    [k[5], k[4], k[3], k[2], k[1], k[0], k[7], k[6]],
-    [k[6], k[3], k[4], k[1], k[2], k[7], k[0], k[5]],
-    [k[7], k[2], k[1], k[4], k[3], k[6], k[5], k[0]] ]);
-    return (KE)
-#
-def deleterowcol(A, delrow, delcol):
-    # Assumes that matrix is in symmetric csc form !
-    m = A.shape[0]
-    keep = np.delete (np.arange(0, m), delrow)
-    A = A[keep, :]
-    keep = np.delete (np.arange(0, m), delcol)
-    A = A[:, keep]
-    return A    
 #

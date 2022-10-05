@@ -18,7 +18,7 @@ def loop(init,apar,simu,caml,subs,g):
     [mov,asf,enf,kmx,cnv]=apar()
 #
     if g >= 0:
-        for i in range(n): x_k[i]=random.uniform(x_l[i],x_u[i])
+        for i in range(n): x_k[i]=random.uniform(x_l[i]+.25*(x_u[i]-x_l[i]),x_u[i]-.25*(x_u[i]-x_l[i]))
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
@@ -27,10 +27,10 @@ def loop(init,apar,simu,caml,subs,g):
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n))
 #
-    log.write(('%3s%3s%14s%9s%7s%11s%11s\n')%\
+    log.write(('%4s%3s%14s%9s%7s%11s%11s\n')%\
         ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||'))#,flush=True)
     if not g > 0:
-        print(('%3s%3s%14s%9s%7s%11s%11s')%\
+        print(('%4s%3s%14s%9s%7s%11s%11s')%\
             ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||'))#,flush=True)
 #
     enfc = Enfc()
@@ -73,10 +73,10 @@ def loop(init,apar,simu,caml,subs,g):
         else: itr=str(test)[0]
         h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
         if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)
-        log.write('%3d%3s%14.3e%9.0e%7.2f%11.1e%11.1e\n'%\
+        log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e\n'%\
             (k, itr, f_k[0], v_k, bdd, d_xi, d_xe)); log.flush()
         if not g > 0:
-            print('%3d%3s%14.3e%9.0e%7.2f%11.1e%11.1e'%\
+            print('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e'%\
                 (k, itr, f_k[0], v_k, bdd, d_xi, d_xe))#,flush=True)
 #
         if k>0 and cont : 
@@ -140,10 +140,13 @@ if __name__ == "__main__":
     elif gmx == 1:  #one multi-start (debugging)
         h=loop(init,apar,simu,caml,subs,0)
     elif gmx>1:     #multi-starts
-        fopt=1e8; gopt=0
+        fopt=1e8; gopt=0; ktot=0
+        glog = open('global.log','w')
         for g in range(1,gmx+1):
             [k_s,f_s,v_s]=loop(init,apar,simu,caml,subs,g)
-            if f_s < fopt and v_s<1e-3: fopt=f_s; gopt=g
-            print("done")
-        print(g,fopt)
+            if f_s < fopt and v_s<1e-3: fopt=f_s; gopt=g; nopt='T'
+            else: nopt='F'
+            glog.write('%3s%10d%14.3e%9.0e'%(nopt, k_s, f_s, v_s))#,flush=True)
+            print('%3s%10d%14.3e%9.0e'%(nopt, k_s, f_s, v_s))#,flush=True)
+        glog.close()
 #
