@@ -6,7 +6,7 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 import cvxopt; import cvxopt.cholmod
 #
-def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,muc,Emin,Emax,gv,g):
+def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,qen,muc,Emin,Emax,gv,g):
 #
     # dofs
     nelm=nelx*nely
@@ -70,7 +70,7 @@ def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,mu
     else:
         fig=0; im=0
 #
-    aux=[nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,muc,Emin,Emax,gv,\
+    aux=[nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,qen,muc,Emin,Emax,gv,\
         ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,fig,im]
 #
     return aux
@@ -87,7 +87,7 @@ def topo2d_simu(n,m,x,aux,vis):
     xPhys=np.zeros(n,dtype=float)
     dv=np.ones(n,dtype=float)
 #
-    [nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,muc,Emin,Emax,gv,\
+    [nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,qen,muc,Emin,Emax,gv,\
         ndof,KE,H,Hs,iK,jK,edofMat,fixed,free,f,u,fig,im]=aux
 #
     if np.count_nonzero(xPadd <= -1) != len(x):
@@ -96,7 +96,7 @@ def topo2d_simu(n,m,x,aux,vis):
 #
     pad=np.argwhere(xPadd <= -1).flatten()
 #
-    # Filter design variables
+# Filter design variables
     if ft==0:   xPhys[:]=x
     elif ft==1: 
         tmp=xPadd.copy(); tmp[pad]=x
@@ -123,7 +123,7 @@ def topo2d_simu(n,m,x,aux,vis):
     K = deleterowcol(K,fixed,fixed).tocoo()
     # Set self-weight load
     f_tmp=np.zeros(ndof)
-    np.add.at(f_tmp, edofMat[:, 1::2].flatten(), np.kron(xPhys, gv * np.ones(4)/4. ))
+    np.add.at(f_tmp, edofMat[:, 1::2].flatten(), np.kron(xPena(0.,qen,xPhys), gv * np.ones(4)/4. ))
     f_apl = f.copy()
     f_apl[:,0] += f_tmp
     # Solve system 
@@ -136,8 +136,10 @@ def topo2d_simu(n,m,x,aux,vis):
     ce[:] = (np.dot(u[edofMat].reshape(nelx*nely,8),KE)*u[edofMat].reshape(nelx*nely,8) ).sum(1)
     obj = ( (Emin+xPena(muc,pen,xPhys)*(Emax-Emin))*ce ).sum()
     dc[:] = -dxPena(muc,pen,xPhys)*(Emax-Emin)*ce
-    dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4.
-    dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4.; dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4.
+    dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
+    dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
+    dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
+    dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
     dv[:] = np.ones(nely*nelx)
     # Sensitivity filtering:
     if ft==0:

@@ -47,12 +47,12 @@ def init(g):
     nelx=20*mm
     nely=20*mm
     v_l = 0.1
-    v_0 = 0.5
+    v_0 = 0.6
     v_u = 1.0
 #
     ft = 1
     rmin = 1.1*mm
-    dext=int(np.ceil(rmin))
+    dext=0#int(np.ceil(rmin))
     felx = nelx+dext
     fely = nely+2*dext
 #
@@ -72,17 +72,18 @@ def init(g):
     frc=[(1,0)]
 #
     pen = 3.0
+    qen = 1.0
     muc = 1e-2
     Emin = 0e0; Emax=1.0
     gv = -9.81/800/mm
 #
     n = nelx*nely
     m = 2
-    x_l = np.ones(n,dtype=float)*1e-3
+    x_l = np.ones(n,dtype=float)*1e-6
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #
-    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,muc,Emin,Emax,gv,g)
+    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,qen,muc,Emin,Emax,gv,g)
 #
     return n,m,x_l,x_u,x_k,aux
 #

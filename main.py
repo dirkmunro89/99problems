@@ -18,7 +18,9 @@ def loop(init,apar,simu,caml,subs,g):
     [mov,asf,enf,kmx,cnv]=apar()
 #
     if g >= 0:
-        for i in range(n): x_k[i]=random.uniform(x_l[i]+.25*(x_u[i]-x_l[i]),x_u[i]-.25*(x_u[i]-x_l[i]))
+        for i in range(n): x_k[i]=random.uniform(x_l[i]+.0*(x_u[i]-x_l[i]),x_u[i]-.0*(x_u[i]-x_l[i]))
+    if g == -9:
+        for i in range(n): x_k[i]=x_l[i]+0.5*(x_u[i]-x_l[i])
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
@@ -26,6 +28,10 @@ def loop(init,apar,simu,caml,subs,g):
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n))
+#
+    if g == -9: 
+        fdck(simu,n,m,x_k,aux,0)
+        return
 #
     log.write(('%4s%3s%14s%9s%7s%11s%11s\n')%\
         ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||'))#,flush=True)
@@ -72,7 +78,7 @@ def loop(init,apar,simu,caml,subs,g):
         if not str(test).strip(): itr=str(cont)[0]
         else: itr=str(test)[0]
         h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
-        if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)
+        if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)#/float(n)
         log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e\n'%\
             (k, itr, f_k[0], v_k, bdd, d_xi, d_xe)); log.flush()
         if not g > 0:
@@ -115,6 +121,35 @@ def loop(init,apar,simu,caml,subs,g):
         enfc.par_plt(); enfc.cnv_plt(h)
         return h
 #
+def fdck(simu,n,m,x_k,aux,g):
+#
+#   f=np.zeros((1+m),dtype=float)
+    df = np.zeros((m + 1, n), dtype=float)
+#
+    [f0,df0] = simu(n,m,x_k,aux,g)
+#
+    dx=1e-4
+#
+    print("")
+    print("Error in computed derivatives with respect to finite differences")
+    print("")
+#
+    err=-1e8
+    print('%10s %10s'%("Variables", "Responses"))
+    for i in range(0,n,int(np.ceil(n/100))):
+        x0 = x_k[i]
+        x_k[i] += dx
+        [fd,_] = simu(n,m,x_k,aux,g)
+        x_k[i] = x0
+        df[:, i] = (fd - f0) / dx
+        print("%10d "%i,end="")
+        for j in range(m+1):
+            print("%7.0e "%(df[j,i]-df0[j,i]),end="")
+        print("")
+        err=max(err,np.amax(np.absolute(df[:,i]-df0[:,i])))
+    print("")
+    print("Maximum absolute error: %7.0e"%err)
+#
 def main(prob):
 #
     [init,apar,simu,caml,subs]=mods(prob)
@@ -134,7 +169,11 @@ if __name__ == "__main__":
 #   X to do X random multi-starts
 #
     gmx=0
+    fdc=0
 #
+    if fdc:         #check finite differences
+        h=loop(init,apar,simu,caml,subs,-9)
+        sys.exit()
     if gmx == 0:    #standard run
         h=loop(init,apar,simu,caml,subs,-1)
     elif gmx == 1:  #one multi-start (debugging)
@@ -146,7 +185,8 @@ if __name__ == "__main__":
             [k_s,f_s,v_s]=loop(init,apar,simu,caml,subs,g)
             if f_s < fopt and v_s<1e-3: fopt=f_s; gopt=g; nopt='T'
             else: nopt='F'
-            glog.write('%3s%10d%14.3e%9.0e'%(nopt, k_s, f_s, v_s))#,flush=True)
-            print('%3s%10d%14.3e%9.0e'%(nopt, k_s, f_s, v_s))#,flush=True)
+            glog.write('%3d%3s%10d%14.3e%9.0e\n'%(g, nopt, k_s, f_s, v_s))#,flush=True)
+            print('%3d%3s%10d%14.3e%9.0e'%(g, nopt, k_s, f_s, v_s))#,flush=True)
+        print("See solution", gopt)
         glog.close()
 #
