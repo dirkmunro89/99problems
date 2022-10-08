@@ -7,7 +7,7 @@ class Stub:
         self._k = k
         self._x_k = x_k.copy()
         self._x_d = x_d.copy()
-        self._mov = mov
+        self._mov = mov.copy()
         self._d_l = d_l.copy()
         self._d_u = d_u.copy()
         self._g_k = g_k.copy()
@@ -17,10 +17,10 @@ class Stub:
         self._c_x = c_x.copy()
 #   change the move limit and bounds of the current instantiation
     def set_mov(self,fct,x_l,x_u):
-        mov=self._mov*fct
+        mov=self._mov.copy()*fct
         self._d_l = np.maximum(self._x_k-mov*(x_u-x_l),x_l)
         self._d_u = np.minimum(self._x_k+mov*(x_u-x_l),x_u)
-        self._mov=mov
+        self._mov=mov.copy()
         return mov
 #   set new curvatures for old problem, and return them 
 #   (because cont is false, caml update is not done, so curvatures are taken from loop)

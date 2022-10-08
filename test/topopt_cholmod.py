@@ -126,8 +126,7 @@ def main(nelx,nely,volfrac,penal,rmin,ft):
 
 		# Optimality criteria
 		xold[:]=x
-		g=np.sum(x)-nelx*nely*volfrac ###!!!
-		(x[:],_)=oc(nelx,nely,x,volfrac,dc,dv,g) ###!!!
+		(x[:],g)=oc(nelx,nely,x,volfrac,dc,dv,g) 
 
 		# Filter design variables
 		if ft==0:   xPhys[:]=x

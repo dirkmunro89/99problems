@@ -7,7 +7,7 @@ from prob.util.topo2d import topo2d_simu
 #
 #from subs.condual import con as subs
 from subs.t2dual import t2d as subs
-#from subs.t2dual import t2d as subs
+from subs.mmadual import mma as subs
 #
 # specify problem and algorithmic parameters here
 #
@@ -16,28 +16,38 @@ def apar(n):
     mov=0.1*np.ones(n)
     asf=[0.7,1.1]
 #
-    enf='c-a'
+    enf='none'
 #
     kmx=1000
     cnv=[1e-2,1e-2]
-#
+#       
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df)/x_k
-    c_x[1:]=0e0
+    c_x=np.zeros_like(df)
 #
-    c_x=np.maximum(c_x,1e-6)
+    if k<=1:
+        L = x_k-0.5*(x_u-x_l)
+        U = x_k+0.5*(x_u-x_l)
+    else:
+        L=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k - asf[0]*(x_1 - L_k), x_k - asf[1]*(x_1 - L_k))
+        U=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k + asf[0]*(U_k - x_1), x_k + asf[1]*(U_k - x_1))
 #
-#   LP
-#   c_x[:]=1e-6
+#   L = np.maximum(L, x_k-1e+0*(x_u-x_l))
+#   L = np.minimum(L, x_k-1e-2*(x_u-x_l))
+#   U = np.maximum(U, x_k+1e-2*(x_u-x_l))
+#   U = np.minimum(U, x_k+1e+0*(x_u-x_l))
 #
-    L = x_k#-mov*(x_u-x_l)
-    U = x_k#+mov*(x_u-x_l)
+    c_x[0]=np.where(df[0] < 0, -2./(x_k-L)*df[0], 2./(U-x_k)*df[0])
+    c_x[:]=0.
+    c_x=np.maximum(c_x,1e-3)
 #
-    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
-    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
+    d_l = np.maximum(L*1.01, x_l)
+    d_u = np.minimum(U*0.99, x_u)
+#
+    d_l= np.maximum(d_l, x_k-mov*(x_u-x_l))
+    d_u= np.minimum(d_u, x_k+mov*(x_u-x_l))
 #
     return c_x,mov,L,U,d_l,d_u
 #
@@ -45,8 +55,9 @@ def init(g):
 #
     mm=3
     nelx=20*mm
+    nelx=2*20*mm
     nely=20*mm
-    v_l = 0.1
+    v_l = 0.2
     v_0 = 0.6
     v_u = 1.0
 #
@@ -67,7 +78,8 @@ def init(g):
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-#
+    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
+
     # Set load
     frc=[(1,0)]
 #

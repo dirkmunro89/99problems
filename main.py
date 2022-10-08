@@ -15,7 +15,7 @@ def loop(init,apar,simu,caml,subs,g):
 #
     [n,m,x_l,x_u,x_k,aux]=init(g)
 #
-    [mov,asf,enf,kmx,cnv]=apar()
+    [mov,asf,enf,kmx,cnv]=apar(n)
 #
     if g >= 0:
         for i in range(n): x_k[i]=random.uniform(x_l[i]+.0*(x_u[i]-x_l[i]),x_u[i]-.0*(x_u[i]-x_l[i]))
@@ -24,7 +24,7 @@ def loop(init,apar,simu,caml,subs,g):
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
-    mov0=mov; k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
+    mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n))
@@ -90,7 +90,7 @@ def loop(init,apar,simu,caml,subs,g):
                 log.write('Termination on Convergence criteria\n')
                 if not g > 0: print('Termination on Convergence criteria')
                 break
-        if k>0 and mov<cnv[0]:
+        if k>0 and np.amax(mov)<cnv[0]:
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
@@ -100,7 +100,8 @@ def loop(init,apar,simu,caml,subs,g):
             break
 #
         if cont:
-            [c_x,L,U,d_l,d_u] = caml(k,x_k,df_k,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov); L_k[:]=L; U_k[:]=U
+            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,df_k,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
+            mov[:]=m_k; L_k[:]=L; U_k[:]=U
             if enf == 't-r' or enf == 'c-a': stub=Stub(k,x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
 #
         x_0[:]=x_k 

@@ -7,37 +7,35 @@ from prob.util.topo2d import topo2d_simu
 #
 #from subs.condual import con as subs
 from subs.t2dual import t2d as subs
-#from subs.t2dual import t2d as subs
 #
 # specify problem and algorithmic parameters here
 #
 def apar(n):
 #   
-    mov=0.1*np.ones(n)
+    mov=np.ones(n,dtype=float)*0.1
     asf=[0.7,1.1]
 #
-    enf='c-a'
+    enf='none'
 #
     kmx=1000
     cnv=[1e-2,1e-2]
-#
+#       
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df)/x_k
-    c_x[1:]=0e0
+    c_x=np.ones_like(df)*1e-3
 #
-    c_x=np.maximum(c_x,1e-6)
+    if k>2:
+        mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
 #
-#   LP
-#   c_x[:]=1e-6
+    L=L_k
+    U=U_k
 #
-    L = x_k#-mov*(x_u-x_l)
-    U = x_k#+mov*(x_u-x_l)
+    mov=np.minimum(np.maximum(mov,1e-3),0.1)
 #
-    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
-    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
+    d_l= np.maximum(x_l, x_k-mov*(x_u-x_l))
+    d_u= np.minimum(x_u, x_k+mov*(x_u-x_l))
 #
     return c_x,mov,L,U,d_l,d_u
 #
@@ -45,8 +43,9 @@ def init(g):
 #
     mm=3
     nelx=20*mm
+    nelx=2*20*mm
     nely=20*mm
-    v_l = 0.1
+    v_l = 0.2
     v_0 = 0.6
     v_u = 1.0
 #
@@ -67,7 +66,8 @@ def init(g):
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-#
+    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
+
     # Set load
     frc=[(1,0)]
 #

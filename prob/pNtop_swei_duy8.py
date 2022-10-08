@@ -9,9 +9,9 @@ from subs.condual import con as subs
 #
 # specify problem and algorithmic parameters here
 #
-def apar():
+def apar(n):
 #   
-    mov=0.5
+    mov=0.5*np.ones(n)
     asf=[0.7,1.1]
 #  
     enf='none' # run with none and with t-r
@@ -39,7 +39,7 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #   d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
 #   d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
 #
-    return c_x,L,U,d_l,d_u
+    return c_x,mov,L,U,d_l,d_u
 #
 def init(g):
 #

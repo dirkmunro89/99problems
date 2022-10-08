@@ -14,9 +14,9 @@ def init(g):
 #
     return n,m,x_l,x_u,x_k,aux
 #
-def apar():
+def apar(n):
 #   
-    mov=1.0
+    mov=1.0*np.ones(n)
     asf=[0.7,1.1]
 # 
     enf='none'
@@ -40,7 +40,7 @@ def caml(k, x_k, df_k, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
     d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
 #
-    return c_x,L,U,d_l,d_u
+    return c_x,mov,L,U,d_l,d_u
 #
 def simu(n,m,x,aux,g):
 #

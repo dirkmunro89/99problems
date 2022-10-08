@@ -143,6 +143,30 @@ def mods(prob):
         from prob.pNtop_swei_enf2b import simu
         from prob.pNtop_swei_enf2b import caml
         from prob.pNtop_swei_enf2b import subs
+    elif prob == 'Ntop_swei_enf2c':
+        from prob.pNtop_swei_enf2c import init
+        from prob.pNtop_swei_enf2c import apar
+        from prob.pNtop_swei_enf2c import simu
+        from prob.pNtop_swei_enf2c import caml
+        from prob.pNtop_swei_enf2c import subs
+    elif prob == 'Ntop_swei_enf2z':
+        from prob.pNtop_swei_enf2z import init
+        from prob.pNtop_swei_enf2z import apar
+        from prob.pNtop_swei_enf2z import simu
+        from prob.pNtop_swei_enf2z import caml
+        from prob.pNtop_swei_enf2z import subs
+    elif prob == 'Ntop_swei_enf3a':
+        from prob.pNtop_swei_enf3a import init
+        from prob.pNtop_swei_enf3a import apar
+        from prob.pNtop_swei_enf3a import simu
+        from prob.pNtop_swei_enf3a import caml
+        from prob.pNtop_swei_enf3a import subs
+    elif prob == 'Ntop_swei_enf3b':
+        from prob.pNtop_swei_enf3b import init
+        from prob.pNtop_swei_enf3b import apar
+        from prob.pNtop_swei_enf3b import simu
+        from prob.pNtop_swei_enf3b import caml
+        from prob.pNtop_swei_enf3b import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init
@@ -152,21 +176,4 @@ def mods(prob):
         from temp import subs
 #
     return init,apar,simu,caml,subs
-#
-def keep(prob):
-#
-    if prob == 'arch': 
-        m_r=1e8; m_a=0.2
-        a_f=[0.7,1.2]
-        kmax=2000; conv=1e-2
-    elif prob == 'comp': 
-        m_r=1e8; m_a=0.2
-        a_f=[0.7,1.2]
-        kmax=2000; conv=1e-2
-    elif prob == 'beam': 
-        m_r=1e8; m_a=0.2
-        a_f=[0.7,1.1]
-        kmax=1000; conv=1e-2
-#
-    return m_r, m_a, a_f, kmax, conv
 #
