@@ -131,6 +131,12 @@ def mods(prob):
         from prob.pNtop_swei_enf1b import simu
         from prob.pNtop_swei_enf1b import caml
         from prob.pNtop_swei_enf1b import subs
+    elif prob == 'Ntop_swei_enf1c':
+        from prob.pNtop_swei_enf1c import init
+        from prob.pNtop_swei_enf1c import apar
+        from prob.pNtop_swei_enf1c import simu
+        from prob.pNtop_swei_enf1c import caml
+        from prob.pNtop_swei_enf1c import subs
     elif prob == 'Ntop_swei_enf2a':
         from prob.pNtop_swei_enf2a import init
         from prob.pNtop_swei_enf2a import apar
