@@ -23,6 +23,10 @@ docs:
 clean:
 	rm -f *.log
 	rm -f *.npz
+	rm -f *.png
+	rm -f *.tex
+	rm -f *.aux
+	rm -f *.dat
 	rm -f *.eps
 	rm -f *.pdf
 	rm -f *.pgf

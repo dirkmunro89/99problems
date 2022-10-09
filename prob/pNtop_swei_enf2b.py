@@ -18,7 +18,7 @@ def apar(n):
 #
     enf='t-r'
 #
-    kmx=1000
+    kmx=2000
     cnv=[1e-2,1e-2]
 #       
     return mov, asf, enf, kmx, cnv
@@ -28,7 +28,7 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     c_x=2e0*np.absolute(df)/x_k
     c_x[1:]=0e0
 #
-    c_x=np.maximum(c_x,1e-3)
+    c_x=np.maximum(c_x,1e-4)
 #
 #   LP
 #   c_x[:]=1e-6
@@ -77,7 +77,7 @@ def init(g):
     qen = 1.0
     muc = 1e-2
     Emin = 0e0; Emax=1.0
-    gv = -9.81/800/mm
+    gv = -9.81/7200
 #
     n = nelx*nely
     m = 2

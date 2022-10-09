@@ -107,6 +107,9 @@ def topo2d_simu(n,m,x,aux,vis):
         fig.canvas.draw()
         fig.canvas.flush_events()
         plt.savefig('topology.eps')
+        tmp=np.flip(x.reshape((nelx,nely)).T,0)
+        tmp2=np.append(np.flip(tmp,1),tmp,axis=1)
+        np.savetxt("topology.dat",tmp2,fmt='%14.7f')
     else:
         if vis > 0:
             fig,ax = plt.subplots()

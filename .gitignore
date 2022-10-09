@@ -4,8 +4,14 @@ __pycache__/
 *$py.class
 
 *.eps
+*.pdf
+*.tex
+*.aux
 *.pgf
 *.npz
+*.png
+*.p
+*.dat
 
 # C extensions
 *.so

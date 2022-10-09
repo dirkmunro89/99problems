@@ -86,7 +86,7 @@ def main(nelx,nely,volfrac,penal,qenal,rmin,ft):
 	interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
 	fig.show()
     
-	gv=-9.81/800/3
+	gv=-9.81/(nelx*nely)
 	loop=0
 	change=1
 	dv = np.ones(nely*nelx)
@@ -175,7 +175,7 @@ def oc(nelx,nely,x,volfrac,dc,dv,g):
 
 	while (l2-l1)/(l1+l2)>1e-3:
 		lmid=0.5*(l2+l1)
-		tmp=np.maximum((-dc/dv/lmid),1e-3)
+		tmp=np.maximum((-dc/dv/lmid),1e-4)
 		xnew[:]=np.maximum(1e-6,np.maximum(x-move,np.minimum(1.0,np.minimum(x+move,x*np.sqrt(tmp)))))
 		gt=g+np.sum((dv*(xnew-x)))
 		if gt<0 :

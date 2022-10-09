@@ -13,7 +13,7 @@ from subs.t2dual import t2d as subs
 #
 def apar(n):
 #   
-    mov=0.1*np.ones(n)
+    mov=0.1*np.ones(n,dtype=float)
     asf=[0.7,1.1]
 #
     enf='none'
@@ -25,13 +25,13 @@ def apar(n):
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.ones_like(df)*1e-3
+    c_x=np.ones_like(df)*1e-4
 #
     if k>2:
         mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
 #
-    L = x_k#-mov*(x_u-x_l)
-    U = x_k#+mov*(x_u-x_l)
+    L=L_k
+    U=U_k
 #
     d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
     d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
@@ -72,7 +72,7 @@ def init(g):
     qen = 1.0
     muc = 1e-2
     Emin = 0e0; Emax=1.0
-    gv = -9.81/800/mm
+    gv = -9.81/2600
 #
     n = nelx*nely
     m = 2

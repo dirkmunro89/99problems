@@ -92,7 +92,7 @@ def main(nelx,nely,volfrac,pen,qen,muc,rmin,ft):
 	interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
 	fig.show()
     
-	gv=-9.81/800/3
+	gv=-9.81/(nelx*nely)/100.
 	loop=0
 	change=1
 	dv = np.ones(nely*nelx)
@@ -155,7 +155,7 @@ def main(nelx,nely,volfrac,pen,qen,muc,rmin,ft):
 		fig.canvas.flush_events()
 
 		# Write iteration history to screen (req. Python 2.6 or newer)
-		print("it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(\
+		print("it.: {0} , obj.: {1:.3e} Vol.: {2:.3f}, ch.: {3:.3f}".format(\
 					loop,obj,(g+volfrac*nelx*nely)/(nelx*nely),change))
 
 	# Make sure the plot stays and that the shell remains	
@@ -185,9 +185,7 @@ def oc(nelx,nely,x,volfrac,dc,dv,g,mov):
 
 	while (l2-l1)/(l1+l2)>1e-9:
 		lmid=0.5*(l2+l1)
-		c_k = np.ones(nelx*nely)*1e-3
-#	c_k = np.maximum(np.absolute(-2.*dc/x),1e-3)
-		tmp=np.minimum(np.maximum((dc + lmid*dv)/c_k,-mov),mov)
+		tmp=np.minimum(np.maximum((dc + lmid*dv)/1e-6,-mov),mov)
 		xnew[:] = np.minimum(np.maximum(0.,x - tmp),1.)
 		gt=g+np.sum((dv*(xnew-x)))
 		if gt>0:
