@@ -172,8 +172,8 @@ if __name__ == "__main__":
 #   1 to do one standard run with a random start (test of mult start)
 #   X to do X random multi-starts
 #
-    gmx=6
-    pus=6
+    gmx=0
+    pus=0
     fdc=0
 #
     if fdc:         #check finite differences
@@ -185,8 +185,7 @@ if __name__ == "__main__":
         h=loop(init,apar,simu,caml,subs,0)
     elif gmx>1:     #multi-starts
         fopt=1e8; gopt=0; ktot=0
-        res = Parallel(n_jobs=pus,backend='multiprocessing')\
-            (delayed(loop)(init,apar,simu,caml,subs,g) for g in range(1,gmx+1))
+        res = Parallel(n_jobs=pus)(delayed(loop)(init,apar,simu,caml,subs,g) for g in range(1,gmx+1))
         glog = open('global.log','w'); g=1
         for r in res:
             (k_s,t_s,f_s,v_s)=r
