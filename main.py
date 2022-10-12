@@ -63,13 +63,13 @@ def loop(init,apar,simu,caml,subs,g):
         elif enf == 'c-a':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
-                cont=enfc.con_pas(f_1,f_k,q_k)
+                cont=enfc.con_pas(f_1,f_k,q_k,c_x)
                 if cont:
                     test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                     if test: enfc.par_add(f_k[0],v_k,k)
                 else:
                     [s_k,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
-                    c_x[:]=stub.set_crv(2.,f_k,q_k)
+                    c_x[:]=stub.set_crv(5.,f_k,q_k)
         else:
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else: 

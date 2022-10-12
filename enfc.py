@@ -13,14 +13,16 @@ class Enfc:
         self.gama = 1e-1#5
         self.beta = 1.-self.gama
 #
-    def con_pas(self,g_1,g_k,q_k):
+    def con_pas(self,g_1,g_k,q_k,c_x):
         gama=self.gama
         f_k = g_k[0]; f_1 = g_1[0]
         # if feasible descent
         if f_k < f_1 and max(g_k[1:]) < 1e-6: return True
         # if conservative
-        elif all(np.greater_equal(q_k,g_k)): return True
-        else: return False
+        else:
+            for j in range(len(g_k)):
+                if np.amax(c_x[j]) > 0. and q_k[j] < g_k[j]: return False
+            return True
 #
     def par_pas(self,f_1,f_k,v_k,p_k):
         beta=self.beta; gama=self.gama
