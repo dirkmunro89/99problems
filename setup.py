@@ -28,6 +28,7 @@ setup(
         'matplotlib',
         'cvxopt',
         'pytest',
+        'joblib',
         'osqp'
     ]
 #    extras_require={

@@ -9,17 +9,17 @@ class Enfc:
 #
     def __init__(self):
         self.pf = []
-        self.sgma = 1e-2
-        self.gama = 1e-5
+        self.sgma = 25e-2#9e-1
+        self.gama = 1e-1#5
         self.beta = 1.-self.gama
 #
     def con_pas(self,g_1,g_k,q_k):
         gama=self.gama
         f_k = g_k[0]; f_1 = g_1[0]
         # if feasible descent
-        if f_k < f_1  and max(g_k[1:]) < 0.: return True
+        if f_k < f_1 and max(g_k[1:]) < 1e-6: return True
         # if conservative
-        elif all(np.greater(q_k,g_k)): return True
+        elif all(np.greater_equal(q_k,g_k)): return True
         else: return False
 #
     def par_pas(self,f_1,f_k,v_k,p_k):

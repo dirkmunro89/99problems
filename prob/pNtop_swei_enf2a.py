@@ -5,15 +5,13 @@ from prob.util.topo2d import topo2d_simu
 #
 # specify subsolver here
 #
-#from subs.condual import con as subs
 from subs.t2dual import t2d as subs
-#from subs.t2dual import t2d as subs
 #
 # specify problem and algorithmic parameters here
 #
 def apar(n):
 #   
-    mov=0.1*np.ones(n,dtype=float)
+    mov=1e-1*np.ones(n,dtype=float)
     asf=[0.7,1.1]
 #
     enf='c-a'
@@ -28,13 +26,10 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     c_x=2e0*np.absolute(df)/x_k
     c_x[1:]=0e0
 #
-    c_x=np.maximum(c_x,1e-4)
+    c_x[0]=np.maximum(c_x[0],1e-6)
 #
-#   LP
-#   c_x[:]=1e-6
-#
-    L = x_k#-mov*(x_u-x_l)
-    U = x_k#+mov*(x_u-x_l)
+    L=L_k
+    U=U_k
 #
     d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
     d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
@@ -77,7 +72,7 @@ def init(g):
     qen = 1.0
     muc = 1e-2
     Emin = 0e0; Emax=1.0
-    gv = -9.81/7200
+    gv = -9.81/nelx/nely
 #
     n = nelx*nely
     m = 2
@@ -99,11 +94,11 @@ def simu(n,m,x,aux,g):
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0]=c/n
+    f[0]=c/7200
     f[1]=v/n/v_u-1.
     f[2]=-v/n/v_l+1.
 #
-    df[0][:] = dc/n
+    df[0][:] = dc/7200
     df[1][:] = dv/n/v_u
     df[2][:] = -dv/n/v_l
 #

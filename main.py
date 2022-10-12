@@ -3,6 +3,7 @@ import sys
 import random
 import numpy as np
 import logging as log
+from joblib import Parallel, delayed
 #
 from prbs import mods
 from stub import Stub
@@ -10,7 +11,7 @@ from enfc import Enfc
 #
 def loop(init,apar,simu,caml,subs,g):
 #
-    if g > 0: log = open('hist_%d.log'%g,'w')
+    if g > 0: print("Start %d .."%g); log = open('hist_%d.log'%g,'w')
     else: log = open('history.log','w')
 #
     [n,m,x_l,x_u,x_k,aux]=init(g)
@@ -41,10 +42,11 @@ def loop(init,apar,simu,caml,subs,g):
 #
     enfc = Enfc()
 #
+    inn=0; tot=0
     while k<kmx:
 #
         if k > 0: f_1 = f_k.copy(); df_1 = df_k.copy()
-        [f_k,df_k] = simu(n,m,x_k,aux,0)
+        [f_k,df_k] = simu(n,m,x_k,aux,0); tot=tot+1
         v_k=max(f_k[1:])
 #
         cont=True; test=' '
@@ -56,7 +58,7 @@ def loop(init,apar,simu,caml,subs,g):
                     mov=mov*1.1
                     enfc.par_add(f_k[0],v_k,k)
                 else:
-                    mov=stub.set_mov(0.7,x_l,x_u)
+                    mov=stub.set_mov(0.5,x_l,x_u)
                     [s_k,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'c-a':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
@@ -82,8 +84,8 @@ def loop(init,apar,simu,caml,subs,g):
         log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e\n'%\
             (k, itr, f_k[0], v_k, bdd, d_xi, d_xe)); log.flush()
         if not g > 0:
-            print('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e'%\
-                (k, itr, f_k[0], v_k, bdd, d_xi, d_xe))#,flush=True)
+            print('%4d%3s%2d%14.3e%9.0e%7.2f%11.1e%11.1e'%\
+                (k, itr, inn, f_k[0], v_k, bdd, d_xi, d_xe))#,flush=True)
 #
         if k>0 and cont : 
             if d_xi<cnv[0] or d_xe<cnv[1]: 
@@ -94,15 +96,16 @@ def loop(init,apar,simu,caml,subs,g):
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
-        if k>0 and np.amax(c_x)>1e16:
+        if k>0 and np.amax(c_x)>1e12 and inn>20:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
 #
         if cont:
             [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,df_k,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
-            mov[:]=m_k; L_k[:]=L; U_k[:]=U
+            mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
             if enf == 't-r' or enf == 'c-a': stub=Stub(k,x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
+        else: inn=inn+1; k=k-1
 #
         x_0[:]=x_k 
         [x,d,q_k] = subs(n,m,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
@@ -116,8 +119,8 @@ def loop(init,apar,simu,caml,subs,g):
     [f_k,_] = simu(n,m,x_k,aux,g)
     log.close()
     if g > 0: 
-        np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k)
-        return k,h[-1][0],max(h[-1][1:])
+        np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k); print("... exit %d"%g)
+        return k,tot,h[-1][0],max(h[-1][1:])
     else: 
         enfc.par_plt(); enfc.cnv_plt(h)
         return h
@@ -170,6 +173,7 @@ if __name__ == "__main__":
 #   X to do X random multi-starts
 #
     gmx=0
+    pus=6
     fdc=0
 #
     if fdc:         #check finite differences
@@ -181,13 +185,15 @@ if __name__ == "__main__":
         h=loop(init,apar,simu,caml,subs,0)
     elif gmx>1:     #multi-starts
         fopt=1e8; gopt=0; ktot=0
-        glog = open('global.log','w')
-        for g in range(1,gmx+1):
-            [k_s,f_s,v_s]=loop(init,apar,simu,caml,subs,g)
+        res = Parallel(n_jobs=pus)(delayed(loop)(init,apar,simu,caml,subs,g) for g in range(1,gmx+1))
+        glog = open('global.log','w'); g=1
+        for r in res:
+            (k_s,t_s,f_s,v_s)=r
             if f_s < fopt and v_s<1e-3: fopt=f_s; gopt=g; nopt='T'
             else: nopt='F'
-            glog.write('%3d%3s%10d%14.3e%9.0e\n'%(g, nopt, k_s, f_s, v_s))#,flush=True)
-            print('%3d%3s%10d%14.3e%9.0e'%(g, nopt, k_s, f_s, v_s))#,flush=True)
+            glog.write('%3d%3s%10d%10d%14.3e%9.0e\n'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
+            print('%3d%3s%10d%10d%14.3e%9.0e'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
+            g=g+1
         print("See solution", gopt)
         glog.close()
 #

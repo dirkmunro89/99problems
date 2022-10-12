@@ -144,11 +144,6 @@ def topo2d_simu(n,m,x,aux,vis):
     dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
     dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
     dv[:] = np.ones(nely*nelx)
-#   tmp=2. * gv * u[edofMat[:,1],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
-#   tmp+=2. * gv * u[edofMat[:,3],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
-#   tmp+=2. * gv * u[edofMat[:,5],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
-#   tmp+=2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
-#   print(-(dxPena(muc,pen,xPhys)*(Emax-Emin)*ce)[0],tmp[0])
     # Sensitivity filtering:
     if ft==0:
         dc[:] = np.asarray((H*(x*dc))[np.newaxis].T/Hs)[:,0] / np.maximum(0.001,x)

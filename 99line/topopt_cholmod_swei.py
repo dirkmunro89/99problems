@@ -8,26 +8,32 @@ from scipy.sparse.linalg import spsolve
 from matplotlib import colors
 import matplotlib.pyplot as plt
 import cvxopt ;import cvxopt.cholmod
-
-def main(nelx,nely,volfrac,penal,qenal,rmin,ft):
+#
+def xPena(muc,pen,xPhys):
+	return muc*xPhys + (1-muc)*xPhys**pen
+def dxPena(muc,pen,xPhys):
+	return muc + pen*(1-muc)*xPhys**(pen-1.)
+#
+def main(nelx,nely,volfrac,pen,qen,muc,rmin,ft):
 	print("Minimum compliance problem with OC")
 	print("ndes: " + str(nelx) + " x " + str(nely))
-	print("volfrac: " + str(volfrac) + ", rmin: " + str(rmin) + ", penal: " + str(penal))
+	print("volfrac: " + str(volfrac) + ", rmin: " + str(rmin) + ", pen: " + str(pen))
 	print("Filter method: " + ["Sensitivity based","Density based"][ft])
 
+	mov=0.1*np.ones(nelx*nely)
+
 	# Max and min stiffness
-	Emin=0.#1e-9
+	Emin=1e-9
 	Emax=1.0
 
 	# dofs:
 	ndof = 2*(nelx+1)*(nely+1)
 
-	# Allocate design variables (as array), initialize and allocate sens.
-	x=volfrac * np.ones(nely*nelx,dtype=float)
-	xold=x.copy()
+	# Allcate design variables (as array), initialize and allocate sens.
+	x= volfrac * np.ones(nely*nelx,dtype=float)
+	xold=x.copy(); xolder=x.copy(); xoldest=x.copy()
 	xPhys=x.copy()
 
-	g=0 # must be initialized to use the NGuyen/Paulino OC approach
 	dc=np.zeros((nely,nelx), dtype=float)
 
 	# FE: Build the index vectors for the for coo matrix format.
@@ -95,13 +101,13 @@ def main(nelx,nely,volfrac,penal,qenal,rmin,ft):
 	while change>0.01 and loop<2000:
 		loop=loop+1
 		# Setup and solve FE problem
-		sK=((KE.flatten()[np.newaxis]).T*(Emin+(xPhys)**penal*(Emax-Emin))).flatten(order='F')
+		sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,pen,xPhys)*(Emax-Emin))).flatten(order='F')
 		K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()
 		# Remove constrained dofs from matrix and convert to coo
 		K = deleterowcol(K,fixed,fixed).tocoo()
         # Set self-weight load
 		f_tmp=np.zeros(ndof)
-		np.add.at(f_tmp,edofMat[:, 1::2].flatten(),np.kron(xPhys**qenal,gv*np.ones(4)/4.))
+		np.add.at(f_tmp,edofMat[:, 1::2].flatten(),np.kron(xPena(muc,qen,xPhys),gv*np.ones(4)/4.))
 		f_apl = f.copy()
 		f_apl[:,0] += f_tmp
 		# Solve system 
@@ -112,12 +118,12 @@ def main(nelx,nely,volfrac,penal,qenal,rmin,ft):
 
 		# Objective and sensitivity
 		ce[:] = (np.dot(u[edofMat].reshape(nelx*nely,8),KE)*u[edofMat].reshape(nelx*nely,8) ).sum(1)
-		obj=( (Emin+xPhys**penal*(Emax-Emin))*ce ).sum()
-		dc[:]=(-penal*xPhys**(penal-1)*(Emax-Emin))*ce
-		dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4. * qenal * xPhys**(qenal-1.)
-		dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4. * qenal * xPhys**(qenal-1.)
-		dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4. * qenal * xPhys**(qenal-1.)
-		dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4. * qenal * xPhys**(qenal-1.)
+		obj=( (Emin+xPhys**pen*(Emax-Emin))*ce ).sum()
+		dc[:]=(-dxPena(muc,pen,xPhys)*(Emax-Emin))*ce
+		dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4. * dxPena(muc,qen,xPhys)
+		dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4. * dxPena(muc,qen,xPhys)
+		dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4. * dxPena(muc,qen,xPhys)
+		dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(muc,qen,xPhys)
 
 		dv[:] = -np.ones(nely*nelx)
 		# Sensitivity filtering:
@@ -127,9 +133,14 @@ def main(nelx,nely,volfrac,penal,qenal,rmin,ft):
 			dc[:] = np.asarray(H*(dc[np.newaxis].T/Hs))[:,0]
 			dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
 
+		g=-np.sum(xPhys)/nelx/nely/volfrac+1.
 		# Optimality criteria
 		xold[:]=x
-		(x[:],g)=oc(nelx,nely,x,volfrac,dc,dv,g)
+		if loop > 2:
+			osc=(x-xolder)*(xolder-xoldest)
+			mov=np.minimum(np.maximum(1e-3,np.where(osc<=0.,mov*0.7,mov*1.2)),1e-1)
+		(x[:],g)=oc(nelx,nely,x,volfrac,dc,dv,g,mov)
+		xoldest[:]=xolder; xolder[:]=xold
 
 		# Filter design variables
 		if ft==0:   xPhys[:]=x
@@ -144,7 +155,7 @@ def main(nelx,nely,volfrac,penal,qenal,rmin,ft):
 		fig.canvas.flush_events()
 
 		# Write iteration history to screen (req. Python 2.6 or newer)
-		print("it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(\
+		print("it.: {0} , obj.: {1:.3e} Vol.: {2:.3f}, ch.: {3:.3f}".format(\
 					loop,obj,(g+volfrac*nelx*nely)/(nelx*nely),change))
 
 	# Make sure the plot stays and that the shell remains	
@@ -166,19 +177,18 @@ def lk():
 	[k[7], k[2], k[1], k[4], k[3], k[6], k[5], k[0]] ]);
 	return (KE)
 
-def oc(nelx,nely,x,volfrac,dc,dv,g):
+def oc(nelx,nely,x,volfrac,dc,dv,g,mov):
 	l1=1e-9
 	l2=1e9
-	move=0.1
 	# reshape to perform vector operations
 	xnew=np.zeros(nelx*nely)
 
-	while (l2-l1)/(l1+l2)>1e-3:
+	while (l2-l1)/(l1+l2)>1e-9:
 		lmid=0.5*(l2+l1)
-		tmp=np.maximum((-dc/dv/lmid),1e-4)
-		xnew[:]=np.maximum(1e-6,np.maximum(x-move,np.minimum(1.0,np.minimum(x+move,x*np.sqrt(tmp)))))
+		tmp=np.minimum(np.maximum((dc + lmid*dv)/1e-6,-mov),mov)
+		xnew[:] = np.minimum(np.maximum(0.,x - tmp),1.)
 		gt=g+np.sum((dv*(xnew-x)))
-		if gt<0 :
+		if gt>0:
 			l1=lmid
 		else:
 			l2=lmid
@@ -197,10 +207,11 @@ if __name__ == "__main__":
 	# Default input parameters
 	nelx=120
 	nely=60
-	volfrac=0.2
+	volfrac=0.1
 	rmin=3.3
-	penal=1.0
-	qenal=1./3.
+	pen=3.
+	qen=1.
+	muc=1e-2
 	ft=1 # ft==0 -> sens, ft==1 -> dens
 
 	import sys
@@ -208,7 +219,7 @@ if __name__ == "__main__":
 	if len(sys.argv)>2: nely   =int(sys.argv[2])
 	if len(sys.argv)>3: volfrac=float(sys.argv[3])
 	if len(sys.argv)>4: rmin   =float(sys.argv[4])
-	if len(sys.argv)>5: penal  =float(sys.argv[5])
+	if len(sys.argv)>5: pen  =float(sys.argv[5])
 	if len(sys.argv)>6: ft     =int(sys.argv[6])
 
-	main(nelx,nely,volfrac,penal,qenal,rmin,ft)
+	main(nelx,nely,volfrac,pen,qen,muc,rmin,ft)
