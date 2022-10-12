@@ -191,8 +191,8 @@ if __name__ == "__main__":
             (k_s,t_s,f_s,v_s)=r
             if f_s < fopt and v_s<1e-3: fopt=f_s; gopt=g; nopt='T'
             else: nopt='F'
-            glog.write('%3d%3s%10d%10d%14.3e%9.0e\n'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
-            print('%3d%3s%10d%10d%14.3e%9.0e'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
+            glog.write('%4d%3s%10d%10d%14.3e%9.0e\n'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
+            print('%4d%3s%10d%10d%14.3e%9.0e'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
             g=g+1
         print("See solution", gopt)
         glog.close()
