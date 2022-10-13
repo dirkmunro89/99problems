@@ -11,7 +11,7 @@ from subs.t2dual import t2d as subs
 #
 def apar(n):
 #   
-    mov=1e-1*np.ones(n,dtype=float)
+    mov=2e-1*np.ones(n,dtype=float)
     asf=[0.5,1.5]
 #
     enf='c-a'

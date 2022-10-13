@@ -69,7 +69,7 @@ def loop(init,apar,simu,caml,subs,g):
                     if test: enfc.par_add(f_k[0],v_k,k)
                 else:
                     [s_k,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
-                    c_x[:]=stub.set_crv(5.,f_k,q_k)
+                    c_x[:]=stub.set_crv(2.,f_k,q_k)
         else:
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else: 
@@ -96,7 +96,7 @@ def loop(init,apar,simu,caml,subs,g):
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
-        if k>0 and np.amax(c_x)>1e12 and inn>20:
+        if k>0 and enf=='c-a' and inn>10:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break

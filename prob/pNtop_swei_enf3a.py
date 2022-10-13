@@ -11,7 +11,7 @@ from subs.t2dual import t2d as subs
 #
 def apar(n):
 #   
-    mov=1e-1*np.ones(n,dtype=float)
+    mov=2e-1*np.ones(n,dtype=float)
     asf=[0.7,1.1]
 #
     enf='c-a'
@@ -39,7 +39,6 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 def init(g):
 #
     mm=3
-    nelx=20*mm
     nelx=2*20*mm
     nely=20*mm
     v_l = 0.2
