@@ -203,6 +203,24 @@ def mods(prob):
         from prob.pNtop_swei_enf3c import simu
         from prob.pNtop_swei_enf3c import caml
         from prob.pNtop_swei_enf3c import subs
+    elif prob == 'Ntop_swei_enf4a':
+        from prob.pNtop_swei_enf4a import init
+        from prob.pNtop_swei_enf4a import apar
+        from prob.pNtop_swei_enf4a import simu
+        from prob.pNtop_swei_enf4a import caml
+        from prob.pNtop_swei_enf4a import subs
+    elif prob == 'Ntop_swei_enf4b':
+        from prob.pNtop_swei_enf4b import init
+        from prob.pNtop_swei_enf4b import apar
+        from prob.pNtop_swei_enf4b import simu
+        from prob.pNtop_swei_enf4b import caml
+        from prob.pNtop_swei_enf4b import subs
+    elif prob == 'Ntop_swei_enf4c':
+        from prob.pNtop_swei_enf4c import init
+        from prob.pNtop_swei_enf4c import apar
+        from prob.pNtop_swei_enf4c import simu
+        from prob.pNtop_swei_enf4c import caml
+        from prob.pNtop_swei_enf4c import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init

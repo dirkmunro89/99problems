@@ -117,11 +117,13 @@ def loop(init,apar,simu,caml,subs,g):
         k=k+1
 #
     [f_k,_] = simu(n,m,x_k,aux,g)
-    log.close()
     if g > 0: 
         np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k); print("... exit %d"%g)
+        log.close()
         return k,tot,h[-1][0],max(h[-1][1:])
     else: 
+        log.write('Total number of system evaluations: %d\n'%tot); log.close()
+        print('Total number of system evaluations: %d\n'%tot)
         enfc.par_plt(); enfc.cnv_plt(h)
         return h
 #
@@ -184,7 +186,7 @@ if __name__ == "__main__":
     elif gmx == 1:  #one multi-start (debugging)
         h=loop(init,apar,simu,caml,subs,0)
     elif gmx>1:     #multi-starts
-        fopt=1e8; gopt=0; ktot=0
+        fopt=1e8; gopt=0; ktot=0; fnd=0
         res = Parallel(n_jobs=pus)(delayed(loop)(init,apar,simu,caml,subs,g) for g in range(1,gmx+1))
         glog = open('global.log','w'); g=1
         for r in res:
@@ -194,6 +196,12 @@ if __name__ == "__main__":
             glog.write('%4d%3s%10d%10d%14.3e%9.0e\n'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
             print('%4d%3s%10d%10d%14.3e%9.0e'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
             g=g+1
-        print("See solution", gopt)
+        print("See solution %d"%gopt)
+        glog.write("See solution %d\n"%gopt)
+        for r in res:
+            (k_s,t_s,f_s,v_s)=r
+            if (f_s-fopt)/fopt < 1e-2 and v_s<1e-3: fnd=fnd+1
+        print("Found %d times"%fnd)
+        glog.write("Found %d times\n"%fnd)
         glog.close()
 #
