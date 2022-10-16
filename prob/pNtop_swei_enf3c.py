@@ -95,11 +95,11 @@ def simu(n,m,x,aux,g):
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0]=c/3600
+    f[0]=c/360#0
     f[1]=v/n/v_u-1.
     f[2]=-v/n/v_l+1.
 #
-    df[0][:] = dc/3600
+    df[0][:] = dc/360#0
     df[1][:] = dv/n/v_u
     df[2][:] = -dv/n/v_l
 #
