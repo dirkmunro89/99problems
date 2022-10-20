@@ -112,7 +112,8 @@ def mods(prob):
         from prob.pNtop_eoc import apar
         from prob.pNtop_eoc import simu
         from prob.pNtop_eoc import caml
-        from subs.eocdual import eoc as subs
+#       from subs.eocdual import eoc as subs
+        from prob.pNtop_eoc import subs
     elif prob == 'Ntop_swei_duy8':
         from prob.pNtop_swei_duy8 import init
         from prob.pNtop_swei_duy8 import apar
@@ -221,6 +222,18 @@ def mods(prob):
         from prob.pNtop_swei_enf4c import simu
         from prob.pNtop_swei_enf4c import caml
         from prob.pNtop_swei_enf4c import subs
+    elif prob == 'Ntop_mech_enf1a':
+        from prob.pNtop_mech_enf1a import init
+        from prob.pNtop_mech_enf1a import apar
+        from prob.pNtop_mech_enf1a import simu
+        from prob.pNtop_mech_enf1a import caml
+        from prob.pNtop_mech_enf1a import subs
+    elif prob == 'Ntop_mech_enf2a':
+        from prob.pNtop_mech_enf2a import init
+        from prob.pNtop_mech_enf2a import apar
+        from prob.pNtop_mech_enf2a import simu
+        from prob.pNtop_mech_enf2a import caml
+        from prob.pNtop_mech_enf2a import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init
