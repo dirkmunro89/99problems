@@ -26,8 +26,7 @@ class Stub:
 #   (because cont is false, caml update is not done, so curvatures are taken from loop)
     def set_crv(self,fct,g_k,q_k):
         c_x=self._c_x.copy()
-        for i in range(len(g_k)):
-            if q_k[i] < g_k[i] and np.amax(c_x) > 0.: c_x[i]=c_x[i]*fct
+        c_x=c_x*np.where(q_k < g_k, fct , 1.)[:, np.newaxis]
         self._c_x = c_x.copy()
         return c_x
 #   retrieve a copy of the current instantiationn (dont return pointers)

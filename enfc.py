@@ -20,8 +20,8 @@ class Enfc:
         if f_k < f_1 and max(g_k[1:]) < 1e-6: return True
         # if conservative
         else:
-            for j in range(len(g_k)):
-                if np.amax(c_x[j]) > 0. and q_k[j] < g_k[j]: return False
+            if np.any( (np.where(np.amax(c_x,axis=1) > 0.,1,0)) * (np.where(q_k < g_k, 1, 0))):
+                return False
             return True
 #
     def par_pas(self,f_1,f_k,v_k,p_k):

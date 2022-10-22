@@ -1,5 +1,6 @@
 #
 import sys
+import time
 import random
 import numpy as np
 import logging as log
@@ -11,6 +12,7 @@ from enfc import Enfc
 #
 def loop(init,apar,simu,caml,subs,g):
 #
+    t0=time.time()
     if g > 0: print("Start %d .."%g); log = open('hist_%d.log'%g,'w')
     else: log = open('history.log','w')
 #
@@ -34,21 +36,24 @@ def loop(init,apar,simu,caml,subs,g):
         fdck(simu,n,m,x_k,aux,0)
         return
 #
-    log.write(('%4s%3s%14s%9s%7s%11s%11s\n')%\
-        ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||'))#,flush=True)
+    log.write(('%4s%3s%10s%12s%9s%9s%13s%8s%11s%11s\n')%\
+        ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))#,flush=True)
     if not g > 0:
-        print(('%4s%3s%14s%9s%7s%11s%11s')%\
-            ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||'))#,flush=True)
+        print(('%4s%3s%10s%12s%9s%9s%13s%8s%11s%11s')%\
+            ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))#,flush=True)
 #
     enfc = Enfc()
 #
-    inn=0; tot=0
+    inn=0; tot=0; ts1=0.; ts0=0.; tf1=0.; tf0=0.; to=0.; to0=0.; to1=0.
     while k<kmx:
 #
+        ts0=time.time()
         if k > 0: f_1 = f_k.copy(); df_1 = df_k.copy()
         [f_k,df_k] = simu(n,m,x_k,aux,0); tot=tot+1
         v_k=max(f_k[1:])
+        ts1=time.time(); ts=ts1-ts0
 #
+        tf0=time.time()
         cont=True; test=' '
         if enf == 't-r':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
@@ -76,16 +81,18 @@ def loop(init,apar,simu,caml,subs,g):
                 test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if test: enfc.par_add(f_k[0],v_k,k)
         v_k=max(f_k[1:])
+        tf1=time.time(); tf=tf1-tf0
 #
+        ti=time.time()
         if not str(test).strip(): itr=str(cont)[0]
         else: itr=str(test)[0]
         h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
         if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)#/float(n)
-        log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e\n'%\
-            (k, itr, f_k[0], v_k, bdd, d_xi, d_xe)); log.flush()
+        log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e%11.1e%11.1e%11.1e\n'%\
+            (k, itr, f_k[0], v_k, bdd, d_xi, d_xe,ts,to,ti-to0)); log.flush()
         if not g > 0:
-            print('%4d%3s%2d%14.3e%9.0e%7.2f%11.1e%11.1e'%\
-                (k, itr, inn, f_k[0], v_k, bdd, d_xi, d_xe))#,flush=True)
+            print('%4d%3s%2d%14.3e%9.0e%7.2f%11.1e%11.1e%11.1e%11.1e%11.1e'%\
+                (k, itr, inn, f_k[0], v_k, bdd, d_xi, d_xe, ts,to,ti-to0))#,flush=True)
 #
         if k>0 and cont : 
             if d_xi<cnv[0] or d_xe<cnv[1]: 
@@ -101,6 +108,7 @@ def loop(init,apar,simu,caml,subs,g):
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
 #
+        to0=time.time()
         if cont:
             [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,df_k,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
             mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
@@ -110,6 +118,7 @@ def loop(init,apar,simu,caml,subs,g):
         x_0[:]=x_k 
         [x,d,q_k] = subs(n,m,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
         x_k[:]=x; x_d[:]=d
+        to1=time.time(); to=to1-to0; ti=time.time()
 #
         if cont:
             x_2[:]=x_1; x_1[:]=x_0 
