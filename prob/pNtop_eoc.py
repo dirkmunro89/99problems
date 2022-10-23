@@ -5,7 +5,7 @@ from prob.util.topo2d import topo2d_simu
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=0e0*np.absolute(df)/x_k
+    c_x=2e0*np.absolute(df)/x_k
 #
     L=x_k
     U=x_k

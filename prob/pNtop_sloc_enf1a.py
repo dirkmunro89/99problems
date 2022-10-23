@@ -6,8 +6,9 @@ from prob.util.topo2d import topo2d_simu
 # specify subsolver here
 #
 from subs.t2dual import t2d as subs
+from subs.t2cvxo import t2cvxo as subs
 from subs.t2osqp import t2osqp as subs
-#from subs.t2cvxo import t2cvxo as subs
+from subs.t2cplx import t2cplx as subs
 #
 # specify problem and algorithmic parameters here
 #

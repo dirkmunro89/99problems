@@ -113,6 +113,9 @@ def mods(prob):
         from prob.pNtop_eoc import simu
         from prob.pNtop_eoc import caml
         from subs.eocdual import eoc as subs
+#       from subs.t2dual import t2d as subs
+#       from subs.t2osqp import t2osqp as subs
+#       from subs.t2cvxo import t2cvxo as subs
     elif prob == 'Ntop_swei_duy8':
         from prob.pNtop_swei_duy8 import init
         from prob.pNtop_swei_duy8 import apar
