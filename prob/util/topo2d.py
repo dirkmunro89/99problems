@@ -102,6 +102,19 @@ def topo2d_simu(n,m,x,aux,vis):
         tmp=xPadd.copy(); tmp[pad]=x
         xPhys[:]=np.asarray(H*tmp[np.newaxis].T/Hs)[:,0][pad] ###
 #
+#   x[:]=np.zeros(nelx*nely,dtype=float)
+#   for i in range(1,felx-1):
+#       for j in range(fely-1):
+#           c=i*felx+j
+#           l=(i-1)*felx+j+1
+#           r=(i+1)*felx+j+1
+#           u=i*felx+j+1
+#           x[c]=1.
+#           x[u]=0.5
+#           x[l]=0.1
+#           x[r]=0.1
+#           break
+#       break
     if fig and im:
         im.set_array(-x.reshape((nelx,nely)).T)
         fig.canvas.draw()
@@ -117,7 +130,6 @@ def topo2d_simu(n,m,x,aux,vis):
             interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
             plt.savefig('topo_%d.eps'%vis)
             plt.close()
-
 #
     # Setup and solve FE problem
     sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,pen,xPhys)*(Emax-Emin))).flatten(order='F')

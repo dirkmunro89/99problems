@@ -50,7 +50,7 @@ def loop(init,apar,simu,caml,subs,g):
         ts0=time.time()
         if k > 0: f_1 = f_k.copy(); df_1 = df_k.copy()
         [f_k,df_k] = simu(n,m,x_k,aux,0); tot=tot+1
-        v_k=max(f_k[1:])
+        v_k=np.amax(f_k[1:])
         ts1=time.time(); ts=ts1-ts0
 #
         tf0=time.time()
@@ -80,13 +80,13 @@ def loop(init,apar,simu,caml,subs,g):
             else: 
                 test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if test: enfc.par_add(f_k[0],v_k,k)
-        v_k=max(f_k[1:])
+        v_k=np.amax(f_k[1:])
         tf1=time.time(); tf=tf1-tf0
 #
         ti=time.time()
         if not str(test).strip(): itr=str(cont)[0]
         else: itr=str(test)[0]
-        h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
+        h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n-np.count_nonzero(x_u-x_l<1e-3)/n
         if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)#/float(n)
         log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e%11.1e%11.1e%11.1e\n'%\
             (k, itr, f_k[0], v_k, bdd, d_xi, d_xe,ts,to,ti-to0)); log.flush()
@@ -94,16 +94,16 @@ def loop(init,apar,simu,caml,subs,g):
             print('%4d%3s%2d%14.3e%9.0e%7.2f%11.1e%11.1e%11.1e%11.1e%11.1e'%\
                 (k, itr, inn, f_k[0], v_k, bdd, d_xi, d_xe, ts,to,ti-to0))#,flush=True)
 #
-        if k>0 and cont : 
+        if k>1 and cont : 
             if d_xi<cnv[0] or d_xe<cnv[1]: 
                 log.write('Termination on Convergence criteria\n')
                 if not g > 0: print('Termination on Convergence criteria')
                 break
-        if k>0 and np.amax(mov)<cnv[0]:
+        if k>1 and np.amax(mov)<cnv[0]:
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
-        if k>0 and enf=='c-a' and inn>10:
+        if k>1 and enf=='c-a' and inn>10:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break

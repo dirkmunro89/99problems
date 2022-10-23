@@ -16,7 +16,7 @@ def t2cplx(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
     dx_l=d_l-x_k
     dx_u=d_u-x_k
 #
-    ddL=np.maximum(c_x[0]+np.dot(x_d.transpose(),c_x[1:]),0e0)
+    ddL=np.maximum(c_x[0]+np.dot(x_d.transpose(),c_x[1:]),1e-6)
 #
     prob=cplex.Cplex()
 #   prob.set_results_stream(None)
@@ -34,8 +34,10 @@ def t2cplx(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
     print(t2-t1)
     prob.objective.set_quadratic(ddL)
     prob.solve()
-#
-    x_d[:]=-np.array(prob.solution.get_dual_values())
+    if prob.solution.get_status() == 3:
+        prob.feasopt(prob.feasopt.all_constraints())
+    else:
+        x_d[:]=-np.array(prob.solution.get_dual_values())
     x=x_k+np.maximum(np.minimum(prob.solution.get_values(),dx_u),dx_l)
 #
     q_k = g+np.dot(dg,x-x_k)+np.dot(c_x/2.,(x-x_k)**2.)
