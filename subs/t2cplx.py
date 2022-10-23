@@ -38,6 +38,7 @@ def t2cplx(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
         prob.feasopt(prob.feasopt.all_constraints())
     else:
         x_d[:]=-np.array(prob.solution.get_dual_values())
+#
     x=x_k+np.maximum(np.minimum(prob.solution.get_values(),dx_u),dx_l)
 #
     q_k = g+np.dot(dg,x-x_k)+np.dot(c_x/2.,(x-x_k)**2.)
