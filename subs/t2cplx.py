@@ -19,8 +19,8 @@ def t2cplx(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
     ddL=np.maximum(c_x[0]+np.dot(x_d.transpose(),c_x[1:]),1e-6)
 #
     prob=cplex.Cplex()
-#   prob.set_results_stream(None)
-#   prob.set_log_stream(None)
+    prob.set_results_stream(None)
+    prob.set_log_stream(None)
     prob.parameters.threads=8
     prob.parameters.read.datacheck=0
     prob.variables.add(obj=dg[0][:],lb=dx_l,ub=dx_u)
