@@ -35,7 +35,7 @@ def t2cplx(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
     prob.objective.set_quadratic(ddL)
     prob.solve()
     if prob.solution.get_status() == 3:
-        prob.feasopt(prob.feasopt.all_constraints())
+        prob.feasopt(prob.feasopt.linear_constraints())
     else:
         x_d[:]=-np.array(prob.solution.get_dual_values())
 #

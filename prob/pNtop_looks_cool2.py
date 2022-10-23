@@ -19,7 +19,7 @@ def apar(n):
 #
     enf='none'
 #
-    kmx=1000
+    kmx=100
     cnv=[1e-6,1e-6]
 #
     return mov, asf, enf, kmx, cnv
@@ -45,11 +45,11 @@ def init(g):
     nelx=40*mm
     nely=20*mm
     v_l = 0.01
-    v_0 = 0.01
+    v_0 = 0.2
     v_u = 0.5
 #
     ft = 1
-    rmin = 2.*mm
+    rmin = 1.1*mm
     dext=0#int(np.ceil(rmin))
     felx = nelx+dext
     fely = nely+2*dext
@@ -106,14 +106,14 @@ def simu(n,m,x,aux,g):
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
     f[0]=c/n/36#np.sum(x)/n
-    f[1]=v/n/v_u-1.
-    f[2]=-v/n/v_l+1.
+    f[1]=np.sum(x)/n/v_u-1.
+    f[2]=-np.sum(x)/n/v_l+1.
 #
     xp=x#np.asarray(H*x[np.newaxis].T/Hs)[:,0]#[pad] ###
     c=0
     a=3.
-    p=3.#/1.
-    q=2.#/1.#/1.#1.1#p
+    p=2.
+    q=1.#/p
     z=1.
     for i in range(1,felx-1):
         for j in range(fely-1):
@@ -129,8 +129,8 @@ def simu(n,m,x,aux,g):
             df[3+c][u]=  -(1./a)/z*(tmp)**(1./a-1.)*a*p*xp[u]**(a*p-1)
 #
     df[0][:] = dc/n/36#np.ones(n,dtype=float)/n#dc/360#0
-    df[1][:] = dv/n/v_u
-    df[2][:] = -dv/n/v_l
+    df[1][:] = np.ones(n,dtype=float)/n/v_u
+    df[2][:] = -np.ones(n,dtype=float)/n/v_l
 #
 #   for j in range(3,m+1):
 #       df[j][:] = np.asarray(H*(df[j][np.newaxis].T/Hs))[:,0]
