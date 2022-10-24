@@ -149,6 +149,26 @@ def topo2d_simu(n,m,x,aux,vis):
     dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
     dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
     dv[:] = np.ones(nely*nelx)
+#
+    m_x=0e0
+    m_y=0e0
+    tmpx=0.
+    tmpy=0.
+    dm_x=np.zeros_like(dv)
+    dm_y=np.zeros_like(dv)
+    for i in range(nelx):
+        for j in range(nely):
+            row=i*nely+j
+            m_x=m_x+xPhys[row]*float(i)/np.sum(xPhys)
+            tmpx=tmpx+xPhys[row]*float(i)
+            m_y=m_y+xPhys[row]*float(j)/np.sum(xPhys)
+            tmpy=tmpy+xPhys[row]*float(j)
+    for i in range(nelx):
+        for j in range(nely):
+            row=i*nely+j
+            dm_x[row]=(float(i)*np.sum(xPhys)-tmpx)/(np.sum(xPhys))**2.
+            dm_y[row]=(float(j)*np.sum(xPhys)-tmpy)/(np.sum(xPhys))**2.
+#
     # Sensitivity filtering:
     if ft==0:
         dc[:] = np.asarray((H*(x*dc))[np.newaxis].T/Hs)[:,0] / np.maximum(0.001,x)
@@ -156,10 +176,12 @@ def topo2d_simu(n,m,x,aux,vis):
         tmp=np.zeros_like(xPadd)
         tmp[pad]=dc; dc[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
         tmp[pad]=dv; dv[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
+        tmp[pad]=dm_x; dm_x[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
+        tmp[pad]=dm_y; dm_y[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
 #
     v=np.sum(xPhys)
 #
-    return obj,dc,v,dv
+    return obj,dc,v,dv, m_x, dm_x, m_y, dm_y
 #
 #element stiffness matrix
 def lk():

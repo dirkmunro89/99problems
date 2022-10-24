@@ -63,7 +63,6 @@ def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,pen,qen,muc,
     # Set load
     f[din,0]=1
     f[dout,1]=1
-
 #
     if g <= 0 and g > -2:
         plt.ion(); fig,ax = plt.subplots()
@@ -149,6 +148,22 @@ def topo2d_simu(n,m,x,aux,vis):
     dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
     dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
     dv[:] = np.ones(nely*nelx)
+#
+    m_x=0e0
+    tmp=0.
+    dm_x=np.zeros_like(dv)
+    for i in range(nelx):
+        for j in range(nely):
+            row=i*fely+j
+            m_x=m_x+x[row]*float(i)/np.sum(x)
+            tmp=tmp+x[row]*float(i)
+    for i in range(nelx):
+        for j in range(nely):
+            row=i*fely+j
+            dm_x[row]=(float(i)*np.sum(x)-tmp)/(np.sum(x))**2.
+#
+    v=np.sum(xPhys)
+#
     # Sensitivity filtering:
     if ft==0:
         dc[:] = np.asarray((H*(x*dc))[np.newaxis].T/Hs)[:,0] / np.maximum(0.001,x)
@@ -156,10 +171,9 @@ def topo2d_simu(n,m,x,aux,vis):
         tmp=np.zeros_like(xPadd)
         tmp[pad]=dc; dc[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
         tmp[pad]=dv; dv[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
+        tmp[pad]=dm_x; dm_x[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
 #
-    v=np.sum(xPhys)
-#
-    return obj,dc,v,dv
+    return obj,dc,v,dv, m_x, dm_x
 #
 #element stiffness matrix
 def lk():

@@ -236,6 +236,18 @@ def mods(prob):
         from prob.pNtop_mech_enf2a import simu
         from prob.pNtop_mech_enf2a import caml
         from prob.pNtop_mech_enf2a import subs
+    elif prob == 'Ntop_mech_enf3a':
+        from prob.pNtop_mech_enf3a import init
+        from prob.pNtop_mech_enf3a import apar
+        from prob.pNtop_mech_enf3a import simu
+        from prob.pNtop_mech_enf3a import caml
+        from prob.pNtop_mech_enf3a import subs
+    elif prob == 'Ntop_mech_enf4a':
+        from prob.pNtop_mech_enf4a import init
+        from prob.pNtop_mech_enf4a import apar
+        from prob.pNtop_mech_enf4a import simu
+        from prob.pNtop_mech_enf4a import caml
+        from prob.pNtop_mech_enf4a import subs
     elif prob == 'Ntop_sloc_enf1a':
         from prob.pNtop_sloc_enf1a import init
         from prob.pNtop_sloc_enf1a import apar
