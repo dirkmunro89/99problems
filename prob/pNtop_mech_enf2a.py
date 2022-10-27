@@ -14,7 +14,7 @@ def apar(n):
     mov=5e-2*np.ones(n,dtype=float)
     asf=[0.5,1.5]
 #
-    enf='none'
+    enf='t-r'
 #
     kmx=1000
     cnv=[1e-2,1e-2]
@@ -23,7 +23,7 @@ def apar(n):
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df)/x_k*0.
+    c_x=2e0*np.absolute(df)/x_k#*0.
     c_x[1:]=0e0
 #
     c_x[0]=np.maximum(c_x[0],1e-6)

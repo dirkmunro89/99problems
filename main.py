@@ -86,7 +86,8 @@ def loop(init,apar,simu,caml,subs,g):
         ti=time.time()
         if not str(test).strip(): itr=str(cont)[0]
         else: itr=str(test)[0]
-        h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n-np.count_nonzero(x_u-x_l<1e-3)/n
+        h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
+        bdd=bdd-np.count_nonzero(x_u-x_l<1e-3)/n
         if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)#/float(n)
         log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e%11.1e%11.1e%11.1e\n'%\
             (k, itr, f_k[0], v_k, bdd, d_xi, d_xe,ts,to,ti-to0)); log.flush()

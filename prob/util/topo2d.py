@@ -6,6 +6,8 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 import cvxopt; import cvxopt.cholmod
 #
+from prob.util.para2d import para2d
+#
 def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,qen,muc,Emin,Emax,gv,g):
 #
     # dofs
@@ -150,12 +152,16 @@ def topo2d_simu(n,m,x,aux,vis):
     # Objective and sensitivity
     ce[:] = (np.dot(u[edofMat].reshape(nelx*nely,8),KE)*u[edofMat].reshape(nelx*nely,8) ).sum(1)
     obj = ( (Emin+xPena(muc,pen,xPhys)*(Emax-Emin))*ce ).sum()
-    dc[:] = -dxPena(muc,pen,xPhys)*(Emax-Emin)*ce
-    dc[:] += 2. * gv * u[edofMat[:,1],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
-    dc[:] += 2. * gv * u[edofMat[:,3],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
-    dc[:] += 2. * gv * u[edofMat[:,5],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
-    dc[:] += 2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
+    tmp = -dxPena(muc,pen,xPhys)*(Emax-Emin)*ce
+    tmp += 2. * gv * u[edofMat[:,1],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
+    tmp += 2. * gv * u[edofMat[:,3],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
+    tmp += 2. * gv * u[edofMat[:,5],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
+    tmp += 2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
+    dc[:] = tmp
     dv[:] = np.ones(nely*nelx)
+    
+    para2d(nelx,nely,x,u,gv,tmp)
+
     # Sensitivity filtering:
     if ft==0:
         dc[:] = np.asarray((H*(x*dc))[np.newaxis].T/Hs)[:,0] / np.maximum(0.001,x)

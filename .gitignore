@@ -10,6 +10,7 @@ __pycache__/
 *.npz
 *.png
 *.dat
+*.vtp
 
 *.so
 
@@ -31,6 +32,7 @@ sdist/
 var/
 wheels/
 pip-wheel-metadata/
+plt/
 share/python-wheels/
 *.egg-info/
 .installed.cfg

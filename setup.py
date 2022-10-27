@@ -29,6 +29,7 @@ setup(
         'cvxopt',
         'pytest',
         'joblib',
+        'vtk',
         'osqp'
     ]
 #    extras_require={

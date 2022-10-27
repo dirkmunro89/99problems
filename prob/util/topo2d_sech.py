@@ -173,7 +173,7 @@ def topo2d_simu(n,m,x,aux,vis):
         tmp[pad]=dv; dv[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
         tmp[pad]=dm_x; dm_x[:] = np.asarray(H*(tmp[np.newaxis].T/Hs))[:,0][pad]
 #
-    return obj,dc,v,dv, m_x, dm_x
+    return obj,dc,v,dv#, m_x, dm_x
 #
 #element stiffness matrix
 def lk():

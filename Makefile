@@ -30,6 +30,7 @@ clean:
 	rm -f *.eps
 	rm -f *.pdf
 	rm -f *.pgf
+	rm -f *.vtp
 
 .PHONY: docsclean
 docsclean:

@@ -181,7 +181,7 @@ def topo2d_simu(n,m,x,aux,vis):
 #
     v=np.sum(xPhys)
 #
-    return obj,dc,v,dv, m_x, dm_x, m_y, dm_y
+    return obj,dc,v,dv#, m_x, dm_x, m_y, dm_y
 #
 #element stiffness matrix
 def lk():
