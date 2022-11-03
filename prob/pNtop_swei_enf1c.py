@@ -17,7 +17,7 @@ def apar(n):
     enf='none'
 #
     kmx=1000
-    cnv=[1e-2,1e-2]
+    cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
 #
     return mov, asf, enf, kmx, cnv
 #
@@ -29,7 +29,7 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     if k>2:
         mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
 #
-    mov=np.minimum(np.maximum(mov,1e-3),0.1)
+    mov=np.minimum(np.maximum(mov,1e-6),0.1)
 #
     L=L_k
     U=U_k

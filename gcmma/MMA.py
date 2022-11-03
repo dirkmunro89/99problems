@@ -478,7 +478,6 @@ def kktcheck(m,n,x,y,z,lam,xsi,eta,mu,zet,s,xmin,xmax,df0dx,fval,dfdx,a0,a,c,d):
         residumax  = max(abs(residu)).
 
     """
-
     rex = df0dx+np.dot(dfdx.T,lam)-xsi+eta
     rey = c+d*y-mu-lam
     rez = a0-zet-np.dot(a.T,lam)

@@ -36,11 +36,11 @@ def loop(init,apar,simu,caml,subs,g):
         fdck(simu,n,m,x_k,aux,0)
         return
 #
-    log.write(('%4s%3s%10s%12s%9s%7s%12s%12s%6s%9s%9s\n')%\
-        ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))#,flush=True)
+    log.write(('%4s%3s%8s%11s%8s%5s%13s%7s%11s%6s%9s%9s\n')%\
+        ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '||KT||', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))
     if not g > 0:
-        print(('%4s%3s%10s%12s%9s%7s%12s%12s%6s%9s%9s')%\
-            ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))#,flush=True)
+        print(('%4s%3s%8s%11s%8s%5s%13s%7s%11s%6s%9s%9s')%\
+            ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '||KT||', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))
 #
     enfc = Enfc()
 #
@@ -88,23 +88,30 @@ def loop(init,apar,simu,caml,subs,g):
         else: itr=str(test)[0]
         h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
         bdd=bdd-np.count_nonzero(x_u-x_l<1e-3)/n
-        if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)#/float(n)
-        log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%10.1e%10.1e%9.1e%9.1e%9.1e\n'%\
-            (k, itr, f_k[0], v_k, bdd, np.amax(mov), d_xi, d_xe,ts,to,ti-to0)); log.flush()
+        ubd=np.where(x_k-x_l>1e-3,np.where(x_u-x_k>1e-3,1,0),0)
+        kkt=np.linalg.norm(  (df_k[0] + np.dot(x_d,df_k[1:]))*ubd, np.inf )
+#
+        if k == 0: ti=to0
+        else: 
+            d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)
+            d_f0=abs((f_k[0]-f_1[0])/f_k[0])
+        log.write('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e\n'%\
+            (k,itr,inn,f_k[0],v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0)); log.flush()
         if not g > 0:
-            print('%4d%3s%2d%14.3e%9.0e%7.2f%11.1e%10.1e%10.1e%9.1e%9.1e%9.1e'%\
-                (k, itr, inn, f_k[0], v_k, bdd, np.amax(mov), d_xi, d_xe, ts,to,ti-to0))#,flush=True)
+            print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
+                (k,itr,inn,f_k[0],v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0))#,flush=True)
 #
         if k>1 and cont : 
-            if d_xi<cnv[0] or d_xe<cnv[1]: 
+            if d_xi<cnv[0] and d_xe<cnv[1] and d_f0<cnv[2] and kkt<cnv[3] and v_k<cnv[4]:
                 log.write('Termination on Convergence criteria\n')
                 if not g > 0: print('Termination on Convergence criteria')
                 break
-        if k>1 and np.amax(mov)<cnv[0]:
+        if k>1 and enf=='t-r' and inn>15:
+#       if k>1 and enf=='t-r' and np.amax(mov)<cnv[0]:
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
-        if k>1 and enf=='c-a' and inn>10:
+        if k>1 and enf=='c-a' and inn>15:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
