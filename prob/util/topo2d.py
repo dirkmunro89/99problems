@@ -1,4 +1,5 @@
 #
+import os
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
@@ -159,8 +160,11 @@ def topo2d_simu(n,m,x,aux,vis):
     tmp += 2. * gv * u[edofMat[:,7],0] * 1./4. * dxPena(0.,qen,xPhys)#qen*xPhys**(qen-1.)
     dc[:] = tmp
     dv[:] = np.ones(nely*nelx)
-    
-    para2d(nelx,nely,x,u,gv,tmp)
+
+#   c=0
+#   while os.path.isfile('u_vec_%d.dat'%c): c=c+1
+#   np.savetxt('u_vec_%d.dat'%c, u[edofMat[:,[1,3,5,7]],0] )
+#   para2d(nelx,nely,x,u,gv,tmp)
 
     # Sensitivity filtering:
     if ft==0:

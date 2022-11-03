@@ -36,11 +36,11 @@ def loop(init,apar,simu,caml,subs,g):
         fdck(simu,n,m,x_k,aux,0)
         return
 #
-    log.write(('%4s%3s%10s%12s%9s%9s%13s%8s%11s%11s\n')%\
-        ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))#,flush=True)
+    log.write(('%4s%3s%10s%12s%9s%7s%12s%12s%6s%9s%9s\n')%\
+        ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))#,flush=True)
     if not g > 0:
-        print(('%4s%3s%10s%12s%9s%9s%13s%8s%11s%11s')%\
-            ('k', 's', 'Obj', 'Vio', 'Bou', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))#,flush=True)
+        print(('%4s%3s%10s%12s%9s%7s%12s%12s%6s%9s%9s')%\
+            ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))#,flush=True)
 #
     enfc = Enfc()
 #
@@ -89,11 +89,11 @@ def loop(init,apar,simu,caml,subs,g):
         h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
         bdd=bdd-np.count_nonzero(x_u-x_l<1e-3)/n
         if k>0: d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)#/float(n)
-        log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%11.1e%11.1e%11.1e%11.1e\n'%\
-            (k, itr, f_k[0], v_k, bdd, d_xi, d_xe,ts,to,ti-to0)); log.flush()
+        log.write('%4d%3s%14.3e%9.0e%7.2f%11.1e%10.1e%10.1e%9.1e%9.1e%9.1e\n'%\
+            (k, itr, f_k[0], v_k, bdd, np.amax(mov), d_xi, d_xe,ts,to,ti-to0)); log.flush()
         if not g > 0:
-            print('%4d%3s%2d%14.3e%9.0e%7.2f%11.1e%11.1e%11.1e%11.1e%11.1e'%\
-                (k, itr, inn, f_k[0], v_k, bdd, d_xi, d_xe, ts,to,ti-to0))#,flush=True)
+            print('%4d%3s%2d%14.3e%9.0e%7.2f%11.1e%10.1e%10.1e%9.1e%9.1e%9.1e'%\
+                (k, itr, inn, f_k[0], v_k, bdd, np.amax(mov), d_xi, d_xe, ts,to,ti-to0))#,flush=True)
 #
         if k>1 and cont : 
             if d_xi<cnv[0] or d_xe<cnv[1]: 
@@ -139,7 +139,6 @@ def loop(init,apar,simu,caml,subs,g):
 #
 def fdck(simu,n,m,x_k,aux,g):
 #
-#   f=np.zeros((1+m),dtype=float)
     df = np.zeros((m + 1, n), dtype=float)
 #
     [f0,df0] = simu(n,m,x_k,aux,g)

@@ -5,40 +5,41 @@ from prob.util.topo2d import topo2d_simu
 #
 # specify subsolver here
 #
-#from subs.condual import con as subs
 from subs.t2dual import t2d as subs
 #
 # specify problem and algorithmic parameters here
 #
 def apar(n):
 #   
-    mov=np.ones(n,dtype=float)*0.1
-    asf=[0.7,1.1]
+    mov=1e-1*np.ones(n,dtype=float)
+    asf=[0.7,1.2]
 #
     enf='none'
 #
     kmx=1000
-    cnv=[1e-2,1e-2]
-#       
+    cnv=[1e-6,1e-6]
+#
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df)/x_k
+    c_x=np.zeros_like(df)
     c_x[1:]=0e0
 #
-    c_x=np.maximum(c_x,1e-3)
+    if k<=1:
+        L = x_k-mov*(x_u-x_l)
+        U = x_k+mov*(x_u-x_l)
+    else:
+        L=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k - asf[0]*(x_1 - L_k), x_k - asf[1]*(x_1 - L_k))
+        U=np.where((x_k-x_1)*(x_1-x_2) < 0e0, x_k + asf[0]*(U_k - x_1), x_k + asf[1]*(U_k - x_1))
 #
-    if k>2:
-        mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
+    L=np.maximum(np.minimum(L, x_k-1e-2*(x_u-x_l)), x_k-1e1*(x_u-x_l))
+    U=np.minimum(np.maximum(U, x_k+1e-2*(x_u-x_l)), x_k+1e1*(x_u-x_l))
 #
-    L=L_k
-    U=U_k
+    c_x[0] = np.maximum(np.where( df[0] < 0 , -2./(x_k - L)*df[0], 2/(U - x_k)*df[0]   ),1e-6)
 #
-    mov=np.minimum(np.maximum(mov,1e-3),0.1)
-#
-    d_l= np.maximum(x_l, x_k-mov*(x_u-x_l))
-    d_u= np.minimum(x_u, x_k+mov*(x_u-x_l))
+    d_l = np.maximum(x_l, np.maximum(L + 0.1*(x_k-L), x_k - mov*(x_u-x_l)))
+    d_u = np.minimum(x_u, np.minimum(U - 0.1*(U-x_k), x_k + mov*(x_u-x_l)))
 #
     return c_x,mov,L,U,d_l,d_u
 #
@@ -46,9 +47,8 @@ def init(g):
 #
     mm=3
     nelx=20*mm
-    nelx=2*20*mm
     nely=20*mm
-    v_l = 0.2
+    v_l = 0.1
     v_0 = 0.6
     v_u = 1.0
 #
@@ -69,8 +69,7 @@ def init(g):
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
-
+#
     # Set load
     frc=[(1,0)]
 #
@@ -78,7 +77,7 @@ def init(g):
     qen = 1.0
     muc = 1e-2
     Emin = 0e0; Emax=1.0
-    gv = -9.81/800/mm
+    gv = -9.81/nelx/nely
 #
     n = nelx*nely
     m = 2
@@ -100,11 +99,11 @@ def simu(n,m,x,aux,g):
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0]=c/n
+    f[0]=c/360#0
     f[1]=v/n/v_u-1.
     f[2]=-v/n/v_l+1.
 #
-    df[0][:] = dc/n
+    df[0][:] = dc/360#0
     df[1][:] = dv/n/v_u
     df[2][:] = -dv/n/v_l
 #
