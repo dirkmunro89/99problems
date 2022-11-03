@@ -4,6 +4,8 @@ Do `make install` to setup Python virtual environment. Activate the virtual envi
 
 Adapted and developed from work done with [artofscience](https://github.com/artofscience); in particular, linear programming and adaptive move-limits on self-weight topology optimisation.
 
+The GCMMA is taken from [arjendeetman](https://github.com/arjendeetman/GCMMA-MMA-Python), November 2022.
+
 From [SOAPs](https://github.com/dirkmunro89/SOAPs):
 
 ## Description
