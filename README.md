@@ -4,9 +4,9 @@ Do `make install` to setup Python virtual environment. Activate the virtual envi
 
 Adapted and developed from work done with [artofscience](https://github.com/artofscience); in particular, linear programming and adaptive move-limits on self-weight topology optimisation.
 
-The GCMMA is taken from [arjendeetman](https://github.com/arjendeetman/GCMMA-MMA-Python), November 2022.
+The MMA and GCMMA is taken from [arjendeetman](https://github.com/arjendeetman/GCMMA-MMA-Python), November 2022. It is stated to be faithful reproduction of the Matlab codes kindly made available by [Svanberg](http://www.smoptit.se/) (which can of course itself be tested). We test our pure dual implementation of the 2002 MMA subproblem against it. GCMMA implementation and testing may follow. The 1987 MMA implementation is tested against the iteration histories provided in [literature](https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.1620240207).
 
-From [SOAPs](https://github.com/dirkmunro89/SOAPs):
+This repository is closely related to [SOAPs](https://github.com/dirkmunro89/SOAPs) (these will be merged into one code-base in future), from which we take the description:
 
 ## Description
 
