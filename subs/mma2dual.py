@@ -10,8 +10,10 @@ def mma(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
 #
     for i in range(m+1):
         tmp=dg[i]
-        p[i][:] = np.where(tmp>0e0, tmp*(U-x_k)**2e0, 0e0)
-        q[i][:] = np.where(tmp>=0e0, 0e0, -tmp*(x_k-L)**2e0)
+        dpos=np.maximum(dg[i],0.)
+        dneg=np.maximum(-dg[i],0.)
+        p[i][:] = (1.001*dpos+0.001*dneg + 1e-5/(1.-1e-3))*(U-x_k)**2e0
+        q[i][:] = (0.001*dpos+1.001*dneg + 1e-5/(1.-1e-3))*(x_k-L)**2e0
         r[i] = g[i] - np.sum(p[i]/(U-x_k) + q[i]/(x_k-L))
 #
     bds=[[1e-6,1e6] for i in range(m)]; tup_bds=tuple(bds)

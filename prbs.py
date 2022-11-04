@@ -146,12 +146,12 @@ def mods(prob):
         from prob.pNtop_swei_enf1d import simu
         from prob.pNtop_swei_enf1d import caml
         from prob.pNtop_swei_enf1d import subs
-    elif prob == 'Ntop_swei_enf1e': # t2mma
-        from prob.pNtop_swei_enf1e import init
-        from prob.pNtop_swei_enf1e import apar
-        from prob.pNtop_swei_enf1e import simu
-        from prob.pNtop_swei_enf1e import caml
-        from prob.pNtop_swei_enf1e import subs
+    elif prob == 'Ntop_swei_enf1t':
+        from prob.pNtop_swei_enf1t import init
+        from prob.pNtop_swei_enf1t import apar
+        from prob.pNtop_swei_enf1t import simu
+        from prob.pNtop_swei_enf1t import caml
+        from prob.pNtop_swei_enf1t import subs
     elif prob == 'Ntop_swei_enf2a':
         from prob.pNtop_swei_enf2a import init
         from prob.pNtop_swei_enf2a import apar
@@ -170,6 +170,12 @@ def mods(prob):
         from prob.pNtop_swei_enf2c import simu
         from prob.pNtop_swei_enf2c import caml
         from prob.pNtop_swei_enf2c import subs
+    elif prob == 'Ntop_swei_enf2d':
+        from prob.pNtop_swei_enf2d import init
+        from prob.pNtop_swei_enf2d import apar
+        from prob.pNtop_swei_enf2d import simu
+        from prob.pNtop_swei_enf2d import caml
+        from prob.pNtop_swei_enf2d import subs
     elif prob == 'Ntop_swei_enf3a':
         from prob.pNtop_swei_enf3a import init
         from prob.pNtop_swei_enf3a import apar

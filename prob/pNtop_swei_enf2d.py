@@ -11,40 +11,50 @@ from subs.t2dual import t2d as subs
 #
 def apar(n):
 #   
-    mov=1e-1*np.ones(n,dtype=float)
-    asf=[0.5,1.5]
+    mov=2e-1*np.ones(n,dtype=float)
+    asf=[0.7,1.1]
 #
     enf='none'
 #
-    kmx=1000
+    kmx=2000
     cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
-#
+#       
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.zeros_like(df)
-    c_x[0]=1e-6
+    c_x=np.ones_like(df)*1e-6 
+    c_x[1:]=0e0
 #
-    if k>2:
-        mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
+    if k<=1:
+        L = x_k-0.5*(x_u-x_l)
+        U = x_k+0.5*(x_u-x_l)
+    else:
+        osc=(x_k-x_1)*(x_1-x_2)
+        fac=np.ones_like(x_k)
+        fac[np.where(osc>0)] = asf[1]
+        fac[np.where(osc<0)] = asf[0]
+        L=x_k-fac*(x_1-L_k)
+        U=x_k+fac*(U_k-x_1)
 #
-    mov=np.minimum(np.maximum(mov,1e-6),0.1)
+    L_l = x_k - 10.*(x_u-x_l)
+    L_u = x_k - 0.01*(x_u-x_l)
+    U_l = x_k + 0.01*(x_u-x_l)
+    U_u = x_k + 10.*(x_u-x_l)
+    L=np.maximum(np.minimum(L, L_u), L_l)
+    U=np.minimum(np.maximum(U, U_l), U_u)
 #
-    L=L_k
-    U=U_k
-#
-    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
-    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
+    d_l = np.maximum(x_l, np.maximum(L + 0.1*(x_k-L), x_k - mov*(x_u-x_l)))
+    d_u = np.minimum(x_u, np.minimum(U - 0.1*(U-x_k), x_k + mov*(x_u-x_l)))
 #
     return c_x,mov,L,U,d_l,d_u
 #
 def init(g):
 #
     mm=3
-    nelx=20*mm
+    nelx=2*20*mm
     nely=20*mm
-    v_l = 0.1
+    v_l = 0.2
     v_0 = 0.6
     v_u = 1.0
 #
@@ -65,7 +75,8 @@ def init(g):
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-#
+    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
+
     # Set load
     frc=[(1,0)]
 #
@@ -95,11 +106,11 @@ def simu(n,m,x,aux,g):
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0]=c/360#0
+    f[0]=c/7200
     f[1]=v/n/v_u-1.
     f[2]=-v/n/v_l+1.
 #
-    df[0][:] = dc/360#0
+    df[0][:] = dc/7200
     df[1][:] = dv/n/v_u
     df[2][:] = -dv/n/v_l
 #

@@ -74,7 +74,7 @@ def init(g):
 #
     n = nelx*nely
     m = 2
-    x_l = np.ones(n,dtype=float)*1e-6
+    x_l = np.ones(n,dtype=float)*1e-3
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #

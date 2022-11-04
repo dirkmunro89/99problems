@@ -36,7 +36,7 @@ import os
 from MMA import mmasub,subsolv,kktcheck
 
 # Import wrapper (Dirk)
-from wrapper import init, wrapper1, wrapper2
+from MMA_swei_wrap import init, wrapper1, wrapper2
 
 ########################################################################################################
 ### MAIN FUNCTION                                                                                    ###
@@ -45,15 +45,9 @@ from wrapper import init, wrapper1, wrapper2
 def main():
     # Logger
     path = os.path.dirname(os.path.realpath(__file__))
-    file = os.path.join(path, "MMA_BEAM2.log")
-    logger = setup_logger(file)
-    logger.info("Started\n")
-    # Set numpy print options
-    np.set_printoptions(precision=4, formatter={'float': '{: 0.4f}'.format})
     #################################################################################################
     [n,m,x_l,x_u,x_k,aux]=init(-1); m = 1
     #################################################################################################
-    epsimin = 0.0000001
     eeen = np.ones((n,1))
     eeem = np.ones((m,1))
     zeron = np.zeros((n,1))
@@ -65,28 +59,37 @@ def main():
     xmax = np.reshape(x_u,(n,1))#10*eeen
     low = xmin.copy()
     upp = xmax.copy()
-    move = 0.2
+    move = 0.1
     c = 1000*eeem
     d = eeem.copy()
     a0 = 1
     a = zerom.copy()
     outeriter = 0
-    maxoutit = 10000
+    maxoutit = 10
     kkttol = 1e-12 # not used
     simuc = 0
+    print(('%4s%3s%8s%11s%8s%5s%12s%8s%11s%6s%9s%9s')%\
+        ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|KKT|', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))
     # Calculate function values and gradients of the objective and constraints functions
     if outeriter == 0:
         f0val,df0dx,fval,dfdx = wrapper2(n,xval,aux); simuc = simuc + 1
         innerit = 0
         outvector1 = np.array([outeriter, innerit, f0val, fval])
         outvector2 = xval.flatten()
-        # Log
-        logger.info("outvector1 = {}".format(outvector1))
-        logger.info("outvector2 = {}\n".format(outvector2))
     # The iterations starts
     kktnorm = kkttol+10
     outit = 0
+    lam = np.ones(m)*1e6
+    hist=[]
     while (outit < maxoutit):
+        bdd=np.count_nonzero(xval-xmin<1e-3)/n+np.count_nonzero(xmax-xval<1e-3)/n
+        bdd=bdd-np.count_nonzero(xmax-xmin<1e-3)/n
+        ubd=np.where(xval-xmin>1e-3,np.where(xmax-xval>1e-3,1,0),0)
+        mykktnorm=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd,np.inf)
+        print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
+            (outeriter,'N',innerit,f0val,fval,bdd,move,mykktnorm,np.linalg.norm(xval-xold1,np.inf),\
+            np.linalg.norm(xval-xold1),0,0,0))
+        hist.append([f0val,fval])
         outit += 1
         outeriter += 1
         # The MMA subproblem is solved at the point xval:
@@ -104,76 +107,19 @@ def main():
             kktcheck(m,n,xmma,ymma,zmma,lam,xsi,eta,mu,zet,s,xmin,xmax,df0dx,fval,dfdx,a0,a,c,d)
         outvector1 = np.array([outeriter, innerit, f0val, fval])
         outvector2 = xval.flatten()
-        # Log
-        logger.info("outvector1 = {}".format(outvector1))
-        logger.info("outvector2 = {}".format(outvector2))
-        logger.info("kktnorm    = {}\n".format(kktnorm))
 
-        np.savetxt('iter_%d.dat'%outeriter,xval)
-        bdd=np.count_nonzero(xval-xmin<1e-3)/n+np.count_nonzero(xmax-xval<1e-3)/n
-        bdd=bdd-np.count_nonzero(xmax-xmin<1e-3)/n
-        ubd=np.where(xval-xmin>1e-3,np.where(xmax-xval>1e-3,1,0),0)
-        mykktnorm=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd,np.inf)
         mykktnorm2=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd)
         f0norm=abs((f0val-f0valold)/f0val)
-        print('|KKT| %e and ||KKT|| %e and |dX| %e and ||dX|| %e and BW %1.2f\n'\
-            %(mykktnorm,mykktnorm2,np.linalg.norm(xval-xold1,np.inf),\
-            np.linalg.norm(xval-xold1),bdd))
-        print('|dF/F| %e \n'%f0norm)
-        print('|viol| %e \n'%max(fval,0e0) )
-        if mykktnorm < 1e-4 and np.linalg.norm(xval-xold1)<1e-1 and np.linalg.norm(xval-xold1,np.inf) < 1e-1 and f0norm < 1e-4: break
 
-    # Final log
-    logger.info(" Finished")
+
+        if mykktnorm < 1e-4 and np.linalg.norm(xval-xold1)<1e-1 \
+            and np.linalg.norm(xval-xold1,np.inf) < 1e-1 and f0norm < 1e-4: 
+            break
     #
     print('Iteration counter ', outeriter)
     print('Simulation counter ', simuc)
-
-########################################################################################################
-### FUNCTIONS                                                                                        ###
-########################################################################################################
-
-# Setup logger
-def setup_logger(logfile):
-    # Create logger
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    # Create console handler and set level to debug
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    # Create file handler and set level to debug
-    fh = logging.FileHandler(logfile)
-    fh.setLevel(logging.DEBUG)
-    # Add formatter to ch and fh
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    fh.setFormatter(formatter)
-    # Add ch and fh to logger
-    logger.addHandler(ch)
-    logger.addHandler(fh)
-    # Open logfile and reset
-    with open(logfile, 'w'): pass
-    # Return logger
-    return logger
-
-# Beam function
-def beam2(xval):
-    nx = 5
-    eeen = np.ones((nx,1))
-    c1 = 0.0624
-    c2 = 1
-    aaa = np.array([[61.0, 37.0, 19.0, 7.0, 1.0]]).T
-    xval2 = xval*xval
-    xval3 = xval2*xval
-    xval4 = xval2*xval2
-    xinv3 = eeen/xval3
-    xinv4 = eeen/xval4
-    f0val = c1*np.dot(eeen.T,xval).item()
-    df0dx = c1*eeen
-    fval = np.dot(aaa.T,xinv3).item()-c2
-    dfdx = -3*(aaa*xinv4).T
-    return f0val,df0dx,fval,dfdx
-
+    #
+    return hist
 
 ########################################################################################################
 ### RUN MAIN FUNCTION                                                                                ###
