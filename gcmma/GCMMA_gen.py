@@ -43,13 +43,6 @@ from wrapper import init,wrapper1,wrapper2
 ########################################################################################################
 
 def main():
-    # Logger
-    path = os.path.dirname(os.path.realpath(__file__))
-    file = os.path.join(path, "GCMMA_gen.log")
-    logger = setup_logger(file)
-    logger.info("Started\n")
-    # Set numpy print options
-    np.set_printoptions(precision=4, formatter={'float': '{: 0.4f}'.format})
     #################################################################################################
     [n,m,x_l,x_u,x_k,aux]=init(-1); m = 1
     #################################################################################################
@@ -65,6 +58,7 @@ def main():
     xmax = np.reshape(x_u,(n,1))#10*eeen
     low = xmin.copy()
     upp = xmax.copy()
+    move = 0.0
     c = 1000*eeem
     d = eeem.copy()
     a0 = 1
@@ -78,19 +72,28 @@ def main():
     kkttol = 1e-12 # not used
     simuc = 0
     # Calculate function values and gradients of the objective and constraints functions
+    print(('%4s%3s%8s%11s%8s%5s%12s%8s%11s%6s%9s%9s')%\
+        ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|KKT|', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))
     if outeriter == 0:
         f0val,df0dx,fval,dfdx = wrapper2(n,xval,aux); simuc = simuc + 1
         innerit = 0
         outvector1 = np.array([outeriter, innerit, f0val, fval])
         outvector2 = xval.flatten()
-        # Log
-        logger.info("outvector1 = {}".format(outvector1))
-        logger.info("outvector2 = {}\n".format(outvector2))
     # The iterations starts
     kktnorm = kkttol+10
     outit = 0
     simuc = 0
+    hist=[]
+    lam = np.ones(m)*1e6
     while (outit < maxoutit):
+        bdd=np.count_nonzero(xval-xmin<1e-3)/n+np.count_nonzero(xmax-xval<1e-3)/n
+        bdd=bdd-np.count_nonzero(xmax-xmin<1e-3)/n
+        ubd=np.where(xval-xmin>1e-3,np.where(xmax-xval>1e-3,1,0),0)
+        mykktnorm=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd,np.inf)
+        print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
+            (outeriter,'N',innerit,f0val,fval,bdd,move,mykktnorm,np.linalg.norm(xval-xold1,np.inf),\
+            np.linalg.norm(xval-xold1),0,0,0))
+        hist.append([f0val,fval])
         outit += 1
         outeriter += 1
         # The parameters low, upp, raa0 and raa are calculated:
@@ -109,6 +112,10 @@ def main():
         if conserv == 0:
             while conserv == 0 and innerit <= 15:
                 innerit += 1
+                print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
+                    (outeriter,'N',innerit,f0valnew,fvalnew,bdd,move,mykktnorm,\
+                    np.linalg.norm(xmma-xold1,np.inf),\
+                    np.linalg.norm(xmma-xold1),0,0,0))
                 # New values on the parameters raa0 and raa are calculated:
                 raa0,raa = raaupdate(xmma,xval,xmin,xmax,low,upp,f0valnew,fvalnew,f0app,fapp,raa0, \
                     raa,raa0eps,raaeps,epsimin)
@@ -132,27 +139,11 @@ def main():
             kktcheck(m,n,xmma,ymma,zmma,lam,xsi,eta,mu,zet,s,xmin,xmax,df0dx,fval,dfdx,a0,a,c,d)
         outvector1 = np.array([outeriter, innerit, f0val, fval])
         outvector2 = xval.flatten()
-        # Log
-        logger.info("outvector1 = {}".format(outvector1))
-        logger.info("outvector2 = {}".format(outvector2))
-        logger.info("kktnorm    = {}\n".format(kktnorm))
 #
-        np.savetxt('iter_%d.dat'%outeriter,xval)
-        bdd=np.count_nonzero(xval-xmin<1e-3)/n+np.count_nonzero(xmax-xval<1e-3)/n
-        bdd=bdd-np.count_nonzero(xmax-xmin<1e-3)/n
-        ubd=np.where(xval-xmin>1e-3,np.where(xmax-xval>1e-3,1,0),0)
-        mykktnorm=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd,np.inf)
-        mykktnorm2=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd)
         f0norm=abs((f0val-f0valold)/f0val)
-        print('|KKT| %e and ||KKT|| %e and |dX| %e and ||dX|| %e and BW %1.2f\n'\
-            %(mykktnorm,mykktnorm2,np.linalg.norm(xval-xold1,np.inf),\
-            np.linalg.norm(xval-xold1),bdd))
-        print('|dF/F| %e \n'%f0norm)
-        print('|viol| %e \n'%max(fval,0e0) )
-        if mykktnorm < 1e-4 and np.linalg.norm(xval-xold1)<1e-1 and np.linalg.norm(xval-xold1,np.inf) < 1e-1 and f0norm < 1e-4: break
-#
-    # Final log
-    logger.info("Finished")
+        if mykktnorm < 1e-4 and np.linalg.norm(xval-xold1)<1e-1 \
+            and np.linalg.norm(xval-xold1,np.inf) < 1e-1 and f0norm < 1e-4: 
+            break
     #
     print('Iteration counter ', outeriter)
     print('Simulation counter ', simuc)

@@ -60,11 +60,11 @@ def loop(init,apar,simu,caml,subs,g):
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if cont:
-                    mov=mov*1.1
+                    mov=mov*1.2
                     enfc.par_add(f_k[0],v_k,k)
                 else:
-                    mov=stub.set_mov(0.5,x_l,x_u)
-                    [s_k,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
+                    mov=stub.set_mov(0.7,x_l,x_u)
+                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'c-a':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
@@ -73,8 +73,28 @@ def loop(init,apar,simu,caml,subs,g):
                     test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                     if test: enfc.par_add(f_k[0],v_k,k)
                 else:
-                    [s_k,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
+                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
                     c_x[:]=stub.set_crv(2.,f_k,q_k)
+        elif enf == 'gcm':
+            if k == 0: enfc.par_add(f_k[0],v_k,k)
+            else:
+                cont=enfc.gcm_pas(f_k,q_k)
+                if cont:
+                    test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
+                    if test: enfc.par_add(f_k[0],v_k,k)
+                else:
+                    xxux = (x_k-x_0)/(U_k-x_k)
+                    xxxl = (x_k-x_0)/(x_k-L_k)
+                    xxul = xxux*xxxl
+                    ulxx = (U_k-L_k)/np.maximum(x_u-x_l,1e-5)
+                    raacof = np.dot(xxul.T,ulxx)
+                    raacof = np.maximum(raacof,1e-12)
+                    for j in range(m+1):
+                        if f_k[j]>q_k[j]+0.5*1e-7:
+                            dlt=1./raacof*(f_k[j]-q_k[j])
+                            c_x[j,0] = np.minimum(1.1*(c_x[j,0]+dlt),10.*c_x[j,0])
+                    c_x[:]=stub.set_rho(c_x)
+                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         else:
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else: 
@@ -107,7 +127,6 @@ def loop(init,apar,simu,caml,subs,g):
                 if not g > 0: print('Termination on Convergence criteria')
                 break
         if k>1 and enf=='t-r' and inn>15:
-#       if k>1 and enf=='t-r' and np.amax(mov)<cnv[0]:
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
@@ -120,7 +139,8 @@ def loop(init,apar,simu,caml,subs,g):
         if cont:
             [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,df_k,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
             mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
-            if enf == 't-r' or enf == 'c-a': stub=Stub(k,x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
+            if enf == 't-r' or enf == 'c-a' or enf == 'gcm': 
+                stub=Stub(x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
         else: inn=inn+1; k=k-1
 #
         x_0[:]=x_k 
@@ -128,8 +148,7 @@ def loop(init,apar,simu,caml,subs,g):
         x_k[:]=x; x_d[:]=d
         to1=time.time(); to=to1-to0; ti=time.time()
 #
-        if cont:
-            x_2[:]=x_1; x_1[:]=x_0 
+        if cont: x_2[:]=x_1; x_1[:]=x_0 
 #
         k=k+1
 #

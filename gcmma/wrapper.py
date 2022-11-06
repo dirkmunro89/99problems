@@ -1,7 +1,7 @@
 #
 import numpy as np
-from prob.pNtop_swei_enf1d import init
-from prob.pNtop_swei_enf1d import simu
+from prob.pNtop_swei_enf1t import init
+from prob.pNtop_swei_enf1t import simu
 #
 def wrapper2(n,xval,aux):
     [f_k,df_k] = simu(n,1,np.reshape(xval,(n,)),aux,0) 

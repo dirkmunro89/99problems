@@ -5,26 +5,31 @@ from prob.util.topo2d import topo2d_simu
 #
 # specify subsolver here
 #
-from subs.mma02dual import mma02 as subs
+from subs.cma02dual import mma02 as subs
 #
 # specify problem and algorithmic parameters here
 #
 def apar(n):
 #   
-    mov=2e-1*np.ones(n,dtype=float)
+    mov=1e-1*np.ones(n,dtype=float)
     asf=[0.7,1.2]
 #
-    enf='none'
+    enf='gcm'
 #
-    kmx=1000
+    kmx=10
     cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
-#       
+#
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.ones_like(df)*1e-6 
+    c_x=np.zeros_like(df)
     c_x[1:]=0e0
+#
+    for j in range(2):
+        for i in range(len(x_k)):
+            c_x[j][0] = c_x[j][0] + 0.1/len(x_k)*np.absolute(df[j][i])*(x_u[i]-x_l[i])
+        c_x[j][0]=np.maximum(c_x[j][0],1e-6)
 #
     if k<=1:
         L = x_k-0.5*(x_u-x_l)
@@ -44,23 +49,23 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     L=np.maximum(np.minimum(L, L_u), L_l)
     U=np.minimum(np.maximum(U, U_l), U_u)
 #
-    d_l = np.maximum(x_l, np.maximum(L + 0.1*(x_k-L), x_k - mov*(x_u-x_l)))
-    d_u = np.minimum(x_u, np.minimum(U - 0.1*(U-x_k), x_k + mov*(x_u-x_l)))
+    d_l = np.maximum(x_l, L + 0.1*(x_k-L))
+    d_u = np.minimum(x_u, U - 0.1*(U-x_k))
 #
     return c_x,mov,L,U,d_l,d_u
 #
 def init(g):
 #
     mm=3
-    nelx=2*20*mm
+    nelx=20*mm
     nely=20*mm
-    v_l = 0.2
+    v_l = 0.1
     v_0 = 0.6
     v_u = 1.0
 #
     ft = 1
     rmin = 1.1*mm
-    dext=0#int(np.ceil(rmin))
+    dext=0
     felx = nelx+dext
     fely = nely+2*dext
 #
@@ -75,8 +80,7 @@ def init(g):
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
-
+#
     # Set load
     frc=[(1,0)]
 #
@@ -88,7 +92,7 @@ def init(g):
 #
     n = nelx*nely
     m = 1
-    x_l = np.ones(n,dtype=float)*1e-6
+    x_l = np.ones(n,dtype=float)*1e-3
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #
@@ -106,11 +110,11 @@ def simu(n,m,x,aux,g):
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0]=c/7200
+    f[0]=c/360#0
 #   f[1]=v/n/v_u-1.
     f[1]=-v/n/v_l+1.
 #
-    df[0][:] = dc/7200
+    df[0][:] = dc/360#0
 #   df[1][:] = dv/n/v_u
     df[1][:] = -dv/n/v_l
 #

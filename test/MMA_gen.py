@@ -43,8 +43,6 @@ from MMA_swei_wrap import init, wrapper1, wrapper2
 ########################################################################################################
 
 def main():
-    # Logger
-    path = os.path.dirname(os.path.realpath(__file__))
     #################################################################################################
     [n,m,x_l,x_u,x_k,aux]=init(-1); m = 1
     #################################################################################################
@@ -108,10 +106,7 @@ def main():
         outvector1 = np.array([outeriter, innerit, f0val, fval])
         outvector2 = xval.flatten()
 
-        mykktnorm2=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd)
         f0norm=abs((f0val-f0valold)/f0val)
-
-
         if mykktnorm < 1e-4 and np.linalg.norm(xval-xold1)<1e-1 \
             and np.linalg.norm(xval-xold1,np.inf) < 1e-1 and f0norm < 1e-4: 
             break

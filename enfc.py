@@ -24,6 +24,12 @@ class Enfc:
                 return False
             return True
 #
+    def gcm_pas(self,g_k,q_k):
+        # if conservative
+        if np.any(np.where(q_k + 1e-7 < g_k, 1, 0)):
+            return False
+        return True
+#
     def par_pas(self,f_1,f_k,v_k,p_k):
         beta=self.beta; gama=self.gama
         sgma=self.sgma; pf=self.pf

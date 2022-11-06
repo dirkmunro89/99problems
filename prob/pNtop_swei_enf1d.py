@@ -11,13 +11,13 @@ from subs.mma02dual import mma02 as subs
 #
 def apar(n):
 #   
-    mov=1e-1*np.ones(n,dtype=float)
+    mov=2e-1*np.ones(n,dtype=float)
     asf=[0.7,1.2]
 #
     enf='none'
 #
-    kmx=10
-    cnv=[1e-6,1e-6,1e-6,1e-6,1e-6]
+    kmx=1000
+    cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
 #
     return mov, asf, enf, kmx, cnv
 #
@@ -87,7 +87,7 @@ def init(g):
 #
     n = nelx*nely
     m = 1
-    x_l = np.ones(n,dtype=float)*1e-3
+    x_l = np.ones(n,dtype=float)*1e-6
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #
