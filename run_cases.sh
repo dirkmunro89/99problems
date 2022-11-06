@@ -11,8 +11,6 @@ gnuplot -e "xi=240;yi=60" topomake.p
 mv topology.eps ./res/${name}_topo.eps
 mv history.log ./res/${name}_hist.log
 
-exit 1
-
 name="Ntop_swei_enf1a"
 python main.py $name
 gnuplot -e "xi=120;yi=60" topomake.p
@@ -24,7 +22,6 @@ python main.py $name
 gnuplot -e "xi=120;yi=60" topomake.p
 mv topology.eps ./res/${name}_topo.eps
 mv history.log ./res/${name}_hist.log
-
 
 name="Ntop_swei_enf2a"
 python main.py $name

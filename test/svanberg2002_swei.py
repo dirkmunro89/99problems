@@ -14,7 +14,7 @@ def test():
     g=[itm[1] for itm in f]
 #
     assert pytest.approx(f0_ref, abs=1e-3) == f0
-    assert pytest.approx(g_ref, abs=1e-2) == g
+    assert pytest.approx(g_ref, abs=1e-3) == g
 #
 if __name__ == "__main__":
     test()

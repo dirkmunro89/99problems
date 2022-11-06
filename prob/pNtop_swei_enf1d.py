@@ -5,7 +5,7 @@ from prob.util.topo2d import topo2d_simu
 #
 # specify subsolver here
 #
-from subs.mma87dual import mma87 as subs
+from subs.mma02dual import mma02 as subs
 #
 # specify problem and algorithmic parameters here
 #
