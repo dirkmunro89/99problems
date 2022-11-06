@@ -17,7 +17,7 @@ def apar(n):
     enf='none' # run with none and with t-r
 #     
     kmx=200
-    cnv=[1e-2,1e-2]
+    cnv=[1e-2,1e-2,1e-6,1e-6,1e-6]
 #       
     return mov, asf, enf, kmx, cnv
 #

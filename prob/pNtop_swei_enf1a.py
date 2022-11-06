@@ -17,6 +17,7 @@ def apar(n):
     enf='c-a'
 #
     kmx=1000
+#   inf(dX), Euc(dX), dF/F, inf(KKT), viol.
     cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
 #
     return mov, asf, enf, kmx, cnv
