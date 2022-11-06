@@ -16,7 +16,7 @@ def apar(n):
 #
     enf='gcm'
 #
-    kmx=2000
+    kmx=1000
     cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
 #
     return mov, asf, enf, kmx, cnv
@@ -86,12 +86,12 @@ def init(g):
     pen = 3.0
     qen = 1.0
     muc = 1e-2
-    Emin = 0e0; Emax=1.0
+    Emin = 1e-9; Emax=1.0
     gv = -9.81/nelx/nely
 #
     n = nelx*nely
     m = 1
-    x_l = np.ones(n,dtype=float)*1e-6
+    x_l = np.ones(n,dtype=float)*0e-6
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #

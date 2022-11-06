@@ -24,7 +24,7 @@ def apar(n):
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df)/x_k
+    c_x=2e0*np.absolute(df)/np.maximum(x_k,1e-6)
     c_x[1:]=0e0
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
@@ -70,12 +70,12 @@ def init(g):
     pen = 3.0
     qen = 1.0
     muc = 1e-2
-    Emin = 0e0; Emax=1.0
+    Emin = 1e-9; Emax=1.0
     gv = -9.81/nelx/nely
 #
     n = nelx*nely
     m = 2
-    x_l = np.ones(n,dtype=float)*1e-6
+    x_l = np.ones(n,dtype=float)*0e0
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #

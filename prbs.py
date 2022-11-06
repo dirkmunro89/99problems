@@ -146,6 +146,12 @@ def mods(prob):
         from prob.pNtop_swei_enf1d import simu
         from prob.pNtop_swei_enf1d import caml
         from prob.pNtop_swei_enf1d import subs
+    elif prob == 'Ntop_swei_enf1e': # mma
+        from prob.pNtop_swei_enf1e import init
+        from prob.pNtop_swei_enf1e import apar
+        from prob.pNtop_swei_enf1e import simu
+        from prob.pNtop_swei_enf1e import caml
+        from prob.pNtop_swei_enf1e import subs
     elif prob == 'Ntop_swei_enf1t':
         from prob.pNtop_swei_enf1t import init
         from prob.pNtop_swei_enf1t import apar
@@ -182,42 +188,12 @@ def mods(prob):
         from prob.pNtop_swei_enf2d import simu
         from prob.pNtop_swei_enf2d import caml
         from prob.pNtop_swei_enf2d import subs
-    elif prob == 'Ntop_swei_enf3a':
-        from prob.pNtop_swei_enf3a import init
-        from prob.pNtop_swei_enf3a import apar
-        from prob.pNtop_swei_enf3a import simu
-        from prob.pNtop_swei_enf3a import caml
-        from prob.pNtop_swei_enf3a import subs
-    elif prob == 'Ntop_swei_enf3b':
-        from prob.pNtop_swei_enf3b import init
-        from prob.pNtop_swei_enf3b import apar
-        from prob.pNtop_swei_enf3b import simu
-        from prob.pNtop_swei_enf3b import caml
-        from prob.pNtop_swei_enf3b import subs
-    elif prob == 'Ntop_swei_enf3c':
-        from prob.pNtop_swei_enf3c import init
-        from prob.pNtop_swei_enf3c import apar
-        from prob.pNtop_swei_enf3c import simu
-        from prob.pNtop_swei_enf3c import caml
-        from prob.pNtop_swei_enf3c import subs
-    elif prob == 'Ntop_swei_enf4a':
-        from prob.pNtop_swei_enf4a import init
-        from prob.pNtop_swei_enf4a import apar
-        from prob.pNtop_swei_enf4a import simu
-        from prob.pNtop_swei_enf4a import caml
-        from prob.pNtop_swei_enf4a import subs
-    elif prob == 'Ntop_swei_enf4b':
-        from prob.pNtop_swei_enf4b import init
-        from prob.pNtop_swei_enf4b import apar
-        from prob.pNtop_swei_enf4b import simu
-        from prob.pNtop_swei_enf4b import caml
-        from prob.pNtop_swei_enf4b import subs
-    elif prob == 'Ntop_swei_enf4c':
-        from prob.pNtop_swei_enf4c import init
-        from prob.pNtop_swei_enf4c import apar
-        from prob.pNtop_swei_enf4c import simu
-        from prob.pNtop_swei_enf4c import caml
-        from prob.pNtop_swei_enf4c import subs
+    elif prob == 'Ntop_swei_enf2e':
+        from prob.pNtop_swei_enf2e import init
+        from prob.pNtop_swei_enf2e import apar
+        from prob.pNtop_swei_enf2e import simu
+        from prob.pNtop_swei_enf2e import caml
+        from prob.pNtop_swei_enf2e import subs
     elif prob == 'Ntop_mech_enf1a':
         from prob.pNtop_mech_enf1a import init
         from prob.pNtop_mech_enf1a import apar
