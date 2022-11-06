@@ -28,7 +28,12 @@ class Stub:
         c_x=c_x*np.where(q_k < g_k, fct , 1.)[:, np.newaxis]
         self._c_x = c_x.copy()
         return c_x
-    def set_rho(self,c_x):
+    def set_rho(self,c_x,f_k,q_k,x_k,x_0,L_k,U_k,x_u,x_l):
+        dee=np.maximum(np.sum(((U_k-L_k)*(x_k-x_0)**2.)/(U_k-x_k)/(x_k-L_k)/(x_u-x_l)),1e-12)
+        for j in range(len(f_k)):
+            if f_k[j]>q_k[j]+0.5e-7:
+                dlt=1./dee*(f_k[j]-q_k[j])/(x_u-x_l)
+                c_x[j]=np.minimum(1.1*(c_x[j]+dlt),10.*c_x[j])
         self._c_x = c_x.copy()
         return c_x
 #   retrieve a copy of the current instantiationn (dont return pointers)

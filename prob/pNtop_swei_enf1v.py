@@ -16,7 +16,7 @@ def apar(n):
 #
     enf='gcm'
 #
-    kmx=10
+    kmx=8
     cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
 #
     return mov, asf, enf, kmx, cnv
@@ -27,9 +27,8 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     c_x[1:]=0e0
 #
     for j in range(2):
-        for i in range(len(x_k)):
-            c_x[j][0] = c_x[j][0] + 0.1/len(x_k)*np.absolute(df[j][i])*(x_u[i]-x_l[i])
-        c_x[j][0]=np.maximum(c_x[j][0],1e-6)
+        c_x[j] = c_x[j] + np.sum(0.1/len(x_k)*np.absolute(df[j])*(x_u-x_l))
+        c_x[j]=np.maximum(c_x[j],1e-6)/(x_u-x_l)
 #
     if k<=1:
         L = x_k-0.5*(x_u-x_l)

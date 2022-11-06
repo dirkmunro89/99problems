@@ -14,8 +14,10 @@ def mma02(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
         tmp=dg[i]
         dpos=np.maximum(dg[i],0.)
         dneg=np.maximum(-dg[i],0.)
-        p[i][:] = (1.001*dpos+0.001*dneg + c_x[i][0]/(1.-1e-3))*(U-x_k)**2e0
-        q[i][:] = (0.001*dpos+1.001*dneg + c_x[i][0]/(1.-1e-3))*(x_k-L)**2e0
+        p[i][:] = (1.001*dpos+0.001*dneg + c_x[i])*(U-x_k)**2e0
+        q[i][:] = (0.001*dpos+1.001*dneg + c_x[i])*(x_k-L)**2e0
+#       p[i][:] = (1.001*dpos+0.001*dneg + c_x[i][0]/(1.-1e-3))*(U-x_k)**2e0
+#       q[i][:] = (0.001*dpos+1.001*dneg + c_x[i][0]/(1.-1e-3))*(x_k-L)**2e0
         r[i] = g[i] - np.sum(p[i]/(U-x_k) + q[i]/(x_k-L))
 #
     bds=[[1e-6,1e6] for i in range(m)]; tup_bds=tuple(bds)

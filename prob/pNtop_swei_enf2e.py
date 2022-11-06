@@ -18,7 +18,7 @@ def apar(n):
 #
     kmx=2000
     cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
-#
+#       
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
@@ -56,9 +56,9 @@ def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 def init(g):
 #
     mm=3
-    nelx=20*mm
+    nelx=2*20*mm
     nely=20*mm
-    v_l = 0.1
+    v_l = 0.2
     v_0 = 0.6
     v_u = 1.0
 #
@@ -79,7 +79,8 @@ def init(g):
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-#
+    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
+
     # Set load
     frc=[(1,0)]
 #
@@ -109,11 +110,11 @@ def simu(n,m,x,aux,g):
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0]=c/360#0
+    f[0]=c/7200
 #   f[1]=v/n/v_u-1.
     f[1]=-v/n/v_l+1.
 #
-    df[0][:] = dc/360#0
+    df[0][:] = dc/7200
 #   df[1][:] = dv/n/v_u
     df[1][:] = -dv/n/v_l
 #

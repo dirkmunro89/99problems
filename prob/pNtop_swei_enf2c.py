@@ -12,7 +12,7 @@ from subs.t2dual import t2d as subs
 def apar(n):
 #   
     mov=1e-1*np.ones(n,dtype=float)
-    asf=[0.5,1.5]
+    asf=[0.7,1.2]
 #
     enf='none'
 #

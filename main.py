@@ -60,10 +60,10 @@ def loop(init,apar,simu,caml,subs,g):
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if cont:
-                    mov=mov*1.2
+                    mov=mov*1.1
                     enfc.par_add(f_k[0],v_k,k)
                 else:
-                    mov=stub.set_mov(0.7,x_l,x_u)
+                    mov=stub.set_mov(0.5,x_l,x_u)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'c-a':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
@@ -83,17 +83,7 @@ def loop(init,apar,simu,caml,subs,g):
                     test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                     if test: enfc.par_add(f_k[0],v_k,k)
                 else:
-                    xxux = (x_k-x_0)/(U_k-x_k)
-                    xxxl = (x_k-x_0)/(x_k-L_k)
-                    xxul = xxux*xxxl
-                    ulxx = (U_k-L_k)/np.maximum(x_u-x_l,1e-5)
-                    raacof = np.dot(xxul.T,ulxx)
-                    raacof = np.maximum(raacof,1e-12)
-                    for j in range(m+1):
-                        if f_k[j]>q_k[j]+0.5*1e-7:
-                            dlt=1./raacof*(f_k[j]-q_k[j])
-                            c_x[j,0] = np.minimum(1.1*(c_x[j,0]+dlt),10.*c_x[j,0])
-                    c_x[:]=stub.set_rho(c_x)
+                    c_x[:]=stub.set_rho(c_x,f_k,q_k,x_k,x_0,L_k,U_k,x_u,x_l)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         else:
             if k == 0: enfc.par_add(f_k[0],v_k,k)

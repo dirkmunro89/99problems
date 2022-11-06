@@ -11,7 +11,7 @@ from subs.mma02dual import mma02 as subs
 #
 def apar(n):
 #   
-    mov=2e-1*np.ones(n,dtype=float)
+    mov=1e-1*np.ones(n,dtype=float)
     asf=[0.7,1.2]
 #
     enf='none'

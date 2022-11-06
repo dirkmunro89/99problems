@@ -212,7 +212,7 @@ def gcmmasub(m,n,iter,epsimin,xval,xmin,xmax,low,upp,raa0,raa,f0val,df0dx,fval,d
     r = fval-np.dot(P,uxinv)-np.dot(Q,xlinv)
     b = -r
     # Solving the subproblem by a primal-dual Newton method
-    xmma,ymma,zmma,lam,xsi,eta,mu,zet,s = subsolv(m,n,epsimin,low,upp,alfa,beta,p0,q0,P,Q,a0,a,b,c,d)
+    xmma,ymma,zmma,lam,xsi,eta,mu,zet,s = subsolv(m,n,1e-12,low,upp,alfa,beta,p0,q0,P,Q,a0,a,b,c,d)
     # Calculations of f0app and fapp.
     ux1 = upp-xmma
     xl1 = xmma-low

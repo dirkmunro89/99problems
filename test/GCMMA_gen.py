@@ -36,7 +36,7 @@ import os
 from MMA import gcmmasub,subsolv,kktcheck,asymp,concheck,raaupdate
 
 # Import wrapper (Dirk)
-from wrapper import init,wrapper1,wrapper2
+from MMA_cwei_wrap import init,wrapper1,wrapper2
 
 ########################################################################################################
 ### MAIN FUNCTION                                                                                    ###
@@ -68,7 +68,7 @@ def main():
     raa0eps = 0.000001
     raaeps = 0.000001*eeem
     outeriter = 0
-    maxoutit = 10
+    maxoutit = 8
     kkttol = 1e-12 # not used
     simuc = 0
     # Calculate function values and gradients of the objective and constraints functions
@@ -116,6 +116,7 @@ def main():
                     (outeriter,'N',innerit,f0valnew,fvalnew,bdd,move,mykktnorm,\
                     np.linalg.norm(xmma-xold1,np.inf),\
                     np.linalg.norm(xmma-xold1),0,0,0))
+                hist.append([f0val,fval])
                 # New values on the parameters raa0 and raa are calculated:
                 raa0,raa = raaupdate(xmma,xval,xmin,xmax,low,upp,f0valnew,fvalnew,f0app,fapp,raa0, \
                     raa,raa0eps,raaeps,epsimin)
@@ -147,7 +148,8 @@ def main():
     #
     print('Iteration counter ', outeriter)
     print('Simulation counter ', simuc)
-
+    #
+    return hist
 ########################################################################################################
 ### FUNCTIONS                                                                                        ###
 ########################################################################################################
