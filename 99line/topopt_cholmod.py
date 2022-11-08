@@ -99,7 +99,7 @@ def main(nelx,nely,volfrac,penal,rmin,ft):
 		# Remove constrained dofs from matrix and convert to coo
 		K = deleterowcol(K,fixed,fixed).tocoo()
 		# Solve system 
-		K = cvxopt.spmatrix(K.data,K.row.astype(np.int),K.col.astype(np.int))
+		K = cvxopt.spmatrix(K.data,K.row.astype(int),K.col.astype(int))
 		B = cvxopt.matrix(f[free,0])
 		cvxopt.cholmod.linsolve(K,B)
 		u[free,0]=np.array(B)[:,0] 
@@ -131,6 +131,7 @@ def main(nelx,nely,volfrac,penal,rmin,ft):
 		# Plot to screen
 		im.set_array(-xPhys.reshape((nelx,nely)).T)
 		fig.canvas.draw()
+		fig.canvas.flush_events()
 
 		# Write iteration history to screen (req. Python 2.6 or newer)
 		print("it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(\
@@ -138,7 +139,7 @@ def main(nelx,nely,volfrac,penal,rmin,ft):
 
 	# Make sure the plot stays and that the shell remains	
 	plt.show()
-	raw_input("Press any key...")
+	input("Press any key...")
     
 #element stiffness matrix
 def lk():

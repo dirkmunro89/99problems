@@ -119,7 +119,7 @@ def main(nelx,nely,volfrac,penal,rmin,ft):
 			dv[:] = np.asarray(H*(dv[np.newaxis].T/Hs))[:,0]
 
         # AdaDelta update
-		wa = wa*0.9 + np.power(dc,2.)*0.1
+		wa = wa + np.power(dc,2.)
 
 		# Optimality criteria
 		xold[:]=x
@@ -161,7 +161,7 @@ def lk():
 	return (KE)
 
 def oc(nelx,nely,x,volfrac,dc,dv,g,wa):
-	l1=1e-9
+	l1=0
 	l2=1e9
 	move=0.2
 	# reshape to perform vector operations
