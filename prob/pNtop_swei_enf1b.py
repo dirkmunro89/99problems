@@ -21,9 +21,9 @@ def apar(n):
 #
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df)/np.maximum(x_k,1e-9)
+    c_x=2e0*np.absolute(df_k)/np.maximum(x_k,1e-9)
     c_x[1:]=0e0
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
@@ -80,7 +80,9 @@ def init(g):
 #
     aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,qen,muc,Emin,Emax,gv,g)
 #
-    return n,m,x_l,x_u,x_k,aux
+    c_s=np.ones(m)
+#
+    return n,m,x_l,x_u,x_k,c_s,aux
 #
 def simu(n,m,x,aux,g):
 #

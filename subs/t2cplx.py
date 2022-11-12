@@ -6,7 +6,7 @@ from scipy.optimize import minimize
 from scipy import sparse
 from docplex.mp.sktrans.transformers import CplexTransformer
 #
-def t2cplx(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
+def t2cplx(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
     dx_l=np.ones(n,dtype=np.float64)
     dx_u=np.ones(n,dtype=np.float64)

@@ -3,9 +3,9 @@ import numpy as np
 from prob.util.topo2d import topo2d_init
 from prob.util.topo2d import topo2d_simu
 #
-def caml(k, x_k, df, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df)/x_k
+    c_x=2e0*np.absolute(df_k)/x_k
 #
     L=x_k
     U=x_k
@@ -69,7 +69,9 @@ def init(g):
 #
     aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,qen,muc,Emin,Emax,gv,g)
 #
-    return n,m,x_l,x_u,x_k,aux
+    c_s=np.ones(m)
+#
+    return n,m,x_l,x_u,x_k,c_s,aux
 #
 def simu(n,m,x,aux,g):
 #

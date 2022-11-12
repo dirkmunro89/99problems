@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.optimize import minimize
 #
-def mma02(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
+def mma02(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
     r = np.zeros((m+1),dtype=float)
     p = np.zeros((m+1,n),dtype=float)

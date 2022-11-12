@@ -230,6 +230,12 @@ def mods(prob):
         from prob.pThou_fle import simu
         from prob.pThou_fle import caml
         from prob.pThou_fle import subs
+    elif prob == '3bar':
+        from prob.p3bar import init
+        from prob.p3bar import apar
+        from prob.p3bar import simu
+        from prob.p3bar import caml
+        from prob.p3bar import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init

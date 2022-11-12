@@ -4,7 +4,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy import sparse
 #
-def t2dsqp(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x):
+def t2dsqp(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
     dx_l=np.ones(n,dtype=np.float64)
     dx_u=np.ones(n,dtype=np.float64)

@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 #
 def t2d(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
-    bds=[[1e-6,1e6] for i in range(m)]; tup_bds=tuple(bds)
+    bds=[[0e0*c_s[i]-1e6*(1-c_s[i]),1e6] for i in range(m)]; tup_bds=tuple(bds)
     sol=minimize(qpq_dual,x_d,args=(n,m,x_k,g,dg,d_l,d_u, c_x[0], c_x[1:]), \
         jac=dqpq_dual,method='L-BFGS-B',bounds=tup_bds, options={'disp':False})
 #
@@ -25,7 +25,8 @@ def t2d(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
 def x_dual(x_d, n, m, x_k, g, dg, dx_l, dx_u, c0, cj):
 #
-    ddL=(c0 + np.dot(x_d,cj))
+    ddL=np.maximum(np.absolute(c0 + np.dot(x_d,cj)),1e-6)
+#   ddL=np.maximum((c0 + np.dot(x_d,cj)),1e-6)
     tmp=(dg[0]+np.dot(x_d,dg[1:]))
 #
     return np.maximum(np.minimum(x_k - tmp/ddL, dx_u),dx_l)
@@ -36,7 +37,8 @@ def qpq_dual(x_d, n, m, x_k, g, dg, dx_l, dx_u, c0, cj):
 #
     x=x_dual(x_d, n, m, x_k, g, dg, dx_l, dx_u, c0, cj)
 #
-    ddL=(c0 + np.dot(x_d,cj))
+    ddL=np.maximum(np.absolute(c0 + np.dot(x_d,cj)),1e-6)
+#   ddL=np.maximum((c0 + np.dot(x_d,cj)),1e-6)
 #
     W=g[0]+np.dot(dg[0],x-x_k)+np.dot(ddL/2.,(x-x_k)**2.)+np.dot(x_d,(g[1:]+np.dot(dg[1:],(x-x_k))))
 #

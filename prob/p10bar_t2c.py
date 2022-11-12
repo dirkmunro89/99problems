@@ -10,9 +10,11 @@ def init(g):
     x_l = .1 * np.ones_like(x_k)
     x_u = 15. * np.ones_like(x_k)
 #
+    c_s=np.ones(m)
+#
     aux=[]
 #
-    return n,m,x_l,x_u,x_k,aux
+    return n,m,x_l,x_u,x_k,c_s,aux
 #
 def apar(n):
 #   
@@ -26,7 +28,7 @@ def apar(n):
 #       
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, df_k, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=np.zeros_like(df_k)
     L=np.zeros_like(x_k)

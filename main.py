@@ -2,6 +2,7 @@
 import sys
 import time
 import random
+import inspect
 import numpy as np
 import logging as log
 from joblib import Parallel, delayed
@@ -16,21 +17,24 @@ def loop(init,apar,simu,caml,subs,g):
     if g > 0: print("Start %d .."%g); log = open('hist_%d.log'%g,'w')
     else: log = open('history.log','w')
 #
-    [n,m,x_l,x_u,x_k,aux]=init(g)
+    [n,m,x_l,x_u,x_k,c_s,aux]=init(g)
+#
+    if np.count_nonzero(c_s==0) > 0 and 't2duel' not in inspect.getfile(subs): 
+        print('Error: equality constraints implemented in only t2d subsolver from t2duel.py'); sys.exit()
 #
     [mov,asf,enf,kmx,cnv]=apar(n)
 #
     if g >= 0:
         for i in range(n): x_k[i]=random.uniform(x_l[i]+.0*(x_u[i]-x_l[i]),x_u[i]-.0*(x_u[i]-x_l[i]))
     if g == -9:
-        for i in range(n): x_k[i]=x_l[i]+0.5*(x_u[i]-x_l[i])
+        for i in range(n): x_k[i]=random.uniform(x_l[i]+.0*(x_u[i]-x_l[i]),x_u[i]-.0*(x_u[i]-x_l[i]))
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
     mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
-    L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n))
+    L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n)); f_1 = np.zeros(m+1)
 #
     if g == -9: 
         fdck(simu,n,m,x_k,aux,0)
@@ -50,7 +54,7 @@ def loop(init,apar,simu,caml,subs,g):
         ts0=time.time()
         if k > 0: f_1 = f_k.copy(); df_1 = df_k.copy()
         [f_k,df_k] = simu(n,m,x_k,aux,0); tot=tot+1
-        v_k=np.amax(f_k[1:])
+        v_k=np.maximum(np.amax(f_k[1:]*c_s),np.amax(np.absolute(f_k[1:]*(1-c_s))))
         ts1=time.time(); ts=ts1-ts0
 #
         tf0=time.time()
@@ -90,7 +94,7 @@ def loop(init,apar,simu,caml,subs,g):
             else: 
                 test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if test: enfc.par_add(f_k[0],v_k,k)
-        v_k=np.amax(f_k[1:])
+        v_k=np.maximum(np.amax(f_k[1:]*c_s),np.amax(np.absolute(f_k[1:]*(1-c_s))))
         tf1=time.time(); tf=tf1-tf0
 #
         ti=time.time()
@@ -131,14 +135,14 @@ def loop(init,apar,simu,caml,subs,g):
 #
         to0=time.time()
         if cont:
-            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,df_k,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
+            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,f_k,df_k,f_1,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
             mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
             if enf == 't-r' or enf == 'c-a' or enf == 'gcm': 
                 stub=Stub(x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
         else: inn=inn+1; k=k-1
 #
         x_0[:]=x_k 
-        [x,d,q_k] = subs(n,m,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
+        [x,d,q_k] = subs(n,m,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x,c_s)
         x_k[:]=x; x_d[:]=d
         to1=time.time(); to=to1-to0; ti=time.time()
 #
@@ -146,6 +150,7 @@ def loop(init,apar,simu,caml,subs,g):
 #
         k=k+1
 #
+    np.savetxt('x_str.log',x_k)
     [f_k,_] = simu(n,m,x_k,aux,g)
     if g > 0: 
         np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k); print("... exit %d"%g)
