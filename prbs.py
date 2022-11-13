@@ -208,12 +208,12 @@ def mods(prob):
         from prob.p1000wml_t2r import simu
         from prob.p1000wml_t2r import caml
         from subs.t2duel import t2d as subs
-    elif prob == '3bar':
-        from prob.p3bar import init
-        from prob.p3bar import apar
-        from prob.p3bar import simu
-        from prob.p3bar import caml
-        from prob.p3bar import subs
+    elif prob == '3bar_sph':
+        from prob.p3bar_sph import init
+        from prob.p3bar_sph import apar
+        from prob.p3bar_sph import simu
+        from prob.p3bar_sph import caml
+        from prob.p3bar_sph import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init
