@@ -19,7 +19,9 @@ def loop(init,apar,simu,caml,subs,g):
 #
     [n,m,x_l,x_u,x_k,c_s,aux]=init(g)
 #
-    if np.count_nonzero(c_s==0) > 0 and 't2duel' not in inspect.getfile(subs): 
+    if np.count_nonzero(c_s==0) > 0 and \
+        't2duel' not in inspect.getfile(subs) and \
+        't2cplx' not in inspect.getfile(subs):
         print('Error: equality constraints implemented in only t2d subsolver from t2duel.py'); sys.exit()
 #
     [mov,asf,enf,kmx,cnv]=apar(n)

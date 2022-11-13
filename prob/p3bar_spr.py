@@ -1,12 +1,12 @@
 #
 import numpy as np
-from subs.t2duel_spr import t2d as subs
+#from subs.t2duel_spr import t2d as subs
 #
 def init(g):
 #
     n = 5; m = 8
 #   3 areas followed by 2 displacements
-    x_l = np.array([0.1, 0.1, 0.1,-1.,-1.])
+    x_l = np.array([0., 0., 0.,-1.,-1.])
     x_u = np.array([1., 1., 1., 1., 1.])
     x_k = np.array([.5, .5, .5, 0., 0.])
 #
