@@ -6,8 +6,8 @@ def init(g):
 #
     n = 5; m = 8
 #   3 areas followed by 2 displacements
-    x_l = np.array([0.0, 0.0, 0.0,-1.0,-1.0])
-    x_u = np.array([1., 1., 1., 1.0, 1.0])
+    x_l = np.array([0.1, 0.1, 0.1,-1.,-1.])
+    x_u = np.array([1., 1., 1., 1., 1.])
     x_k = np.array([.5, .5, .5, 0., 0.])
 #
     c_s = np.array([1,1,1,1,1,1,0,0]) # constraint sense, one is inequality
@@ -23,7 +23,7 @@ def apar(n):
 #
     enf='None'
 #       
-    kmx=1000
+    kmx=100
     cnv=[1e-3,1e-3,1e3,1e-3,1e-3]
 #       
     return mov, asf, enf, kmx, cnv
@@ -34,10 +34,12 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, x_d, L_k, U_k, x_l, x_u, asf, mov):
     if k > 0:
         sph = f_1 - f_k
         sph[0]=sph[0]-np.dot(df_k[0],x_1-x_k)
-        for df in df_k[1:]: sph[df[0]]=sph[df[0]]-df[2]*(x_1[df[1]]-x_k[df[1]])
-        sph=sph/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
-        print(sph)
-        stop
+        for df in df_k[1:]: sph[df[0]+1]=sph[df[0]+1]-df[2]*(x_1[df[1]]-x_k[df[1]])
+        sph=2.*sph/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
+        c_x[0]=c_x[0]*sph[0]
+        for j in range(len(f_k)-1):
+            for i in range(len(x_k)):
+                c_x.append((j,i,sph[j+1]))
     else:
         for j in range(len(f_k)-1):
             for i in range(len(x_k)):

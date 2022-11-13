@@ -102,9 +102,9 @@ def loop(init,apar,simu,caml,subs,g):
         else: itr=str(test)[0]
         h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
         bdd=bdd-np.count_nonzero(x_u-x_l<1e-3)/n
-        kkt=df_k[0]; ubd=np.where(x_k-x_l>1e-3,np.where(x_u-x_k>1e-3,1,0),0)
-        for df in df_k[1:]: kkt[df[1]]=kkt[df[1]]+x_d[df[0]]*df[2]*ubd[df[1]] #
-        kkt=np.linalg.norm(kkt,np.inf)
+        kkt=df_k[0].copy(); ubd=np.where(x_k-x_l>1e-3,np.where(x_u-x_k>1e-3,1,0),0)
+        for df in df_k[1:]: kkt[df[1]]=kkt[df[1]]+x_d[df[0]]*df[2] #
+        kkt=np.linalg.norm(kkt*ubd,np.inf)
 #
         if k == 0: ti=to0
         else: 
