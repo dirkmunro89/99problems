@@ -17,21 +17,20 @@ def apar(n):
     enf='none'
 #
     kmx=1000
-    cnv=[1e-2,1e-2,1e-6,1e-6,1e-6]
+    cnv=[1e-1,1e-1,1e-3,1e-3,1e-3]
 #
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df_k)/x_k
+    c_x=2e0*np.absolute(df_k)/np.maximum(x_k,1e-6)
     c_x[1:]=0e0
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
 #
-    if k>2:
+    if k>1e8:
         mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
-#
-    mov=np.minimum(np.maximum(mov,1e-3),0.2)
+        mov=np.minimum(np.maximum(mov,1e-3),0.1)
 #
     L=L_k
     U=U_k
@@ -71,12 +70,12 @@ def init(g):
     pen = 3.0
     qen = 1.0
     muc = 0e0
-    Emin = 0e0; Emax=1.0
+    Emin = 1e-9; Emax=1.0
     gv = 0.0/nelx/nely
 #
     n = nelx*nely
     m = 1
-    x_l = np.ones(n,dtype=float)*1e-3
+    x_l = np.zeros(n,dtype=float)
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #

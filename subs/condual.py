@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 #
 def con(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
-    bds=[[1e-6,1e8] for i in range(m)]; tup_bds=tuple(bds)
+    bds=[[1e-6,1e6] for i in range(m)]; tup_bds=tuple(bds)
     sol=minimize(con_dual,x_d,args=(n,m,x_k,g,dg,d_l,d_u), \
         jac=dcon_dual,method='L-BFGS-B',bounds=tup_bds, options={'disp':False})
 #

@@ -97,16 +97,6 @@ def mods(prob):
         from prob.p5can_t2m import simu
         from prob.p5can_t2m import caml
         from subs.t2dual import t2d as subs
-    elif prob == 'arch':
-        from arch import init
-        from arch import simu
-        from arch import caml
-#       from qlpml_arch import qlp as subs
-#       from dlpml_arch import dlp as subs
-    elif prob == 'beam':
-        from beam import init
-        from beam import simu
-        from beam import caml
     elif prob == 'Ntop_eoc':
         from prob.pNtop_eoc import init
         from prob.pNtop_eoc import apar
@@ -206,30 +196,12 @@ def mods(prob):
         from prob.pNtop_mech_enf2a import simu
         from prob.pNtop_mech_enf2a import caml
         from prob.pNtop_mech_enf2a import subs
-    elif prob == 'Ntop_mech_enf3a':
-        from prob.pNtop_mech_enf3a import init
-        from prob.pNtop_mech_enf3a import apar
-        from prob.pNtop_mech_enf3a import simu
-        from prob.pNtop_mech_enf3a import caml
-        from prob.pNtop_mech_enf3a import subs
-    elif prob == 'Ntop_mech_enf4a':
-        from prob.pNtop_mech_enf4a import init
-        from prob.pNtop_mech_enf4a import apar
-        from prob.pNtop_mech_enf4a import simu
-        from prob.pNtop_mech_enf4a import caml
-        from prob.pNtop_mech_enf4a import subs
-    elif prob == 'Ntop_sloc_enf1a':
-        from prob.pNtop_sloc_enf1a import init
-        from prob.pNtop_sloc_enf1a import apar
-        from prob.pNtop_sloc_enf1a import simu
-        from prob.pNtop_sloc_enf1a import caml
-        from prob.pNtop_sloc_enf1a import subs
-    elif prob == 'Thou_fle':
-        from prob.pThou_fle import init
-        from prob.pThou_fle import apar
-        from prob.pThou_fle import simu
-        from prob.pThou_fle import caml
-        from prob.pThou_fle import subs
+    elif prob == '1000wm_t2r':
+        from prob.p1000wm_t2r import init
+        from prob.p1000wm_t2r import apar
+        from prob.p1000wm_t2r import simu
+        from prob.p1000wm_t2r import caml
+        from prob.p1000wm_t2r import subs
     elif prob == '3bar':
         from prob.p3bar import init
         from prob.p3bar import apar
