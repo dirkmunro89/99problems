@@ -1,8 +1,6 @@
 #
-#   todo
-#
 import numpy as np
-from subs.t2dual import t2d as subs
+from subs.t2cplx import t2c as subs
 #
 def init(g):
 #
@@ -31,14 +29,11 @@ def apar(n):
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.zeros_like(df_k)
+    c_x=[0e0*np.absolute(df_k[0])/x_k]
+    for df in df_k[1:]: c_x.append((df[0],df[1],2e0*np.absolute(df[2])/x_k[df[1]]))
+#
     L=np.zeros_like(x_k)
     U=np.zeros_like(x_k)
-#
-#   T2R
-    c_x=np.absolute(2e0*df_k/x_k)
-#
-    c_x[0]=0e0*np.ones_like(x_k)
 #
     d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
     d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
@@ -48,24 +43,22 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 def simu(n,m,x,aux,g):
 #
     f=np.zeros((1+m),dtype=float)
-    df = np.zeros((m + 1, n), dtype=float)
+    df = [np.zeros(n, dtype=float)]
 #
-    f[0]=np.sum(x)#/1e3
+    f[0]=np.sum(x)
     for i in range(950):
         f[1]=f[1]+1./x[i]
         f[2]=f[2]+1./x[i]
-        df[1][i]= -1./x[i]**2.
-        df[2][i]= -1./x[i]**2.
+        df.append((0,i,-1./x[i]**2.))
+        df.append((1,i,-1./x[i]**2.))
     for i in range(950,1000):
         f[1]=f[1]+(1.e-6)/x[i]
         f[2]=f[2]-(1.e-6)/x[i]
-        df[1][i]= -1.e-6/x[i]**2.
-        df[2][i]=1.e-6/x[i]**2.
+        df.append((0,i,-1e-6/x[i]**2.))
+        df.append((1,i,1e-6/x[i]**2.))
 #
-    df[0]=np.ones_like(x,dtype=float)#/1e3
+    df[0]=np.ones_like(x,dtype=float)
 #
-#   df[1]=df[1]/1000.
-#   df[2]=df[2]/900.
     f[1]=f[1]-1000.
     f[2]=f[2]-900.
 #

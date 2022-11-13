@@ -16,19 +16,20 @@ def init(g):
 #
 def apar(n):
 #
-    mov=0.2*np.ones(n)
+    mov=0.1*np.ones(n)
     asf=[0.7,1.1]
 #
     enf='none'
 #
-    kmx=14
-    cnv=[1e-6,1e-6,1e-6,1e-6,1e-6]
+    kmx=100
+    cnv=[1e-3,1e-3,1e-3,1e-3,1e-3]
 #
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df_k)/x_k
+    c_x=[2e0*np.absolute(df_k[0])/x_k]
+    for df in df_k[1:]: c_x.append((df[0],df[1],2e0*np.absolute(df[2])/x_k[df[1]]))
 #
     L=x_k
     U=x_k
@@ -41,17 +42,16 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 def simu(n,m,x,aux,g):
 #
     c1 = 0.0624
-    c2 = np.array([61, 37, 19, 7, 1], dtype=float)
+    c2 = np.array([61., 37., 19., 7., 1.], dtype=float)
 #
     f = np.zeros((m + 1), dtype=float)
-    f[0] = c1 * np.sum(x)
-    f[1] = np.dot(c2, 1 / x ** 3) - 1
+    f[0] =  c1*np.sum(x)
+    f[1] = np.dot(c2, 1. / x ** 3.) - 1.
 #
-    df = np.zeros((m + 1, n), dtype=float)
+    df = [np.zeros(n, dtype=float)]
     df[0][:] = c1
-    df[1][:] = -3 * c2 / x ** 4
+#
+    for i in range(n): df.append((0,i,-3.*c2[i]/x[i]**4.))
 #
     return f, df
 #
-
-

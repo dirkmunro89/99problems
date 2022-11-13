@@ -138,7 +138,7 @@ def loop(init,apar,simu,caml,subs,g):
 #
         to0=time.time()
         if cont:
-            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,f_k,df_k,f_1,x_1,x_2,x_d,L_k,U_k,x_l,x_u,asf,mov) #
+            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,f_k,df_k,f_1,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov) #
             mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
             if enf == 't-r' or enf == 'c-a' or enf == 'gcm': 
                 stub=Stub(x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x) #
@@ -169,7 +169,7 @@ def fdck(simu,n,m,x_k,aux,g):
 #
     [f0,df0] = simu(n,m,x_k,aux,g)
 #
-    dx=1e-4
+    dx=1e-6
 #
     print("")
     print("Error in computed derivatives with respect to finite differences")
