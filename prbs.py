@@ -196,12 +196,18 @@ def mods(prob):
         from prob.pNtop_mech_enf2a import simu
         from prob.pNtop_mech_enf2a import caml
         from prob.pNtop_mech_enf2a import subs
-    elif prob == '1000wm_t2r':
-        from prob.p1000wm_t2r import init
-        from prob.p1000wm_t2r import apar
-        from prob.p1000wm_t2r import simu
-        from prob.p1000wm_t2r import caml
-        from prob.p1000wm_t2r import subs
+    elif prob == '1000wml_t2r_t2d':
+        from prob.p1000wml_t2r import init
+        from prob.p1000wml_t2r import apar
+        from prob.p1000wml_t2r import simu
+        from prob.p1000wml_t2r import caml
+        from subs.t2dual import t2d as subs
+    elif prob == '1000wml_t2r_t2e':
+        from prob.p1000wml_t2r import init
+        from prob.p1000wml_t2r import apar
+        from prob.p1000wml_t2r import simu
+        from prob.p1000wml_t2r import caml
+        from subs.t2duel import t2d as subs
     elif prob == '3bar':
         from prob.p3bar import init
         from prob.p3bar import apar

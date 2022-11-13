@@ -2,7 +2,6 @@
 #   todo
 #
 import numpy as np
-from subs.t2dual import t2d as subs
 #
 def init(g):
 #
