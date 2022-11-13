@@ -19,23 +19,23 @@ def mods(prob):
         from prob.p5can_t2r import simu
         from prob.p5can_t2r import caml
         from subs.t2cplx import t2c as subs
-    elif prob == '1000wm_t2r_t2c':
-        from prob.p1000wm_t2r import init
-        from prob.p1000wm_t2r import apar
-        from prob.p1000wm_t2r import simu
-        from prob.p1000wm_t2r import caml
+    elif prob == '1000wml_t2r_t2c':
+        from prob.p1000wml_t2r import init
+        from prob.p1000wml_t2r import apar
+        from prob.p1000wml_t2r import simu
+        from prob.p1000wml_t2r import caml
         from subs.t2cplx import t2c as subs
-    elif prob == '1000wm_t2r_t2d':
-        from prob.p1000wm_t2r import init
-        from prob.p1000wm_t2r import apar
-        from prob.p1000wm_t2r import simu
-        from prob.p1000wm_t2r import caml
+    elif prob == '1000wml_t2r_t2d':
+        from prob.p1000wml_t2r import init
+        from prob.p1000wml_t2r import apar
+        from prob.p1000wml_t2r import simu
+        from prob.p1000wml_t2r import caml
         from subs.t2dual import t2d as subs
-    elif prob == '1000wm_t2r_t2e':
-        from prob.p1000wm_t2r import init
-        from prob.p1000wm_t2r import apar
-        from prob.p1000wm_t2r import simu
-        from prob.p1000wm_t2r import caml
+    elif prob == '1000wml_t2r_t2e':
+        from prob.p1000wml_t2r import init
+        from prob.p1000wml_t2r import apar
+        from prob.p1000wml_t2r import simu
+        from prob.p1000wml_t2r import caml
         from subs.t2duel import t2d as subs
     elif prob == '3bar_sph_t2e':
         from prob.p3bar_sph import init

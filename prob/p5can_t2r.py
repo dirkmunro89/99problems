@@ -16,7 +16,7 @@ def init(g):
 #
 def apar(n):
 #
-    mov=0.1*np.ones(n)
+    mov=0.2*np.ones(n)
     asf=[0.7,1.1]
 #
     enf='none'
