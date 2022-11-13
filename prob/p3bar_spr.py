@@ -30,15 +30,18 @@ def apar(n):
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, x_d, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=[np.zeros_like(x_k)]
+    c_x=[np.ones_like(x_k)]
     if k > 0:
         sph = f_1 - f_k
-        for df in df_k:
-            sph[df[1]]=sph[df[1]]-df[2]*(x_1[df[1]]-x_k[df[1]])
-        sph=sph/np.maximum(np.linalg.norm(x_1-x_k)**2./1e-6)
+        sph[0]=sph[0]-np.dot(df_k[0],x_1-x_k)
+        for df in df_k[1:]: sph[df[0]]=sph[df[0]]-df[2]*(x_1[df[1]]-x_k[df[1]])
+        sph=sph/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
         print(sph)
         stop
-#       for j in range(len(f_k)): c_x[j]=sph[j]
+    else:
+        for j in range(len(f_k)-1):
+            for i in range(len(x_k)):
+                c_x.append((j,i,1.))
 #
     d_l= np.maximum(x_l, x_k-mov*(x_u-x_l))
     d_u= np.minimum(x_u, x_k+mov*(x_u-x_l))
