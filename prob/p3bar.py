@@ -9,7 +9,7 @@ def init(g):
 #   x_l = np.array([0.2357, 0.1, 0.2357,-1.0,-1.0])
 #   x_u = np.array([0.2357, 0.1, 0.2357, 1.0, 1.0])
 #   x_k = np.array([0.2357, 0.1, 0.2357, 0., 0.])
-    x_l = np.array([0.0, 0.0, 0.0,-1.0,-1.0])
+    x_l = np.array([0.1, 0.1, 0.1,-1.0,-1.0])
     x_u = np.array([1., 1., 1., 1.0, 1.0])
     x_k = np.array([.5, .5, .5, 0., 0.])
 #
@@ -26,7 +26,7 @@ def apar(n):
 #
     enf='None'
 #       
-    kmx=1000
+    kmx=100
     cnv=[1e-3,1e-3,1e3,1e-3,1e-3]
 #       
     return mov, asf, enf, kmx, cnv
