@@ -25,6 +25,12 @@ def mods(prob):
         from prob.p5can_t2r import simu
         from prob.p5can_t2r import caml
         from subs.t2dual import t2d as subs
+    elif prob == '5can_t2r_spr': #tested
+        from prob.p5can_t2r_spr import init
+        from prob.p5can_t2r_spr import apar
+        from prob.p5can_t2r_spr import simu
+        from prob.p5can_t2r_spr import caml
+        from subs.t2dual_spr import t2d as subs
     elif prob == '5can_con': #tested
         from prob.p5can_mma_0 import init
         from prob.p5can_mma_0 import apar
@@ -202,12 +208,24 @@ def mods(prob):
         from prob.p1000wm_t2r import simu
         from prob.p1000wm_t2r import caml
         from prob.p1000wm_t2r import subs
+    elif prob == '1000wm_t2r_spr':
+        from prob.p1000wm_t2r_spr import init
+        from prob.p1000wm_t2r_spr import apar
+        from prob.p1000wm_t2r_spr import simu
+        from prob.p1000wm_t2r_spr import caml
+        from prob.p1000wm_t2r_spr import subs
     elif prob == '3bar':
         from prob.p3bar import init
         from prob.p3bar import apar
         from prob.p3bar import simu
         from prob.p3bar import caml
         from prob.p3bar import subs
+    elif prob == '3bar_spr':
+        from prob.p3bar_spr import init
+        from prob.p3bar_spr import apar
+        from prob.p3bar_spr import simu
+        from prob.p3bar_spr import caml
+        from prob.p3bar_spr import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init

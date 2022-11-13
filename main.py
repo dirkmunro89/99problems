@@ -68,7 +68,7 @@ def loop(init,apar,simu,caml,subs,g):
                     enfc.par_add(f_k[0],v_k,k)
                 else:
                     mov=stub.set_mov(0.5,x_l,x_u)
-                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
+                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get() #
         elif enf == 'c-a':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
@@ -77,7 +77,7 @@ def loop(init,apar,simu,caml,subs,g):
                     test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                     if test: enfc.par_add(f_k[0],v_k,k)
                 else:
-                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
+                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get() #
                     c_x[:]=stub.set_crv(2.,f_k,q_k)
         elif enf == 'gcm':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
@@ -88,7 +88,7 @@ def loop(init,apar,simu,caml,subs,g):
                     if test: enfc.par_add(f_k[0],v_k,k)
                 else:
                     c_x[:]=stub.set_rho(c_x,f_k,q_k,x_k,x_0,L_k,U_k,x_u,x_l)
-                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
+                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get() #
         else:
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else: 
@@ -102,8 +102,9 @@ def loop(init,apar,simu,caml,subs,g):
         else: itr=str(test)[0]
         h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
         bdd=bdd-np.count_nonzero(x_u-x_l<1e-3)/n
-        ubd=np.where(x_k-x_l>1e-3,np.where(x_u-x_k>1e-3,1,0),0)
-        kkt=np.linalg.norm((df_k[0] + np.dot(x_d,df_k[1:]))*ubd,np.inf)
+        kkt=df_k[0]; ubd=np.where(x_k-x_l>1e-3,np.where(x_u-x_k>1e-3,1,0),0)
+        for df in df_k[1:]: kkt[df[1]]=kkt[df[1]]+x_d[df[0]]*df[2]*ubd[df[1]] #
+        kkt=np.linalg.norm(kkt,np.inf)
 #
         if k == 0: ti=to0
         else: 
@@ -135,14 +136,14 @@ def loop(init,apar,simu,caml,subs,g):
 #
         to0=time.time()
         if cont:
-            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,f_k,df_k,f_1,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
+            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,f_k,df_k,f_1,x_1,x_2,x_d,L_k,U_k,x_l,x_u,asf,mov) #
             mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
             if enf == 't-r' or enf == 'c-a' or enf == 'gcm': 
-                stub=Stub(x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
+                stub=Stub(x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x) #
         else: inn=inn+1; k=k-1
 #
         x_0[:]=x_k 
-        [x,d,q_k] = subs(n,m,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x,c_s)
+        [x,d,q_k] = subs(n,m,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x,c_s) #
         x_k[:]=x; x_d[:]=d
         to1=time.time(); to=to1-to0; ti=time.time()
 #
@@ -164,8 +165,6 @@ def loop(init,apar,simu,caml,subs,g):
 #
 def fdck(simu,n,m,x_k,aux,g):
 #
-    df = np.zeros((m + 1, n), dtype=float)
-#
     [f0,df0] = simu(n,m,x_k,aux,g)
 #
     dx=1e-4
@@ -174,21 +173,41 @@ def fdck(simu,n,m,x_k,aux,g):
     print("Error in computed derivatives with respect to finite differences")
     print("")
 #
-    err=-1e8
-    print('%10s %10s'%("Variables", "Responses"))
+#   first objective
+#
+    mrr=-1e8
     for i in range(0,n,int(np.ceil(n/100))):
         x0 = x_k[i]
         x_k[i] += dx
         [fd,_] = simu(n,m,x_k,aux,g)
         x_k[i] = x0
-        df[:, i] = (fd - f0) / dx
-        print("%10d "%i,end="")
-        for j in range(m+1):
-            print("%7.0e "%(df[j,i]-df0[j,i]),end="")
-        print("")
-        err=max(err,np.amax(np.absolute(df[:,i]-df0[:,i])))
+        scl = np.maximum(np.absolute(df0[0][i]),1e-6)
+        fdf=(fd[0]-f0[0])/dx
+        err = np.absolute((fdf-df0[0][i])/scl)
+        tmp='%6d %6d %14.7e % 14.7e %14.7e'%\
+            (0,i,fdf,df0[0][i],err)
+        print(tmp)
+        mrr=max(mrr,err)
     print("")
-    print("Maximum absolute error: %7.0e"%err)
+#
+#   now constraints
+#
+    for df in df0[1:]:
+        j=df[0]; i=df[1]
+        x0 = x_k[i]
+        x_k[i] += dx
+        [fd,_] = simu(n,m,x_k,aux,g)
+        x_k[i] = x0
+        scl = np.maximum(np.absolute(df[2]),1e-6)
+        fdf=(fd[j+1]-f0[j+1])/dx
+        err = np.absolute((fdf-df[2])/scl)
+        tmp='%6d %6d %14.7e % 14.7e %14.7e'%\
+            (j,i,fdf,df[2],err)
+        print(tmp)
+        mrr=max(mrr,err)
+    print("")
+#        
+    print("Maximum absolute error: %7.0e"%mrr)
 #
 def main(prob):
 #
