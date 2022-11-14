@@ -42,10 +42,10 @@ def loop(init,apar,simu,caml,subs,g):
         fdck(simu,n,m,x_k,aux,0)
         return
 #
-    log.write(('%4s%3s%8s%11s%8s%5s%12s%8s%11s%6s%9s%9s\n')%\
+    log.write(('%4s%3s%8s%12s%7s%5s%12s%8s%11s%6s%9s%9s\n')%\
         ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|KKT|', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))
     if not g > 0:
-        print(('%4s%3s%8s%11s%8s%5s%12s%8s%11s%6s%9s%9s')%\
+        print(('%4s%3s%8s%12s%7s%5s%12s%8s%11s%6s%9s%9s')%\
             ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|KKT|', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))
 #
     enfc = Enfc()
