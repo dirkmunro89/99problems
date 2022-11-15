@@ -36,7 +36,7 @@ def loop(init,apar,simu,caml,subs,g):
     mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
-    L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n)); f_1 = np.zeros(m+1)
+    L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=[np.zeros(n)]; f_1 = np.zeros(m+1)
 #
     if g == -9: 
         fdck(simu,n,m,x_k,aux,0)
@@ -154,6 +154,7 @@ def loop(init,apar,simu,caml,subs,g):
         k=k+1
 #
     np.savetxt('x_str.log',x_k)
+    np.savetxt('f_str.log',f_k)
     [f_k,_] = simu(n,m,x_k,aux,g)
     if g > 0: 
         np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k); print("... exit %d"%g)
@@ -169,7 +170,7 @@ def fdck(simu,n,m,x_k,aux,g):
 #
     [f0,df0] = simu(n,m,x_k,aux,g)
 #
-    dx=1e-6
+    dx=1e-8
 #
     print("")
     print("Error in computed derivatives with respect to finite differences")
@@ -177,8 +178,10 @@ def fdck(simu,n,m,x_k,aux,g):
 #
 #   first objective
 #
+    mi=0
+    mj=0
     mrr=-1e8
-    for i in range(0,n,int(np.ceil(n/100))):
+    for i in range(n):
         x0 = x_k[i]
         x_k[i] += dx
         [fd,_] = simu(n,m,x_k,aux,g)
@@ -186,9 +189,10 @@ def fdck(simu,n,m,x_k,aux,g):
         scl = np.maximum(np.absolute(df0[0][i]),1e-6)
         fdf=(fd[0]-f0[0])/dx
         err = np.absolute((fdf-df0[0][i])/scl)
-        tmp='%6d %6d %14.7e % 14.7e %14.7e'%\
-            (0,i,fdf,df0[0][i],err)
+        tmp='%6d %6d %14.7e % 14.7e %14.7e'% (0,i,fdf,df0[0][i],err)
         print(tmp)
+        if err > mrr:
+            mi = i; mj = 0
         mrr=max(mrr,err)
     print("")
 #
@@ -203,13 +207,14 @@ def fdck(simu,n,m,x_k,aux,g):
         scl = np.maximum(np.absolute(df[2]),1e-6)
         fdf=(fd[j+1]-f0[j+1])/dx
         err = np.absolute((fdf-df[2])/scl)
-        tmp='%6d %6d %14.7e % 14.7e %14.7e'%\
-            (j,i,fdf,df[2],err)
+        tmp='%6d %6d %14.7e % 14.7e %14.7e'%(j,i,fdf,df[2],err)
         print(tmp)
+        if err > mrr:
+            mi = i; mj = j
         mrr=max(mrr,err)
     print("")
 #        
-    print("Maximum absolute error: %7.0e"%mrr)
+    print("Maximum absolute error %7.0e at function %d and variable %d"%(mrr,mj,mi))
 #
 def main(prob):
 #

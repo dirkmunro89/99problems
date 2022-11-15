@@ -1,23 +1,102 @@
 #
 import numpy as np
-from subs.t2duel import t2d as subs
+import importlib.util
+from subs.t2cplx import t2c as subs
+#from subs.t2duel import t2d as subs
+#from prob.util.orien import orien_init
+#from prob.util.orien import orien_simu
+#from prob.util.orien import orien_outp
+#
+spec=importlib.util.spec_from_file_location("orien", "/home/dirk/RECIPE/knap/orien.py")
+orien = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(orien)
 #
 def init(g):
 #
-    n = 5; m = 8
-#   3 areas followed by 2 displacements
-    x_l = np.array([0., 0., 0.,-1.,-1.])
-    x_u = np.array([1., 1., 1., 1., 1.])
-    x_k = np.array([.5, .5, .5, 0., 0.])
+#   Run init from RECIPE module
+    [ply,nrm,aea,fln]=orien.orien_init("/home/dirk/RECIPE/knap/cone.stl")
 #
-    c_s = np.array([1,1,1,1,1,1,0,0]) # constraint sense, one is inequality
+    t=len(aea)
 #
-    aux=[]
+#   Number of variables is 4 quaternion coefficients (put them at the end), 
+#   and then an additional 2 per triangle (one for down indicator, and one for overhanging indicator)
+#   the length of the array of triangle areas is thus used
+    n = 2*t + 4
+#
+#   The number of constraints is 2 per triangle; one to set the down indicator, and one to set the 
+#   overhanging indicator; plus one more to constrain the quaternion coefficients to length 1
+    m = 2*t + 1
+#
+#   Indicator variables, followed by 4 quaternion coefficients
+    x_l = np.ones(n,dtype=float)*1e-6
+    x_l[-4:] = -1.0
+    x_u = np.ones(n,dtype=float)
+    x_k = np.ones(n,dtype=float)
+    x_k[-4] = 1e-6
+    x_k[-3] = 1e-6
+    x_k[-2] = 1e-6
+    x_k[-1] = 1.
+#
+#   Last constraint is the quaternion norm (equality)
+    c_s = np.ones(m,dtype=int)
+    c_s[-1] = 0
+#
+#   Pack data returned from init into aux
+    aux=[ply,nrm,aea,t,fln,0]
 #
     return n,m,x_l,x_u,x_k,c_s,aux
 #
+def simu(n,m,x,aux,g):
+#
+    f = np.zeros((m + 1), dtype=float)
+    df = [np.zeros(n,dtype=float)]
+#
+    q = x[-4:].copy()
+    [ply,nrm,aea,t,fln,k]=aux
+    [rrm,dndr,dndi,dndj,dndk]=orien.orien_simu(q,nrm)
+#
+#   x = [y,z,q]
+#
+    f[0] = np.sum(x[:t]*x[t:2*t]*aea)
+#
+    tmp = rrm.copy()
+    tmp[:,0]=-2.*tmp[:,0]; tmp[:,1]=-2.*tmp[:,1]; tmp[:,2]= 2.*tmp[:,2]
+    dfdr = tmp*dndr
+    dfdi = tmp*dndi
+    dfdj = tmp*dndj
+    dfdk = tmp*dndk
+    p = 3.
+    for j in range(t):
+        df[0][j] = x[t+j]*aea[j]
+        df[0][t+j] = x[j]*aea[j]
+        f[j+1] = -rrm[j,2] - x[j]**p
+        df.append((j,j,-p*x[j]**(p-1.)))
+        df.append((j,n-4,-dndr[j,2]))
+        df.append((j,n-3,-dndi[j,2]))
+        df.append((j,n-2,-dndj[j,2]))
+        df.append((j,n-1,-dndk[j,2]))
+        f[t+j+1] = rrm[j,2]**2. - rrm[j,1]**2. - rrm[j,0]**2. - x[t+j]**p
+        df.append((t+j,t+j,-p*x[t+j]**(p-1.)))
+        df.append((t+j,n-4, 2.*rrm[j,2]*dndr[j,2]-2.*rrm[j,1]*dndr[j,1]-2.*rrm[j,0]*dndr[j,0]))
+        df.append((t+j,n-3, 2.*rrm[j,2]*dndi[j,2]-2.*rrm[j,1]*dndi[j,1]-2.*rrm[j,0]*dndi[j,0]))
+        df.append((t+j,n-2, 2.*rrm[j,2]*dndj[j,2]-2.*rrm[j,1]*dndj[j,1]-2.*rrm[j,0]*dndj[j,0]))
+        df.append((t+j,n-1, 2.*rrm[j,2]*dndk[j,2]-2.*rrm[j,1]*dndk[j,1]-2.*rrm[j,0]*dndk[j,0]))
+#
+#   unit quaternion constraint and derivative terms
+    f[-1] = q[0]**2. + q[1]**2. + q[2]**2. + q[3]**2. - 1.0
+    df.append((m-1,n-4,2.*q[0]))
+    df.append((m-1,n-3,2.*q[1]))
+    df.append((m-1,n-2,2.*q[2]))
+    df.append((m-1,n-1,2.*q[3]))
+#
+    orien.orien_outp(fln,ply,x,t,k)
+    k=k+1
+    aux[-1]=k
+#
+    return f, df
+#
 def apar(n):
-#   
+#
     mov=0.1*np.ones(n)
     asf=[0.7,1.1]
 #
@@ -52,64 +131,4 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     U=U_k
 #
     return c_x,mov,L,U,d_l,d_u
-#
-def simu(n,m,x,aux,g):
-#
-    f = np.zeros((m + 1), dtype=float)
-    df = [np.zeros(n,dtype=float)]
-#
-    E = 30e6
-    siy = 30e3
-    c=np.array([100.,0.,-100.])
-    l=np.sqrt(c**2. + 100.**2.)
-    sig = E*(-x[3]*c+100.*x[4])/l**2.
-    k11 = 100.**2.*E*(x[0]/l[0]**3. + x[2]/l[2]**3.)
-    k12 = -100.**2.*E*(-x[0]/l[0]**3. + x[2]/l[2]**3.)
-    k22 = 100.**2.*E*(x[0]/l[0]**3. + x[1]/l[1]**3. + x[2]/l[2]**3.)
-#
-    f[0] = 0.29 * np.sum(l*x[:3])/10e0
-    f[1] = sig[0]/siy - 1.
-    f[2] = sig[1]/siy - 1.
-    f[3] = sig[2]/siy - 1.
-    f[4] =-sig[0]/siy - 1.
-    f[5] =-sig[1]/siy - 1.
-    f[6] =-sig[2]/siy - 1.
-    f[7] = k11*x[3]/10e3 + k12*x[4]/10e3 - 1.
-    f[8] = k12*x[3]/10e3 + k22*x[4]/10e3
-#
-    df[0][0] = 0.29 * l[0]
-    df[0][1] = 0.29 * l[1]
-    df[0][2] = 0.29 * l[2]
-    df[0]=df[0]/10.
-#
-    df.append((0,3,-E*c[0]/l[0]**2./siy))
-    df.append((0,4,E*100./l[0]**2./siy))
-#
-    df.append((1,3,-E*c[1]/l[1]**2./siy))
-    df.append((1,4,E*100./l[1]**2./siy))
-#
-    df.append((2,3,-E*c[2]/l[2]**2./siy))
-    df.append((2,4,E*100./l[2]**2./siy))
-#
-    df.append((3,3,E*c[0]/l[0]**2./siy))
-    df.append((3,4,-E*100./l[0]**2./siy))
-#
-    df.append((4,3,E*c[1]/l[1]**2./siy))
-    df.append((4,4,-E*100./l[1]**2./siy))
-#
-    df.append((5,3,E*c[2]/l[2]**2./siy))
-    df.append((5,4,-E*100./l[2]**2./siy))
-#
-    df.append((6,0,E/l[0]**3*x[3] + E/l[0]**3.*x[4]))
-    df.append((6,2,E/l[2]**3*x[3] - E/l[2]**3.*x[4]))
-    df.append((6,3,k11/1e4))
-    df.append((6,4,k12/1e4))
-#
-    df.append((7,0,E/l[0]**3.*x[3] + E/l[0]**3.*x[4]))
-    df.append((7,1,E/l[1]**3*x[4]))
-    df.append((7,2,-E/l[2]**3.*x[3] + E/l[2]**3.*x[4]))
-    df.append((7,3,k12/1e4))
-    df.append((7,4,k22/1e4))
-#
-    return f, df
 #
