@@ -33,8 +33,15 @@ def t2c(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
     sub.solve()
 #
+#   set up and solve the infeasibility problem
+#
+    if sub.solution.get_status()==3: 
+        sub.feasopt(sub.feasopt.all_constraints())
+        x_d[:]=0e0
+    else:
+        x_d[:]=-np.array(sub.solution.get_dual_values())
+#
     x=np.minimum(np.maximum(x_k+sub.solution.get_values(),d_l),d_u)
-    x_d[:]=-np.array(sub.solution.get_dual_values())
 #
     q_k = g.copy(); q_k[0]=q_k[0]+np.dot(dg[0],x-x_k)+np.dot(c_x[0]/2.,(x-x_k)**2.)
     for df in dg[1:]: q_k[df[0]+1]=q_k[df[0]+1]+df[2]*(x[df[1]]-x_k[df[1]])

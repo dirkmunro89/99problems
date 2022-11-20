@@ -32,9 +32,9 @@ def init(g):
     x_l[-4:] = -1.0
     x_u = np.ones(n,dtype=float)
     x_k = np.ones(n,dtype=float)
-    x_k[-4] = 1e-6
-    x_k[-3] = 1e-6
-    x_k[-2] = 1e-6
+    x_k[-4] = 1.
+    x_k[-3] = 1.
+    x_k[-2] = 1.
     x_k[-1] = 1.
 #
 #   Last constraint is the quaternion norm (equality)
@@ -57,7 +57,7 @@ def simu(n,m,x,aux,g):
 #
 #   x = [y,z,q]
 #
-    f[0] = np.sum(x[:t]*x[t:2*t]*aea)
+    f[0] = np.sum(x[:t]*x[t:2*t]*aea)/len(aea)
 #
     tmp = rrm.copy()
     tmp[:,0]=-2.*tmp[:,0]; tmp[:,1]=-2.*tmp[:,1]; tmp[:,2]= 2.*tmp[:,2]
@@ -67,8 +67,8 @@ def simu(n,m,x,aux,g):
     dfdk = tmp*dndk
     p = 3.
     for j in range(t):
-        df[0][j] = x[t+j]*aea[j]
-        df[0][t+j] = x[j]*aea[j]
+        df[0][j] = x[t+j]*aea[j]/len(aea)
+        df[0][t+j] = x[j]*aea[j]/len(aea)
         f[j+1] = -rrm[j,2] - x[j]**p
         df.append((j,j,-p*x[j]**(p-1.)))
         df.append((j,n-4,-dndr[j,2]))
@@ -103,7 +103,7 @@ def apar(n):
     enf='None'
 #       
     kmx=100
-    cnv=[1e-3,1e-3,1e3,1e-3,1e-3]
+    cnv=[1e-4,1e-4,1e4,1e-4,1e-4]
 #       
     return mov, asf, enf, kmx, cnv
 #

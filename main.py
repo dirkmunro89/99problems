@@ -27,9 +27,11 @@ def loop(init,apar,simu,caml,subs,g):
     [mov,asf,enf,kmx,cnv]=apar(n)
 #
     if g >= 0:
-        for i in range(n): x_k[i]=random.uniform(x_l[i]+.0*(x_u[i]-x_l[i]),x_u[i]-.0*(x_u[i]-x_l[i]))
+        for i in range(n): 
+            x_k[i]=random.uniform(x_l[i]+(x_u[i]-x_l[i]),x_u[i]-(x_u[i]-x_l[i]))
     if g == -9:
-        for i in range(n): x_k[i]=random.uniform(x_l[i]+.0*(x_u[i]-x_l[i]),x_u[i]-.0*(x_u[i]-x_l[i]))
+        for i in range(n): 
+            x_k[i]=random.uniform(x_l[i]+.0*(x_u[i]-x_l[i]),x_u[i]-.0*(x_u[i]-x_l[i]))
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
@@ -186,7 +188,7 @@ def fdck(simu,n,m,x_k,aux,g):
         x_k[i] += dx
         [fd,_] = simu(n,m,x_k,aux,g)
         x_k[i] = x0
-        scl = np.maximum(np.absolute(df0[0][i]),1e-6)
+        scl = 1.#np.maximum(np.absolute(df0[0][i]),1e-6)
         fdf=(fd[0]-f0[0])/dx
         err = np.absolute((fdf-df0[0][i])/scl)
         tmp='%6d %6d %14.7e % 14.7e %14.7e'% (0,i,fdf,df0[0][i],err)
@@ -204,7 +206,7 @@ def fdck(simu,n,m,x_k,aux,g):
         x_k[i] += dx
         [fd,_] = simu(n,m,x_k,aux,g)
         x_k[i] = x0
-        scl = np.maximum(np.absolute(df[2]),1e-6)
+        scl = 1.#np.maximum(np.absolute(df[2]),1e-6)
         fdf=(fd[j+1]-f0[j+1])/dx
         err = np.absolute((fdf-df[2])/scl)
         tmp='%6d %6d %14.7e % 14.7e %14.7e'%(j,i,fdf,df[2],err)
