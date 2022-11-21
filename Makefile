@@ -21,16 +21,16 @@ docs:
 
 .PHONY: clean
 clean:
-	rm -f *.log
-	rm -f *.npz
-	rm -f *.png
-	rm -f *.tex
-	rm -f *.aux
-	rm -f *.dat
-	rm -f *.eps
-	rm -f *.pdf
-	rm -f *.pgf
-	rm -f *.vtp
+	-mv  *.log ./trsh/ 
+	-mv  *.npz ./trsh/ 
+	-mv  *.png ./trsh/
+	-mv  *.tex ./trsh/
+	-mv  *.aux ./trsh/
+	-mv  *.dat ./trsh/
+	-mv  *.eps ./trsh/
+	-mv  *.pdf ./trsh/
+	-mv  *.pgf ./trsh/
+	-mv  *.vtp ./trsh/
 
 .PHONY: docsclean
 docsclean:

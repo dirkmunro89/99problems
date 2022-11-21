@@ -196,6 +196,48 @@ def mods(prob):
         from prob.pNtop_mech_enf2a import simu
         from prob.pNtop_mech_enf2a import caml
         from prob.pNtop_mech_enf2a import subs
+    elif prob == 'Ntop_thme_enf1a': # t2ar c-a 
+        from prob.pNtop_thme_enf1a import init
+        from prob.pNtop_thme_enf1a import apar
+        from prob.pNtop_thme_enf1a import simu
+        from prob.pNtop_thme_enf1a import caml
+        from prob.pNtop_thme_enf1a import subs
+    elif prob == 'Ntop_thme_enf2a': # t2ar c-a 
+        from prob.pNtop_thme_enf2a import init
+        from prob.pNtop_thme_enf2a import apar
+        from prob.pNtop_thme_enf2a import simu
+        from prob.pNtop_thme_enf2a import caml
+        from prob.pNtop_thme_enf2a import subs
+    elif prob == 'Ntop_thme_enf3a': # t2ar c-a 
+        from prob.pNtop_thme_enf3a import init
+        from prob.pNtop_thme_enf3a import apar
+        from prob.pNtop_thme_enf3a import simu
+        from prob.pNtop_thme_enf3a import caml
+        from prob.pNtop_thme_enf3a import subs
+    elif prob == 'Ntop_thme_enf4a': # t2ar c-a 
+        from prob.pNtop_thme_enf4a import init
+        from prob.pNtop_thme_enf4a import apar
+        from prob.pNtop_thme_enf4a import simu
+        from prob.pNtop_thme_enf4a import caml
+        from prob.pNtop_thme_enf4a import subs
+    elif prob == 'Ntop_thme_enf5a': # t2ar c-a 
+        from prob.pNtop_thme_enf5a import init
+        from prob.pNtop_thme_enf5a import apar
+        from prob.pNtop_thme_enf5a import simu
+        from prob.pNtop_thme_enf5a import caml
+        from prob.pNtop_thme_enf5a import subs
+    elif prob == 'Ntop_thme_enf6a': # t2ar c-a 
+        from prob.pNtop_thme_enf6a import init
+        from prob.pNtop_thme_enf6a import apar
+        from prob.pNtop_thme_enf6a import simu
+        from prob.pNtop_thme_enf6a import caml
+        from prob.pNtop_thme_enf6a import subs
+    elif prob == 'Ntop_thme_enf7a': # t2ar c-a 
+        from prob.pNtop_thme_enf7a import init
+        from prob.pNtop_thme_enf7a import apar
+        from prob.pNtop_thme_enf7a import simu
+        from prob.pNtop_thme_enf7a import caml
+        from prob.pNtop_thme_enf7a import subs
     elif prob == '1000wml_t2r_t2d':
         from prob.p1000wml_t2r import init
         from prob.p1000wml_t2r import apar

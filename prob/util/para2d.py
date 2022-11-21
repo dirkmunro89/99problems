@@ -4,7 +4,7 @@ import vtk
 from vtk.util import numpy_support
 import numpy as np
 #
-def para2d(nelx,nely,x,u,g,s):
+def para2d(nelx,nely,x,u,s):
 #
     n_nds=(nelx+1)*(nely+1)
     n_elm=nelx*nely
@@ -61,7 +61,7 @@ def para2d(nelx,nely,x,u,g,s):
     c=0
     while os.path.isfile('topo_%d.vtp'%c): c=c+1
     writer = vtk.vtkXMLPolyDataWriter()
-    writer.SetFileName('topo_%d.vtp'%c)
+    writer.SetFileName('topo_%d.vtp'%0)
     writer.SetInputData(ply)
     writer.Write()
 #
