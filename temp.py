@@ -14,7 +14,7 @@ spec.loader.exec_module(orien)
 def init(g):
 #
 #   Run init from RECIPE module
-    [ply,nrm,aea,fln]=orien.orien_init("/home/dirk/RECIPE/knap/cone.stl")
+    [ply,nrm,aea,fln]=orien.orien_init("/home/dirk/RECIPE/knap/stl/dunny.stl")
 #
     t=len(aea)
 #
@@ -28,14 +28,18 @@ def init(g):
     m = 2*t + 1
 #
 #   Indicator variables, followed by 4 quaternion coefficients
-    x_l = np.ones(n,dtype=float)*1e-6
-    x_l[-4:] = -1.0
+    x_l = np.ones(n,dtype=float)*0.0
     x_u = np.ones(n,dtype=float)
-    x_k = np.ones(n,dtype=float)
-    x_k[-4] = 1.
-    x_k[-3] = 1.
-    x_k[-2] = 1.
-    x_k[-1] = 1.
+    x_k = np.ones(n,dtype=float)*0.5
+    x_l[-4:] = -1.
+#
+    x_k[-4] = 0.
+    x_k[-3] = 0.
+    x_k[-2] = 0.
+    x_k[-1] = 0.
+#
+    tmp=np.load('glob_48.npz')
+    x_k[:] = tmp['x_i']
 #
 #   Last constraint is the quaternion norm (equality)
     c_s = np.ones(m,dtype=int)
@@ -57,7 +61,7 @@ def simu(n,m,x,aux,g):
 #
 #   x = [y,z,q]
 #
-    f[0] = np.sum(x[:t]*x[t:2*t]*aea)/len(aea)
+    f[0] = np.sum(x[:t]*x[t:2*t]*aea)/np.sum(aea)
 #
     tmp = rrm.copy()
     tmp[:,0]=-2.*tmp[:,0]; tmp[:,1]=-2.*tmp[:,1]; tmp[:,2]= 2.*tmp[:,2]
@@ -65,10 +69,10 @@ def simu(n,m,x,aux,g):
     dfdi = tmp*dndi
     dfdj = tmp*dndj
     dfdk = tmp*dndk
-    p = 3.
+    p = 9.
     for j in range(t):
-        df[0][j] = x[t+j]*aea[j]/len(aea)
-        df[0][t+j] = x[j]*aea[j]/len(aea)
+        df[0][j] = x[t+j]*aea[j]/np.sum(aea)
+        df[0][t+j] = x[j]*aea[j]/np.sum(aea)
         f[j+1] = -rrm[j,2] - x[j]**p
         df.append((j,j,-p*x[j]**(p-1.)))
         df.append((j,n-4,-dndr[j,2]))
@@ -89,21 +93,26 @@ def simu(n,m,x,aux,g):
     df.append((m-1,n-2,2.*q[2]))
     df.append((m-1,n-1,2.*q[3]))
 #
-    orien.orien_outp(fln,ply,x,t,k)
-    k=k+1
-    aux[-1]=k
+    kt=aux[-1]
+    kt=kt+1
+    aux[-1]=kt
+    orien.orien_outp(fln,ply,x,t,kt)
+#
+    over=np.where(rrm[:,2]<0,1.0,0)*np.where(-rrm[:,2]>np.linalg.norm(rrm[:,:2],axis=1),1.0,0.)
+    fd=np.sum(over*aea)/np.sum(aea)
+    print('F: %14.7e Q: (%4.1f,%4.1f,%4.1f,%4.1f)'%(fd,q[0],q[1],q[2],q[3]))
 #
     return f, df
 #
 def apar(n):
 #
-    mov=0.1*np.ones(n)
+    mov=1.0*np.ones(n)
     asf=[0.7,1.1]
 #
     enf='None'
 #       
-    kmx=100
-    cnv=[1e-4,1e-4,1e4,1e-4,1e-4]
+    kmx=1000
+    cnv=[1e-3,1e-3,1e4,1e-6,1e-3]
 #       
     return mov, asf, enf, kmx, cnv
 #

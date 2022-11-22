@@ -28,14 +28,14 @@ def loop(init,apar,simu,caml,subs,g):
 #
     if g >= 0:
         for i in range(n): 
-            x_k[i]=random.uniform(x_l[i]+(x_u[i]-x_l[i]),x_u[i]-(x_u[i]-x_l[i]))
+            x_k[i]=random.uniform(x_l[i],x_u[i])
     if g == -9:
         for i in range(n): 
-            x_k[i]=random.uniform(x_l[i]+.0*(x_u[i]-x_l[i]),x_u[i]-.0*(x_u[i]-x_l[i]))
+            x_k[i]=random.uniform(x_l[i],x_u[i])
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
-    mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
+    mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*0e6
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=[np.zeros(n)]; f_1 = np.zeros(m+1)

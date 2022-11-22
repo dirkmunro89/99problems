@@ -37,7 +37,6 @@ def t2c(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
     if sub.solution.get_status()==3: 
         sub.feasopt(sub.feasopt.all_constraints())
-        x_d[:]=0e0
     else:
         x_d[:]=-np.array(sub.solution.get_dual_values())
 #
