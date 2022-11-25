@@ -38,7 +38,7 @@ def init(g):
     x_k[-2] = -1.
     x_k[-1] = 0.1
 #
-    tmp=np.load('glob_48.npz')
+    tmp=np.load('/home/dirk/RECIPE/knap/stl/glob_48.npz')
     x_k[:] = tmp['x_i']
 #
 #   Last constraint is the quaternion norm (equality)
