@@ -30,13 +30,13 @@ def init(g):
 #   Indicator variables, followed by 4 quaternion coefficients
     x_l = np.ones(n,dtype=float)*0.0
     x_u = np.ones(n,dtype=float)
-    x_k = np.ones(n,dtype=float)*0.5
+    x_k = np.ones(n,dtype=float)*1.0
     x_l[-4:] = -1.
 #
-    x_k[-4] = 0.
-    x_k[-3] = 0.
-    x_k[-2] = 0.
-    x_k[-1] = 0.
+    x_k[-4] = -0.1
+    x_k[-3] = 1.
+    x_k[-2] = -1.
+    x_k[-1] = 0.1
 #
     tmp=np.load('glob_48.npz')
     x_k[:] = tmp['x_i']
@@ -100,7 +100,7 @@ def simu(n,m,x,aux,g):
 #
     over=np.where(rrm[:,2]<0,1.0,0)*np.where(-rrm[:,2]>np.linalg.norm(rrm[:,:2],axis=1),1.0,0.)
     fd=np.sum(over*aea)/np.sum(aea)
-    print('F: %14.7e Q: (%4.1f,%4.1f,%4.1f,%4.1f)'%(fd,q[0],q[1],q[2],q[3]))
+#   print('F: %14.7e Q: (%4.1f,%4.1f,%4.1f,%4.1f)'%(fd,q[0],q[1],q[2],q[3]))
 #
     return f, df
 #

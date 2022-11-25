@@ -113,7 +113,7 @@ def loop(init,apar,simu,caml,subs,g):
         if k == 0: ti=to0
         else: 
             d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)
-            d_f0=abs((f_k[0]-f_1[0])/f_k[0])
+            d_f0=abs((f_k[0]-f_1[0])/max(f_k[0],1e-6))
         log.write('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e\n'%\
             (k,itr,inn,f_k[0],v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0)); log.flush()
         if not g > 0:

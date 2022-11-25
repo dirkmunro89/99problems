@@ -13,7 +13,7 @@ def t2d(n,m,x_k,x_d_k,d_l,d_u,g,dg,L,U,c_x,c_s):
         jac=dqp_dual,method='L-BFGS-B',bounds=tup_bds, \
         options={'disp':False,'gtol':1e-16,'ftol':1e-16,'maxls':100})
 #
-    if sol.status != 0 or sol.success != True: print('Warning; subproblem'); stop
+    if sol.status != 0 or sol.success != True: print('Warning; subproblem'); #stop
 #
     d=sol.x
     x=x_dual(d, n, m, x_k, g, dg, d_l, d_u, ddL)
