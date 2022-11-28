@@ -23,6 +23,8 @@ def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,qe
     KE=lk()
     DE=ld(l)
     SE=ls(E,nu,l,t)
+    print(np.dot(DE.transpose(),np.dot(SE,DE))-KE)
+    print( np.count_nonzero(np.absolute(KE-np.dot(DE.transpose(),np.dot(SE,DE))) >1e-12 ))
     stop
     edofMat=np.zeros((nelx*nely,8),dtype=int)
     for elx in range(nelx):
@@ -235,6 +237,8 @@ def ls(E,nu,l,t):
 #   for i in range(12):
 #       for j in range(12):
 #           print(i+1,j+1,SE[i][j])
+#
+    return SE
 #
 def ld(l):
     d=np.array([-np.sqrt(3e0)-1e0,-np.sqrt(3e0)+1e0,np.sqrt(3e0)-1e0,np.sqrt(3e0)+1e0])/np.sqrt(3)/2./l
