@@ -23,6 +23,13 @@ def test():
     assert pytest.approx(f0_ref, abs=1e-1) == f0
     assert pytest.approx(g_ref, abs=1e-3) == g
 #
+    f=main('Ntop_eoc_el')
+    f0=[itm[0] for itm in f]
+    g=[itm[1] for itm in f]
+#
+    assert pytest.approx(f0_ref, abs=1e-1) == f0
+    assert pytest.approx(g_ref, abs=1e-3) == g
+#
 if __name__ == "__main__":
     test()
 #
