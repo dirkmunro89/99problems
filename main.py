@@ -151,6 +151,7 @@ def loop(init,apar,simu,caml,subs,g):
         k=k+1
 #
     np.savetxt('x_str.log',x_k)
+    np.savetxt('d_str.log',x_d)
     [f_k,_] = simu(n,m,x_k,aux,g)
     if g > 0: 
         np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k); print("... exit %d"%g)
@@ -168,7 +169,7 @@ def fdck(simu,n,m,x_k,aux,g):
 #
     [f0,df0] = simu(n,m,x_k,aux,g)
 #
-    dx=1e-4
+    dx=1e-6
 #
     print("")
     print("Error in computed derivatives with respect to finite differences")

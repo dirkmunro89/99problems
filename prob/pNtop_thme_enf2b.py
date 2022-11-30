@@ -14,7 +14,7 @@ def apar(n):
     mov=1e-1*np.ones(n,dtype=float)
     asf=[0.7,1.2]
 #
-    enf='c-a'
+    enf='t-r'
 #
     kmx=1000
 #   inf(dX), Euc(dX), dF/F, inf(KKT), viol.
@@ -67,8 +67,8 @@ def init(g):
     # Set load
     frc=[(1,0)]
 #
-    pen = 1./2.
-    qen = 0.
+    pen = 3./10.
+    qen = 1./10.
     muc = 0e0
     Emin = 0e0; Emax=1e0
     gv=0.; bf=np.array([[0.],[gv],[0.],[gv],[0.],[gv],[0.],[gv]])

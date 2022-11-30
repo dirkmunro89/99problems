@@ -33,6 +33,7 @@ eggs/
 .eggs/
 lib/
 lib64/
+oneapi/
 parts/
 sdist/
 var/

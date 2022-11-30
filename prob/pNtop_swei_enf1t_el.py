@@ -83,7 +83,9 @@ def init(g):
     qen = 1.0
     muc = 1e-2
     Emin = 0e0; Emax=1.0
-    gv = [0.,-9.81/nelx/nely]
+    gv = -9.81/nelx/nely
+    bf=np.array([[0.],[gv],[0.],[gv],[0.],[gv],[0.],[gv]])
+    ei=np.array([[1.],[1.],[0.],[1.],[1.],[0.],[1.],[1.],[0.],[1.],[1.],[0.]])*0.
 #
     n = nelx*nely
     m = 1
@@ -91,7 +93,7 @@ def init(g):
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #
-    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,qen,muc,Emin,Emax,gv,g)
+    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,qen,muc,Emin,Emax,bf,ei,g)
 #
     c_s=np.ones(m)
 #

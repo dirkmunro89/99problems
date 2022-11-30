@@ -61,7 +61,7 @@ def para2d(nelx,nely,x,u,s):
     c=0
     while os.path.isfile('topo_%d.vtp'%c): c=c+1
     writer = vtk.vtkXMLPolyDataWriter()
-    writer.SetFileName('topo_%d.vtp'%0)
+    writer.SetFileName('topo_%d.vtp'%c)
     writer.SetInputData(ply)
     writer.Write()
 #

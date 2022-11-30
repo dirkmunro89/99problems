@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 import cvxopt; import cvxopt.cholmod
 #
 from prob.util.para2d import para2d
+from prob.util.simp import *
 #
-def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,qen,muc,Emin,Emax,gv,g):
+def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,qen,muc,Emin,Emax,bf,ei,g):
 #
     # dofs
     nelm=nelx*nely
@@ -80,15 +81,15 @@ def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,qe
     else:
         fig=0; im=0
 #
-    aux=[nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,qen,muc,Emin,Emax,gv,\
+    aux=[nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,qen,muc,Emin,Emax,bf,ei,\
         ndof,SE,DE,NE,H,Hs,iK,jK,edofMat,fixed,free,f,u,fig,im]
 #
     return aux
 #
-def xPena(muc,penal,xPhys):
-    return muc*xPhys + (1-muc)*xPhys**penal
-def dxPena(muc,penal,xPhys):
-    return muc + penal*(1-muc)*xPhys**(penal-1.)
+#ef xPena(muc,penal,xPhys):
+#   return muc*xPhys + (1-muc)*xPhys**penal
+#ef dxPena(muc,penal,xPhys):
+#   return muc + penal*(1-muc)*xPhys**(penal-1.)
 #
 def topo2d_simu(n,m,x,aux,vis):
 #
@@ -97,7 +98,7 @@ def topo2d_simu(n,m,x,aux,vis):
     xPhys=np.zeros(n,dtype=float)
     dv=np.ones(n,dtype=float)
 #
-    [nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,qen,muc,Emin,Emax,gv,\
+    [nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,pen,qen,muc,Emin,Emax,bf,ei,\
         ndof,SE,DE,NE,H,Hs,iK,jK,edofMat,fixed,free,f,u,fig,im]=aux
 #
     if np.count_nonzero(xPadd <= -1) != len(x):
@@ -118,8 +119,8 @@ def topo2d_simu(n,m,x,aux,vis):
         fig.canvas.flush_events()
         plt.savefig('topology.eps')
         tmp=np.flip(x.reshape((nelx,nely)).T,0)
-        tmp2=np.append(np.flip(tmp,1),tmp,axis=1)
-        np.savetxt("topology.dat",tmp2,fmt='%14.7f')
+#       tmp2=np.append(np.flip(tmp,1),tmp,axis=1)
+        np.savetxt("topology.dat",tmp,fmt='%14.7f')
     else:
         if vis > 0:
             fig,ax = plt.subplots()
@@ -131,7 +132,8 @@ def topo2d_simu(n,m,x,aux,vis):
     nelm=nelx*nely
     sK=np.zeros((nelm*64),dtype=float)
     fal = f.copy()
-    bf=np.array([[gv[0]],[gv[1]],[gv[0]],[gv[1]],[gv[0]],[gv[1]],[gv[0]],[gv[1]]])
+#   bf=np.array([[gv[0]],[gv[1]],[gv[0]],[gv[1]],[gv[0]],[gv[1]],[gv[0]],[gv[1]]])
+#   ei=np.array([[1.],[1.],[0.],[1.],[1.],[0.],[1.],[1.],[0.],[1.],[1.],[0.]])*0.
 #
 #   'assembly', slow if done in this way, of course, but wanting to maintain a vanilla 
 #   loop-based implenentation for going to C
@@ -140,7 +142,8 @@ def topo2d_simu(n,m,x,aux,vis):
         SP=SE*(Emin+xPena(muc,pen,xPhys[e])*(Emax-Emin))
         KE=np.dot(DE.T,np.dot(SP,DE))
         sK[64*e:64*(e+1)]=KE.flatten()
-        fal[edofMat[e]] = fal[edofMat[e]] + np.dot(NE,bf)*xPena(0.,qen,xPhys[e])
+        fal[edofMat[e]] = fal[edofMat[e]] + np.dot(NE.T,bf)*xPena(0.,qen,xPhys[e])
+        fal[edofMat[e]] = fal[edofMat[e]] + np.dot(DE.T,np.dot(SP,ei*xPena(0.,qen,xPhys[e])))
 #
     K = coo_matrix((sK,(iK,jK)),shape=(ndof,ndof)).tocsc()
     # Remove constrained dofs from matrix and convert to coo
@@ -158,19 +161,18 @@ def topo2d_simu(n,m,x,aux,vis):
     for e in range(nelm):
         SP=SE*(Emin+xPena(muc,pen,xPhys[e])*(Emax-Emin))
         eps=np.dot(DE,u[edofMat[e]])
-        ele=np.dot(eps.T,np.dot(SP,eps))[0][0]
+        obj=obj+np.dot(eps.T,np.dot(SP,eps))[0][0]
         ele0=np.dot(eps.T,np.dot(SE,eps))[0][0] # can also be done without redoing this
-        obj=obj+ele
-        tmp[e]=-ele0*dxPena(muc,pen,xPhys[e])
-        tmp[e]=tmp[e] + 2.*np.dot(u[edofMat[e]].T,np.dot(NE,bf))
+        tmp[e]=-ele0*dxPena(muc,pen,xPhys[e])*(Emax-Emin) \
+            + 2.*np.dot(u[edofMat[e]].T,np.dot(NE.T,bf))*dxPena(0.,qen,xPhys[e]) \
+            + 2.*np.dot(eps.T,np.dot(SP,ei))*dxPena(0.,qen,xPhys[e]) \
+            + 2.*np.dot(eps.T,np.dot(SE*dxPena(muc,pen,xPhys[e])*(Emax-Emin),ei*xPena(0.,qen,xPhys[e])))
+#
     dc[:] = tmp
     dv[:] = np.ones(nely*nelx)
-
-#   c=0
-#   while os.path.isfile('u_vec_%d.dat'%c): c=c+1
-#   np.savetxt('u_vec_%d.dat'%c, u[edofMat[:,[1,3,5,7]],0] )
-#   para2d(nelx,nely,x,u,gv,tmp)
-
+#
+#   para2d(nelx,nely,x,u,tmp)
+#
     # Sensitivity filtering:
     if ft==0:
         dc[:] = np.asarray((H*(x*dc))[np.newaxis].T/Hs)[:,0] / np.maximum(0.001,x)
@@ -241,6 +243,6 @@ def ln(l,t):
 #
     [n[1],   0., n[2],   0., n[1],   0., n[0],   0.],
     [  0., n[1],   0., n[2],   0., n[1],   0., n[0]],
-    ]).T;
+    ]);
 #
     return (NE)
