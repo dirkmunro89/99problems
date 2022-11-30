@@ -59,7 +59,7 @@ def init(g):
     qen =  0.0
     muc =  0.0
     Emin=1e-9; Emax=1.0
-    gv=0.#-9.81/nelx/nely
+    gv=np.array([0.,0.])#-9.81/nelx/nely
 #
     n = nelx*nely
     m = 1
