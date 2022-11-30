@@ -131,7 +131,7 @@ def topo2d_simu(n,m,x,aux,vis):
     nelm=nelx*nely
     sK=np.zeros((nelm*64),dtype=float)
     fal = f.copy()
-    bf=np.array([[0.],[gv],[0.],[gv],[0.],[gv],[0.],[gv]])
+    bf=np.array([[gv[0]],[gv[1]],[gv[0]],[gv[1]],[gv[0]],[gv[1]],[gv[0]],[gv[1]]])
 #
 #   'assembly', slow if done in this way, of course, but wanting to maintain a vanilla 
 #   loop-based implenentation for going to C
