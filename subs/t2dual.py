@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.optimize import minimize
 #
-def t2d(n,m,x_k,x_d_k,d_l,d_u,g,dg,L,U,c_x,c_s):
+def t2d(n,m,x_k,x_t,x_d_k,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
     bds=[[1e-6,1e6] for i in range(m)]; tup_bds=tuple(bds)
     sol=minimize(qpq_dual,x_d_k.copy(),args=(n,m,x_k,g,dg,d_l,d_u,c_x), \
@@ -18,7 +18,7 @@ def t2d(n,m,x_k,x_d_k,d_l,d_u,g,dg,L,U,c_x,c_s):
     for df in dg[1:]: q_k[df[0]+1]=q_k[df[0]+1]+df[2]*(x[df[1]]-x_k[df[1]])
     for c in c_x[1:]: q_k[c[0]+1]=q_k[c[0]+1]+c[2]/2.*(x[c[1]]-x_k[c[1]])**2.
 #
-    return x,d,q_k
+    return x,d,q_k,1
 #
 # QPQC: x in terms of dual variables 
 #

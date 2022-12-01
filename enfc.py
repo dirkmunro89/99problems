@@ -20,7 +20,7 @@ class Enfc:
         if f_k < f_1 and max(g_k[1:]) < 1e-6: return True
         # if conservative
         else:
-            if np.any( (np.where(np.amax(c_x,axis=1) > 0.,1,0)) * (np.where(q_k < g_k, 1, 0))):
+            if np.any(np.where(q_k < g_k, 1, 0)):
                 return False
             return True
 #

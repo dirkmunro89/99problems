@@ -17,25 +17,30 @@ def loop(init,apar,simu,caml,subs,g):
     if g > 0: print("Start %d .."%g); log = open('hist_%d.log'%g,'w')
     else: log = open('history.log','w')
 #
-    [n,m,x_l,x_u,x_k,c_s,aux]=init(g)
+    [n,m,x_l,x_u,x_k,x_t,x_d,c_s,aux]=init(g)
 #
     if np.count_nonzero(c_s==0) > 0 and \
         't2duel' not in inspect.getfile(subs) and \
+        't2milx' not in inspect.getfile(subs) and \
         't2cplx' not in inspect.getfile(subs):
         print('Error: equality constraints implemented in only t2d subsolver from t2duel.py'); sys.exit()
 #
     [mov,asf,enf,kmx,cnv]=apar(n)
 #
     if g >= 0:
-        for i in range(n): 
-            x_k[i]=random.uniform(x_l[i],x_u[i])
+        for i in range(n):
+            if x_t[i] == 'C':
+                x_k[i]=random.uniform(x_l[i],x_u[i])
+            else:
+                x_k[i]=round(random.uniform(x_l[i],x_u[i]))
+        np.savez_compressed('glob_%d.npz'%g, x_i=x_k);
     if g == -9:
         for i in range(n): 
             x_k[i]=random.uniform(x_l[i],x_u[i])
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
-    mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*0e6
+    sol=1; mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1 
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=[np.zeros(n)]; f_1 = np.zeros(m+1)
@@ -64,14 +69,16 @@ def loop(init,apar,simu,caml,subs,g):
         tf0=time.time()
         cont=True; test=' '
         if enf == 't-r':
-            if k == 0: enfc.par_add(f_k[0],v_k,k)
+            if k == 0 or sol == 0: 
+                enfc.par_add(f_k[0],v_k,k)
+                mov[:]=1.
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if cont:
-                    mov=mov*1.1
+                    mov=np.minimum(mov*1.1,1.)
                     enfc.par_add(f_k[0],v_k,k)
                 else:
-                    mov=stub.set_mov(0.5,x_l,x_u)
+                    mov=stub.set_mov(0.5,x_l,x_u,x_t)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get() #
         elif enf == 'c-a':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
@@ -115,10 +122,10 @@ def loop(init,apar,simu,caml,subs,g):
             d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)
             d_f0=abs((f_k[0]-f_1[0])/max(f_k[0],1e-6))
         log.write('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e\n'%\
-            (k,itr,inn,f_k[0],v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0)); log.flush()
+            (k,itr,inn,f_k[0],v_k,bdd,np.amin(mov),kkt,d_xi,d_xe,ts,to,ti-to0)); log.flush()
         if not g > 0:
             print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
-                (k,itr,inn,f_k[0],v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0))#,flush=True)
+                (k,itr,inn,f_k[0],v_k,bdd,np.amin(mov),kkt,d_xi,d_xe,ts,to,ti-to0))#,flush=True)
 #
         if k>1 and cont:
             if d_xi<cnv[0] and d_xe<cnv[1] and d_f0<cnv[2] and kkt<cnv[3] and v_k<cnv[4]:
@@ -140,14 +147,14 @@ def loop(init,apar,simu,caml,subs,g):
 #
         to0=time.time()
         if cont:
-            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,f_k,df_k,f_1,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov) #
+            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,x_t,f_k,df_k,f_1,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov) #
             mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
             if enf == 't-r' or enf == 'c-a' or enf == 'gcm': 
                 stub=Stub(x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x) #
         else: inn=inn+1; k=k-1
 #
-        x_0[:]=x_k 
-        [x,d,q_k] = subs(n,m,x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x,c_s) #
+        x_0[:]=x_k
+        [x,d,q_k,sol] = subs(n,m,x_k,x_t,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x,c_s) #
         x_k[:]=x; x_d[:]=d
         to1=time.time(); to=to1-to0; ti=time.time()
 #
@@ -156,6 +163,7 @@ def loop(init,apar,simu,caml,subs,g):
         k=k+1
 #
     np.savetxt('x_str.log',x_k)
+    np.savetxt('d_str.log',x_d)
     np.savetxt('f_str.log',f_k)
     [f_k,_] = simu(n,m,x_k,aux,g)
     if g > 0: 
@@ -237,7 +245,7 @@ if __name__ == "__main__":
 #   X to do X random multi-starts
 #
     gmx=0
-    pus=0
+    pus=1
     fdc=0
 #
     if fdc:         #check finite differences

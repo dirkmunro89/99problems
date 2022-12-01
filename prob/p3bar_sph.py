@@ -9,12 +9,14 @@ def init(g):
     x_l = np.array([0., 0., 0.,-1.,-1.])
     x_u = np.array([1., 1., 1., 1., 1.])
     x_k = np.array([.5, .5, .5, 0., 0.])
+    x_t="C"*n
 #
     c_s = np.array([1,1,1,1,1,1,0,0]) # constraint sense, one is inequality
+    x_d = np.ones(m,dtype=float)*1e6
 #
     aux=[]
 #
-    return n,m,x_l,x_u,x_k,c_s,aux
+    return n,m,x_l,x_u,x_k,x_t,x_d,c_s,aux
 #
 def apar(n):
 #   
@@ -28,7 +30,7 @@ def apar(n):
 #       
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, x_t, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=[np.ones_like(x_k)]
     if k > 0:

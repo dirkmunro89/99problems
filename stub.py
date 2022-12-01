@@ -15,8 +15,12 @@ class Stub:
         self._U_k = U_k.copy()
         self._c_x = c_x.copy()
 #   change the move limit and bounds of the current instantiation
-    def set_mov(self,fct,x_l,x_u):
-        mov=self._mov.copy()*fct
+    def set_mov(self,fct,x_l,x_u,x_t):
+        mov=self._mov.copy()
+        c=0
+        for t in x_t:
+            if t == 'C': mov[c]=mov[c]*fct
+            c=c+1
         self._d_l = np.maximum(self._x_k-mov*(x_u-x_l),x_l)
         self._d_u = np.minimum(self._x_k+mov*(x_u-x_l),x_u)
         self._mov=mov.copy()
@@ -24,8 +28,9 @@ class Stub:
 #   set new curvatures for old problem, and return them 
 #   (because cont is false, caml update is not done, so curvatures are taken from loop)
     def set_crv(self,fct,g_k,q_k):
+#       print('ERROR: needs be implemented nicely in sparse setting')
         c_x=self._c_x.copy()
-        c_x=c_x*np.where(q_k < g_k, fct , 1.)[:, np.newaxis]
+        c_x[0]=c_x[0]*fct
         self._c_x = c_x.copy()
         return c_x
     def set_rho(self,c_x,f_k,q_k,x_k,x_0,L_k,U_k,x_u,x_l):

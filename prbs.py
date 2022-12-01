@@ -55,6 +55,18 @@ def mods(prob):
         from prob.pDunny_0 import simu
         from prob.pDunny_0 import caml
         from subs.t2cplx import t2c as subs
+    elif prob == 'Dunny_1':
+        from prob.pDunny_1 import init
+        from prob.pDunny_1 import apar
+        from prob.pDunny_1 import simu
+        from prob.pDunny_1 import caml
+        from subs.t2cplx import t2c as subs
+    elif prob == 'Dunny_2':
+        from prob.pDunny_2 import init
+        from prob.pDunny_2 import apar
+        from prob.pDunny_2 import simu
+        from prob.pDunny_2 import caml
+        from subs.t2milx import t2c as subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init

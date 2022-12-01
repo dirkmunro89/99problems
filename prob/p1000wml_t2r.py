@@ -8,12 +8,14 @@ def init(g):
     x_k = 1e-5 * np.ones((n), dtype=float)
     x_l = 1e-6 * np.ones_like(x_k)
     x_u = 1e6 * np.ones_like(x_k)
+    x_t = "C"*n
 #
     aux=[]
 #
     c_s=np.ones(m)
+    x_d=np.ones(m,dtype=float)*1e6
 #
-    return n,m,x_l,x_u,x_k,c_s,aux
+    return n,m,x_l,x_u,x_k,x_t,x_d,c_s,aux
 #
 def apar(n):
 #   
@@ -27,7 +29,7 @@ def apar(n):
 #       
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, x_t, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=[0e0*np.absolute(df_k[0])/x_k]
     for df in df_k[1:]: c_x.append((df[0],df[1],2e0*np.absolute(df[2])/x_k[df[1]]))

@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.optimize import minimize
 #
-def t2d(n,m,x_k,x_d_k,d_l,d_u,g,dg,L,U,c_x,c_s):
+def t2d(n,m,x_k,x_t,x_d_k,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
     ddL = c_x[0].copy()
     for c in c_x[1:]: ddL[c[1]]=ddL[c[1]]+ x_d_k[c[0]]*c[2]
@@ -22,7 +22,7 @@ def t2d(n,m,x_k,x_d_k,d_l,d_u,g,dg,L,U,c_x,c_s):
     for df in dg[1:]: q_k[df[0]+1]=q_k[df[0]+1]+df[2]*(x[df[1]]-x_k[df[1]])
     for c in c_x[1:]: q_k[c[0]+1]=q_k[c[0]+1]+c[2]/2.*(x[c[1]]-x_k[c[1]])**2.
 #
-    return x,d,q_k
+    return x,d,q_k,1
 #
 # QP: x in terms of dual variables 
 #

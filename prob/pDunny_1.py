@@ -1,7 +1,7 @@
 #
 import numpy as np
 import importlib.util
-from subs.t2milx import t2c as subs
+from subs.t2cplx import t2c as subs
 #from subs.t2duel import t2d as subs
 #from prob.util.orien import orien_init
 #from prob.util.orien import orien_simu
@@ -31,27 +31,25 @@ def init(g):
     x_l = np.ones(n,dtype=float)*0.
     x_u = np.ones(n,dtype=float)
     x_k = np.ones(n,dtype=float)*1.
-    x_t = "I"*t+"C"*4
     x_l[-4:] = -1.
 #
-    x_k[-4] = 1.
-    x_k[-3] = 1.
-    x_k[-2] = 1.
-    x_k[-1] = 1.
+    x_k[-4] = 0.74
+    x_k[-3] = 0.09
+    x_k[-2] = -0.39
+    x_k[-1] = -0.53
 #
-    tmp=np.load('./glob_19.npz')
+#   tmp=np.load('./glob_81.npz')
 #   tmp=np.load('/home/dirk/RECIPE/knap/stl/glob_48.npz')
-    x_k[:] = tmp['x_i']
+#   x_k[:] = tmp['x_i']
 #
 #   Last constraint is the quaternion norm (equality)
     c_s = np.ones(m,dtype=int)
     c_s[-1] = 0
-    x_d = np.ones(m,dtype=float)*1e6
 #
 #   Pack data returned from init into aux
     aux=[ply,nrm,aea,t,fln,0]
 #
-    return n,m,x_l,x_u,x_k,x_t,x_d,c_s,aux
+    return n,m,x_l,x_u,x_k,c_s,aux
 #
 def simu(n,m,x,aux,g):
 #
@@ -72,19 +70,15 @@ def simu(n,m,x,aux,g):
     dfdi = tmp*dndi
     dfdj = tmp*dndj
     dfdk = tmp*dndk
-#
-#   build direction
-    b = np.array([0.,0.,1.]); b=b/np.linalg.norm(b)
-#   minimum allowable normal component projected unto / with respect to build direction (always negative)
-    a = np.cos(135/180*np.pi)
+    p = 2.
     for j in range(t):
         df[0][j] = aea[j]/np.sum(aea)
-        f[j+1] =  np.dot(b,rrm[j])/a - 1. + (1./a+1.)*x[j]
-        df.append((j,j,(1./a+1.)))
-        df.append((j,n-4,np.dot(b,dndr[j])/a))
-        df.append((j,n-3,np.dot(b,dndi[j])/a))
-        df.append((j,n-2,np.dot(b,dndj[j])/a))
-        df.append((j,n-1,np.dot(b,dndk[j])/a))
+        f[j+1] = -rrm[j,2] - 1./np.sqrt(2) - (1.-1./np.sqrt(2))*x[j]**p
+        df.append((j,j,-p*(1.-1./np.sqrt(2))*x[j]**(p-1.)))
+        df.append((j,n-4,-dndr[j,2]))
+        df.append((j,n-3,-dndi[j,2]))
+        df.append((j,n-2,-dndj[j,2]))
+        df.append((j,n-1,-dndk[j,2]))
 #
 #   unit quaternion constraint and derivative terms
     f[-1] = q[0]**2. + q[1]**2. + q[2]**2. + q[3]**2. - 1.0
@@ -100,7 +94,7 @@ def simu(n,m,x,aux,g):
 #
 #   over=np.where(rrm[:,2]<-1./np.sqrt(2),1.0,0)
 #   fd=np.sum(over*aea)/np.sum(aea)
-#   print('F: %14.7e Q: (%4.1e,%4.1e,%4.1e,%4.1e)'%(fd,q[0],q[1],q[2],q[3]))
+#   print('F: %14.7e Q: (%4.1f,%4.1f,%4.1f,%4.1f)'%(fd,q[0],q[1],q[2],q[3]))
 #
     return f, df
 #
@@ -109,32 +103,29 @@ def apar(n):
     mov=1.0*np.ones(n)
     asf=[0.7,1.1]
 #
-    enf='t-r'
+    enf='None'
 #       
     kmx=1000
     cnv=[1e-3,1e-3,1e4,1e-6,1e-3]
 #       
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, x_t, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=[np.zeros_like(x_k)]
-#   if k > 0:
-#       sph = f_1 - f_k
-#       sph[0]=sph[0]-np.dot(df_k[0],x_1-x_k)
-#       for df in df_k[1:]: sph[df[0]+1]=sph[df[0]+1]-df[2]*(x_1[df[1]]-x_k[df[1]])
-#       sph=2.*sph/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
-#       c_x[0]=np.maximum(c_x[0]*sph[0],1e-6)
-#       for j in range(len(f_k)-1):
-#           for i in range(len(x_k)):
-#               c_x.append((j,i,sph[j+1]))
-#   else:
-#       for j in range(len(f_k)-1):
-#   j=len(f_k)-2
-#   c_x.append((j,len(x_k)-1,2.))
-#   c_x.append((j,len(x_k)-2,2.))
-#   c_x.append((j,len(x_k)-3,2.))
-#   c_x.append((j,len(x_k)-4,2.))
+    c_x=[np.ones_like(x_k)]
+    if k > 0:
+        sph = f_1 - f_k
+        sph[0]=sph[0]-np.dot(df_k[0],x_1-x_k)
+        for df in df_k[1:]: sph[df[0]+1]=sph[df[0]+1]-df[2]*(x_1[df[1]]-x_k[df[1]])
+        sph=2.*sph/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
+        c_x[0]=c_x[0]*sph[0]
+        for j in range(len(f_k)-1):
+            for i in range(len(x_k)):
+                c_x.append((j,i,sph[j+1]))
+    else:
+        for j in range(len(f_k)-1):
+            for i in range(len(x_k)):
+                c_x.append((j,i,1.))
 #
     d_l= np.maximum(x_l, x_k-mov*(x_u-x_l))
     d_u= np.minimum(x_u, x_k+mov*(x_u-x_l))
