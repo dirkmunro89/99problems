@@ -32,6 +32,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+oneapi/
 lib64/
 parts/
 sdist/

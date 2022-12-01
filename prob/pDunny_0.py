@@ -19,28 +19,27 @@ def init(g):
     t=len(aea)
 #
 #   Number of variables is 4 quaternion coefficients (put them at the end), 
-#   and then an additional 'slack' variable per triangle which serves as an overhang indicator
+#   and then an additional 2 per triangle (one for down indicator, and one for overhanging indicator)
 #   the length of the array of triangle areas is thus used
-    n = t + 4
+    n = 2*t + 4
 #
-#   The number of constraints is 1 per triangle; one to set the overhanging indicator; 
-#   plus one more to constrain the quaternion coefficients to length 1
-    m = t + 1
+#   The number of constraints is 2 per triangle; one to set the down indicator, and one to set the 
+#   overhanging indicator; plus one more to constrain the quaternion coefficients to length 1
+    m = 2*t + 1
 #
 #   Indicator variables, followed by 4 quaternion coefficients
-    x_l = np.ones(n,dtype=float)*0.
+    x_l = np.ones(n,dtype=float)*0.0
     x_u = np.ones(n,dtype=float)
-    x_k = np.ones(n,dtype=float)*1.
+    x_k = np.ones(n,dtype=float)*1.0
     x_l[-4:] = -1.
 #
-    x_k[-4] = 0.74
-    x_k[-3] = 0.09
-    x_k[-2] = -0.39
-    x_k[-1] = -0.53
+    x_k[-4] = -0.1
+    x_k[-3] = 1.
+    x_k[-2] = -1.
+    x_k[-1] = 0.1
 #
-#   tmp=np.load('./glob_81.npz')
-#   tmp=np.load('/home/dirk/RECIPE/knap/stl/glob_48.npz')
-#   x_k[:] = tmp['x_i']
+    tmp=np.load('/home/dirk/RECIPE/knap/stl/glob_48.npz')
+    x_k[:] = tmp['x_i']
 #
 #   Last constraint is the quaternion norm (equality)
     c_s = np.ones(m,dtype=int)
@@ -60,9 +59,9 @@ def simu(n,m,x,aux,g):
     [ply,nrm,aea,t,fln,k]=aux
     [rrm,dndr,dndi,dndj,dndk]=orien.orien_simu(q,nrm)
 #
-#   x = [y,q]
+#   x = [y,z,q]
 #
-    f[0] = np.sum(x[:t]*aea)/np.sum(aea)
+    f[0] = np.sum(x[:t]*x[t:2*t]*aea)/np.sum(aea)
 #
     tmp = rrm.copy()
     tmp[:,0]=-2.*tmp[:,0]; tmp[:,1]=-2.*tmp[:,1]; tmp[:,2]= 2.*tmp[:,2]
@@ -70,15 +69,22 @@ def simu(n,m,x,aux,g):
     dfdi = tmp*dndi
     dfdj = tmp*dndj
     dfdk = tmp*dndk
-    p = 2.
+    p = 9.
     for j in range(t):
-        df[0][j] = aea[j]/np.sum(aea)
-        f[j+1] = -rrm[j,2] - 1./np.sqrt(2) - (1.-1./np.sqrt(2))*x[j]**p
-        df.append((j,j,-p*(1.-1./np.sqrt(2))*x[j]**(p-1.)))
+        df[0][j] = x[t+j]*aea[j]/np.sum(aea)
+        df[0][t+j] = x[j]*aea[j]/np.sum(aea)
+        f[j+1] = -rrm[j,2] - x[j]**p
+        df.append((j,j,-p*x[j]**(p-1.)))
         df.append((j,n-4,-dndr[j,2]))
         df.append((j,n-3,-dndi[j,2]))
         df.append((j,n-2,-dndj[j,2]))
         df.append((j,n-1,-dndk[j,2]))
+        f[t+j+1] = rrm[j,2]**2. - rrm[j,1]**2. - rrm[j,0]**2. - x[t+j]**p
+        df.append((t+j,t+j,-p*x[t+j]**(p-1.)))
+        df.append((t+j,n-4, 2.*rrm[j,2]*dndr[j,2]-2.*rrm[j,1]*dndr[j,1]-2.*rrm[j,0]*dndr[j,0]))
+        df.append((t+j,n-3, 2.*rrm[j,2]*dndi[j,2]-2.*rrm[j,1]*dndi[j,1]-2.*rrm[j,0]*dndi[j,0]))
+        df.append((t+j,n-2, 2.*rrm[j,2]*dndj[j,2]-2.*rrm[j,1]*dndj[j,1]-2.*rrm[j,0]*dndj[j,0]))
+        df.append((t+j,n-1, 2.*rrm[j,2]*dndk[j,2]-2.*rrm[j,1]*dndk[j,1]-2.*rrm[j,0]*dndk[j,0]))
 #
 #   unit quaternion constraint and derivative terms
     f[-1] = q[0]**2. + q[1]**2. + q[2]**2. + q[3]**2. - 1.0
@@ -92,8 +98,8 @@ def simu(n,m,x,aux,g):
     aux[-1]=kt
     orien.orien_outp(fln,ply,x,t,kt)
 #
-#   over=np.where(rrm[:,2]<-1./np.sqrt(2),1.0,0)
-#   fd=np.sum(over*aea)/np.sum(aea)
+    over=np.where(rrm[:,2]<0,1.0,0)*np.where(-rrm[:,2]>np.linalg.norm(rrm[:,:2],axis=1),1.0,0.)
+    fd=np.sum(over*aea)/np.sum(aea)
 #   print('F: %14.7e Q: (%4.1f,%4.1f,%4.1f,%4.1f)'%(fd,q[0],q[1],q[2],q[3]))
 #
     return f, df
