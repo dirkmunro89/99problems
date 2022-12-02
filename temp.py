@@ -7,14 +7,18 @@ from subs.t2milx import t2c as subs
 #from prob.util.orien import orien_simu
 #from prob.util.orien import orien_outp
 #
-spec=importlib.util.spec_from_file_location("orien", "/home/dirk/RECIPE/knap/orien.py")
+spec=importlib.util.spec_from_file_location("orien", "/home/dirk/RECIPE/knap/orien_suppt.py")
 orien = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(orien)
 #
 def init(g):
 #
 #   Run init from RECIPE module
-    [ply,nrm,aea,fln]=orien.orien_init("/home/dirk/RECIPE/knap/stl/dunny.stl")
+    [ply,nrm,aea,cen,nog,fln]=orien.orien_init("/home/dirk/RECIPE/knap/stl/dunny.stl")
+#
+#   what to do here...? Get furthest point from COG, think of a sphere that goes around that point
+#   to determine base-plate distance. maybe move cog so that that is zero. then the absolute z 
+#   component is my distance to the baseplate
 #
     t=len(aea)
 #
@@ -49,7 +53,7 @@ def init(g):
     x_d = np.ones(m,dtype=float)*1e6
 #
 #   Pack data returned from init into aux
-    aux=[ply,nrm,aea,t,fln,0]
+    aux=[ply,nrm,aea,cen,nog,t,fln,0]
 #
     return n,m,x_l,x_u,x_k,x_t,x_d,c_s,aux
 #
@@ -59,7 +63,7 @@ def simu(n,m,x,aux,g):
     df = [np.zeros(n,dtype=float)]
 #
     q = x[-4:].copy()
-    [ply,nrm,aea,t,fln,k]=aux
+    [ply,nrm,aea,cen,nog,t,fln,0]=aux
     [rrm,dndr,dndi,dndj,dndk]=orien.orien_simu(q,nrm)
 #
 #   x = [y,q]
