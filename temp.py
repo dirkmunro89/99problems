@@ -14,16 +14,13 @@ spec.loader.exec_module(orien)
 def init(g):
 #
 #   Run init from RECIPE module
-    [ply,nrm,aea,cen,nog,fln]=orien.orien_init("/home/dirk/RECIPE/knap/stl/dunny.stl")
+    [ply,nrm,aea,cen,nog,fln]=orien.orien_init("/home/dirk/RECIPE/knap/stl/dunny.stl",0)
 #
-#   what to do here...? Get furthest point from COG, think of a sphere that goes around that point
-#   to determine base-plate distance. maybe move cog so that that is zero. then the absolute z 
-#   component is my distance to the baseplate
-#
+#   Number of triangles
     t=len(aea)
 #
 #   Number of variables is 4 quaternion coefficients (put them at the end), 
-#   and then an additional 'slack' variable per triangle which serves as an overhang indicator
+#   and then an additional integer 'slack' variable per triangle which serves as an overhang indicator
 #   the length of the array of triangle areas is thus used
     n = t + 4
 #
@@ -38,14 +35,14 @@ def init(g):
     x_t = "I"*t+"C"*4
     x_l[-4:] = -1.
 #
-    x_k[-4] = 1.
-    x_k[-3] = 1.
-    x_k[-2] = 1.
-    x_k[-1] = 1.
+    x_k[-4] = -0.60807596
+    x_k[-3] = 0.12336645
+    x_k[-2] = 0.55084492
+    x_k[-1] = -0.55820625
 #
-    tmp=np.load('./glob_19.npz')
+#   tmp=np.load('./glob_19.npz')
 #   tmp=np.load('/home/dirk/RECIPE/knap/stl/glob_48.npz')
-    x_k[:] = tmp['x_i']
+#   x_k[:] = tmp['x_i']
 #
 #   Last constraint is the quaternion norm (equality)
     c_s = np.ones(m,dtype=int)
@@ -62,33 +59,50 @@ def simu(n,m,x,aux,g):
     f = np.zeros((m + 1), dtype=float)
     df = [np.zeros(n,dtype=float)]
 #
+#   build direction
+    b = np.array([0.,0.,1.]); b=b/np.linalg.norm(b)
+#
     q = x[-4:].copy()
-    [ply,nrm,aea,cen,nog,t,fln,0]=aux
-    [rrm,dndr,dndi,dndj,dndk]=orien.orien_simu(q,nrm)
+    [ply,nrm,aea,cen,nog,t,fln,k]=aux
+    [rrm,ren,dndr,dndi,dndj,dndk,dcdr,dcdi,dcdj,dcdk]=orien.orien_simu(q,nrm,cen-nog)
 #
 #   x = [y,q]
 #
-    f[0] = np.sum(x[:t]*aea)/np.sum(aea)
+#   x[:t]=np.where(rrm[:,2]<-1./np.sqrt(2),1,0)
 #
-    tmp = rrm.copy()
-    tmp[:,0]=-2.*tmp[:,0]; tmp[:,1]=-2.*tmp[:,1]; tmp[:,2]= 2.*tmp[:,2]
-    dfdr = tmp*dndr
-    dfdi = tmp*dndi
-    dfdj = tmp*dndj
-    dfdk = tmp*dndk
+    fs_a = np.sum(aea)
+    fs_b = np.sum(aea*(cen[:,2])*abs(nrm[:,2]))
+    f[0] = np.sum(x[:t]*aea)/fs_a
+    f[0] = f[0] + np.sum(x[:t]*aea*(-rrm[:,2])*(ren[:,2]+nog[2]))/fs_b
 #
-#   build direction
-    b = np.array([0.,0.,1.]); b=b/np.linalg.norm(b)
+#   tmp = rrm.copy()
+#   tmp[:,0]=-2.*tmp[:,0]; tmp[:,1]=-2.*tmp[:,1]; tmp[:,2]= 2.*tmp[:,2]
+#   dfdr = tmp*dndr
+#   dfdi = tmp*dndi
+#   dfdj = tmp*dndj
+#   dfdk = tmp*dndk
+#
 #   minimum allowable normal component projected unto / with respect to build direction (always negative)
     a = np.cos(135/180*np.pi)
     for j in range(t):
-        df[0][j] = aea[j]/np.sum(aea)
+#
+        df[0][j] = aea[j]/fs_a + aea[j]*(-rrm[j,2])*(ren[j,2]+nog[2])/fs_b
+#
         f[j+1] =  np.dot(b,rrm[j])/a - 1. + (1./a+1.)*x[j]
         df.append((j,j,(1./a+1.)))
         df.append((j,n-4,np.dot(b,dndr[j])/a))
         df.append((j,n-3,np.dot(b,dndi[j])/a))
         df.append((j,n-2,np.dot(b,dndj[j])/a))
         df.append((j,n-1,np.dot(b,dndk[j])/a))
+#
+    df[0][-4]=np.sum(x[:t]*aea*(-dndr[:,2])*(ren[:,2]+nog[2]) \
+        + x[:t]*aea*(-rrm[:,2])*(dcdr[:,2]))/fs_b
+    df[0][-3]=np.sum(x[:t]*aea*(-dndi[:,2])*(ren[:,2]+nog[2]) \
+        + x[:t]*aea*(-rrm[:,2])*( dcdi[:,2]))/fs_b
+    df[0][-2]=np.sum(x[:t]*aea*(-dndj[:,2])*(ren[:,2]+nog[2]) \
+        + x[:t]*aea*(-rrm[:,2])*( dcdj[:,2]))/fs_b
+    df[0][-1]=np.sum(x[:t]*aea*(-dndk[:,2])*(ren[:,2]+nog[2]) \
+        + x[:t]*aea*(-rrm[:,2])*( dcdk[:,2]))/fs_b
 #
 #   unit quaternion constraint and derivative terms
     f[-1] = q[0]**2. + q[1]**2. + q[2]**2. + q[3]**2. - 1.0
@@ -100,7 +114,7 @@ def simu(n,m,x,aux,g):
     kt=aux[-1]
     kt=kt+1
     aux[-1]=kt
-    orien.orien_outp(fln,ply,x,t,kt)
+#   orien.orien_outp(fln,ply,x,t,kt)
 #
 #   over=np.where(rrm[:,2]<-1./np.sqrt(2),1.0,0)
 #   fd=np.sum(over*aea)/np.sum(aea)
