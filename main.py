@@ -46,7 +46,7 @@ def loop(init,apar,simu,caml,subs,g):
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=[np.zeros(n)]; f_1 = np.zeros(m+1)
 #
     if g == -9: 
-        fdck(simu,n,m,x_k,aux,0)
+        fdck(simu,n,m,x_k,aux,-1)
         return
 #
     log.write(('%4s%3s%8s%12s%7s%5s%12s%8s%11s%6s%9s%9s\n')%\

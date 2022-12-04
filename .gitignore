@@ -14,7 +14,7 @@ __pycache__/
 
 
 /*.log
-
+*.stl
 *.so
 
 *.lprof

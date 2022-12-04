@@ -103,7 +103,7 @@ def apar(n):
     mov=1.0*np.ones(n)
     asf=[0.7,1.1]
 #
-    enf='None'
+    enf='t-r'
 #       
     kmx=1000
     cnv=[1e-3,1e-3,1e4,1e-6,1e-3]
