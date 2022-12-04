@@ -1,110 +1,114 @@
 #
 import numpy as np
-from subs.t2duel import t2d as subs
+from prob.util.topo2d_ei import topo2d_init
+from prob.util.topo2d_ei import topo2d_simu
 #
-def init(g):
+# specify subsolver here
 #
-    n = 5; m = 8
-#   3 areas followed by 2 displacements
-#   x_l = np.array([0.2357, 0.1, 0.2357,-1.0,-1.0])
-#   x_u = np.array([0.2357, 0.1, 0.2357, 1.0, 1.0])
-#   x_k = np.array([0.2357, 0.1, 0.2357, 0., 0.])
-    x_l = np.array([0.0, 0.0, 0.0,-1.0,-1.0])
-    x_u = np.array([1., 1., 1., 1.0, 1.0])
-    x_k = np.array([.5, .5, .5, 0., 0.])
+from subs.t2dual import t2d as subs
 #
-    c_s = np.array([1,1,1,1,1,1,0,0]) # constraint sense, one is inequality
-#
-    aux=[]
-#
-    return n,m,x_l,x_u,x_k,c_s,aux
+# specify problem and algorithmic parameters here
 #
 def apar(n):
 #   
-    mov=0.1*np.ones(n)
-    asf=[0.7,1.1]
+    mov=2e-1*np.ones(n,dtype=float)
+    asf=[0.5,1.5]
 #
-    enf='None'
-#       
+    enf='none'
+#
     kmx=1000
-    cnv=[1e-3,1e-3,1e3,1e-3,1e-3]
-#       
+    cnv=[1e-1,1e-1,1e-3,1e-3,1e-3]
+#
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.ones_like(df)
-    if k > 0:
-        sph = 2.*(f_1 - f_k - np.dot(df_k,(x_1-x_k)))/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
-        for j in range(len(f_k)): c_x[j]=sph[j]
+    c_x=2e0*np.absolute(df_k)/np.maximum(x_k,1e-6)
+    c_x[1:]=0e0
 #
-    d_l= np.maximum(x_l, x_k-mov*(x_u-x_l))
-    d_u= np.minimum(x_u, x_k+mov*(x_u-x_l))
+    c_x[0]=np.maximum(c_x[0],1e-6)
+#
+    if k>20000:
+        mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
+        mov=np.minimum(np.maximum(mov,1e-3),0.2)
 #
     L=L_k
     U=U_k
 #
+    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
+    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
+#
     return c_x,mov,L,U,d_l,d_u
 #
+def init(g):
+#
+    mm=3
+    nelx=80*mm
+    nely=10*mm
+    v_l = 0.1
+    v_0 = 0.4
+    v_u = 0.4
+#
+    ft = 1
+    rmin = 2.
+    dext=0#int(np.ceil(rmin))
+    felx = nelx+dext
+    fely = nely+2*dext
+#
+    xPadd=np.zeros((felx,fely),dtype=float)
+    tmp=-1*np.ones((nelx,nely),dtype=float)#.reshape(nelx,nely)
+    xPadd[:nelx,dext:fely-dext]=tmp
+    xPadd[nelx-dext:,nely+dext:]=1.
+    xPadd[nelx:,nely:nely+dext]=1.
+    xPadd=xPadd.flatten()
+#
+    # BC's and support
+    ndof=2*(nelx+1)*(nely+1)
+    dofs=np.arange(2*(nelx+1)*(nely+1))
+#
+    dely=2*(nely+1)
+    left = np.union1d(dofs[0:dely:2], dofs[1:dely:2])
+    right = np.union1d(dofs[ndof - dely:ndof:2],\
+        dofs[ndof - dely + 1:ndof:2])
+    fix = np.union1d(left, right)
+#
+#   fix=np.union1d(dofs[0:4:1], dofs[2*(nely+1)-1:2*(nely+1)-5:-1])
+#
+    pen = 3.0
+    qen = 1.0
+    muc = 1e-2
+    Emin = 1e-9; Emax=1.0
+    gv = 0.0/nelx/nely
+#
+    n = nelx*nely
+    m = 1
+    x_l = np.zeros(n,dtype=float)
+    x_u = np.ones(n,dtype=float)
+    x_k = v_0*np.ones(n,dtype=float)
+#
+    aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,pen,qen,muc,Emin,Emax,gv,g)
+#
+    c_s=np.ones(m)
+#
+    return n,m,x_l,x_u,x_k,c_s,aux
+#
 def simu(n,m,x,aux,g):
+#
+    v_l=aux[2]
+    v_u=aux[4]
 #
     f = np.zeros((m + 1), dtype=float)
     df = np.zeros((m + 1, n), dtype=float)
 #
-    E = 30e6
-    siy = 30e3
-    c=np.array([100.,0.,-100.])
-    l=np.sqrt(c**2. + 100.**2.)
-    sig = E*(-x[3]*c+100.*x[4])/l**2.
-    k11 = 100.**2.*E*(x[0]/l[0]**3. + x[2]/l[2]**3.)
-    k12 = -100.**2.*E*(-x[0]/l[0]**3. + x[2]/l[2]**3.)
-    k22 = 100.**2.*E*(x[0]/l[0]**3. + x[1]/l[1]**3. + x[2]/l[2]**3.)
+    [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0] = 0.29 * np.sum(l*x[:3])/10e0
-    f[1] = sig[0]/siy - 1.
-    f[2] = sig[1]/siy - 1.
-    f[3] = sig[2]/siy - 1.
-    f[4] =-sig[0]/siy - 1.
-    f[5] =-sig[1]/siy - 1.
-    f[6] =-sig[2]/siy - 1.
-    f[7] = k11*x[3]/10e3 + k12*x[4]/10e3 - 1.
-    f[8] = k12*x[3]/10e3 + k22*x[4]/10e3
+    f[0]=c#/2600#0
+    f[1]=v/n/v_u-1.
+#   f[2]=-v/n/v_l+1.
 #
-    df[0][0] = 0.29 * l[0]
-    df[0][1] = 0.29 * l[1]
-    df[0][2] = 0.29 * l[2]
-    df[0]=df[0]/10.
-#
-#   df[1][0] = -E*x[3]/l[0]**2./siy
-    df[1][3] = -E*c[0]/l[0]**2./siy
-    df[1][4] = E*100./l[0]**2./siy
-#
-#   df[2][1] = -E*x[3]/l[1]**2./siy
-    df[2][3] = -E*c[1]/l[1]**2./siy
-    df[2][4] = E*100./l[1]**2./siy
-#
-#   df[3][2] = -E*x[3]/l[2]**2./siy
-    df[3][3] = -E*c[2]/l[2]**2./siy
-    df[3][4] = E*100./l[2]**2./siy
-#
-    df[4]=-df[1]
-    df[5]=-df[2]
-    df[6]=-df[3]
-#
-    df[7][0] = 100.**2.*E/l[0]**3*x[3] + 100.**2*E/l[0]**3.*x[4]
-    df[7][1] = 0.
-    df[7][2] = 100.**2.*E/l[2]**3*x[3] - 100.**2*E/l[2]**3.*x[4]
-    df[7][3] = k11
-    df[7][4] = k12
-#
-    df[8][0] = 100.**2*E/l[0]**3.*x[3] + 100.**2*E/l[0]**3.*x[4]
-    df[8][1] = 100.**2.*E/l[1]**3*x[4]
-    df[8][2] = -100.**2.*E/l[2]**3.*x[3] + 100.**2.*E/l[2]**3.*x[4]
-    df[8][3] = k12
-    df[8][4] = k22
-#
-    df[7]=df[7]/10e3
-    df[8]=df[8]/10e3
+    df[0][:] = dc#/2600#0
+    df[1][:] = dv/n/v_u
+#   df[2][:] = -dv/n/v_l
 #
     return f, df
 #
