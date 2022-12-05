@@ -40,10 +40,11 @@ def init(g):
     x_l[-4:] = -1.
     x_u[-4:] = 1.
 #
-    x_k[-4] = 0.0
-    x_k[-3] = 0.0
-    x_k[-2] = 0.0
-    x_k[-1] = 0.0
+    x_k[-4] = -1e-6
+    x_k[-3] = -1e-6
+    x_k[-2] = -1e-6
+    x_k[-1] = 1e-6
+#   x_k[-4:]=np.array([-0.82075593, -0.33162381,  0.45697361,  0.08695103])
 #
 #   tmp=np.load('./glob_19.npz')
 #   tmp=np.load('/home/dirk/RECIPE/knap/stl/glob_48.npz')
@@ -113,8 +114,8 @@ def simu(n,m,x,aux,g):
     if g == 0:
         orien.orien_outp(fln+'_pos.vtp',x[-4:],kt)
 #
-#   ovr_srf=np.where(rrm[:,2]<-1./np.sqrt(2),aea,0)
-#   ovr_vol=np.where(rrm[:,2]<-1./np.sqrt(2),aea*(ren[:,2]+nog[2]), 0.)
+#   ovr_srf=np.where(rrm[:,2]<-1./np.sqrt(2)-1e-6,aea,0)
+#   ovr_vol=np.where(rrm[:,2]<-1./np.sqrt(2)-1e-6,aea*(ren[:,2]+nog[2]), 0.)
 #   scl=1.0
 #   fd= scl*np.sum(ovr_srf)/np.sum(aea)
 #   fd=fd+(scl)*np.sum(ovr_vol)/np.sum(aea*(cen[:,2]))
