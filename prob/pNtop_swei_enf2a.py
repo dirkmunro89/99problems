@@ -17,13 +17,13 @@ def apar(n):
     enf='c-a'
 #
     kmx=1000
-    cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
+    cnv=[1e-2,1e0,1e0,1e0,1e0]
 #       
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df_k)/np.maximum(x_k,1e-6)
+    c_x=-2e0*(df_k)/np.maximum(x_k,1e-6)
     c_x[1:]=0e0
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
@@ -42,7 +42,7 @@ def init(g):
     nelx=2*20*mm
     nely=20*mm
     v_l = 0.2
-    v_0 = 0.6
+    v_0 = 0.2
     v_u = 1.0
 #
     ft = 1
@@ -69,13 +69,13 @@ def init(g):
 #
     pen = 3.0
     qen = 1.0
-    muc = 1e-2
+    muc = 0.0
     Emin = 1e-9; Emax=1.0
-    gv = -9.81/nelx/nely
+    gv = -1.
 #
     n = nelx*nely
-    m = 2
-    x_l = np.ones(n,dtype=float)*0e-6
+    m = 1
+    x_l = np.ones(n,dtype=float)*0e0
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #
@@ -95,13 +95,11 @@ def simu(n,m,x,aux,g):
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0]=c/7200
-    f[1]=v/n/v_u-1.
-    f[2]=-v/n/v_l+1.
+    f[0]=c
+    f[1]=-v/n/v_l+1.
 #
-    df[0][:] = dc/7200
-    df[1][:] = dv/n/v_u
-    df[2][:] = -dv/n/v_l
+    df[0][:] = dc
+    df[1][:] = -dv/n/v_l
 #
     return f, df
 #

@@ -18,7 +18,7 @@ def apar(n):
 #
     kmx=1000
     cnv=[1e-2,1e0,1e0,1e0,1e0]
-#       
+#
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
@@ -52,15 +52,15 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 def init(g):
 #
     mm=3
-    nelx=2*20*mm
+    nelx=20*mm
     nely=20*mm
-    v_l = 0.2
-    v_0 = 0.2
+    v_l = 0.1
+    v_0 = 1.0
     v_u = 1.0
 #
     ft = 1
     rmin = 1.1*mm
-    dext=0#int(np.ceil(rmin))
+    dext=0
     felx = nelx+dext
     fely = nely+2*dext
 #
@@ -75,8 +75,7 @@ def init(g):
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
-
+#
     # Set load
     frc=[(1,0)]
 #

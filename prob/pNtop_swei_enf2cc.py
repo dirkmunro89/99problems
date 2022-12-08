@@ -5,7 +5,7 @@ from prob.util.topo2d import topo2d_simu
 #
 # specify subsolver here
 #
-from subs.mma02dual import mma02 as subs
+from subs.t2dual import t2d as subs
 #
 # specify problem and algorithmic parameters here
 #
@@ -23,29 +23,19 @@ def apar(n):
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.ones_like(df_k)*1e-6 
-    c_x[1:]=0e0
+    c_x=np.zeros_like(df_k)
+    c_x[0]=1e-6
 #
-    if k<=1:
-        L = x_k-0.5*(x_u-x_l)
-        U = x_k+0.5*(x_u-x_l)
-    else:
-        osc=(x_k-x_1)*(x_1-x_2)
-        fac=np.ones_like(x_k)
-        fac[np.where(osc>0)] = asf[1]
-        fac[np.where(osc<0)] = asf[0]
-        L=x_k-fac*(x_1-L_k)
-        U=x_k+fac*(U_k-x_1)
+    if k>2:
+        mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
 #
-    L_l = x_k - 10.*(x_u-x_l)
-    L_u = x_k - 0.01*(x_u-x_l)
-    U_l = x_k + 0.01*(x_u-x_l)
-    U_u = x_k + 10.*(x_u-x_l)
-    L=np.maximum(np.minimum(L, L_u), L_l)
-    U=np.minimum(np.maximum(U, U_l), U_u)
+    mov=np.minimum(np.maximum(mov,1e-6),.1)
 #
-    d_l = np.maximum(x_l, np.maximum(L + 0.1*(x_k-L), x_k - mov*(x_u-x_l)))
-    d_u = np.minimum(x_u, np.minimum(U - 0.1*(U-x_k), x_k + mov*(x_u-x_l)))
+    L=L_k
+    U=U_k
+#
+    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
+    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
 #
     return c_x,mov,L,U,d_l,d_u
 #
@@ -55,7 +45,7 @@ def init(g):
     nelx=2*20*mm
     nely=20*mm
     v_l = 0.2
-    v_0 = 0.2
+    v_0 = 1.0
     v_u = 1.0
 #
     ft = 1
@@ -65,7 +55,7 @@ def init(g):
     fely = nely+2*dext
 #
     xPadd=np.zeros((felx,fely),dtype=float)
-    tmp=-1*np.ones((nelx,nely),dtype=float)
+    tmp=-1*np.ones((nelx,nely),dtype=float)#.reshape(nelx,nely)
     xPadd[:nelx,dext:fely-dext]=tmp
     xPadd[nelx-dext:,nely+dext:]=1.
     xPadd[nelx:,nely:nely+dext]=1.

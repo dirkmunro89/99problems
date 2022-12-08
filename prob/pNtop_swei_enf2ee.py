@@ -5,7 +5,7 @@ from prob.util.topo2d import topo2d_simu
 #
 # specify subsolver here
 #
-from subs.mma02dual import mma02 as subs
+from subs.cma02dual import mma02 as subs
 #
 # specify problem and algorithmic parameters here
 #
@@ -14,7 +14,7 @@ def apar(n):
     mov=1e-1*np.ones(n,dtype=float)
     asf=[0.7,1.2]
 #
-    enf='none'
+    enf='gcm'
 #
     kmx=1000
     cnv=[1e-2,1e0,1e0,1e0,1e0]
@@ -23,8 +23,12 @@ def apar(n):
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=np.ones_like(df_k)*1e-6 
+    c_x=np.zeros_like(df_k)
     c_x[1:]=0e0
+#
+    for j in range(2):
+        c_x[j] = c_x[j] + np.sum(0.1/len(x_k)*np.absolute(df_k[j])*(x_u-x_l))
+        c_x[j]=np.maximum(c_x[j],1e-6)/(x_u-x_l)
 #
     if k<=1:
         L = x_k-0.5*(x_u-x_l)
@@ -44,8 +48,8 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     L=np.maximum(np.minimum(L, L_u), L_l)
     U=np.minimum(np.maximum(U, U_l), U_u)
 #
-    d_l = np.maximum(x_l, np.maximum(L + 0.1*(x_k-L), x_k - mov*(x_u-x_l)))
-    d_u = np.minimum(x_u, np.minimum(U - 0.1*(U-x_k), x_k + mov*(x_u-x_l)))
+    d_l = np.maximum(x_l, L + 0.1*(x_k-L))
+    d_u = np.minimum(x_u, U - 0.1*(U-x_k))
 #
     return c_x,mov,L,U,d_l,d_u
 #
@@ -55,12 +59,12 @@ def init(g):
     nelx=2*20*mm
     nely=20*mm
     v_l = 0.2
-    v_0 = 0.2
+    v_0 = 1.0
     v_u = 1.0
 #
     ft = 1
     rmin = 1.1*mm
-    dext=0#int(np.ceil(rmin))
+    dext=0
     felx = nelx+dext
     fely = nely+2*dext
 #

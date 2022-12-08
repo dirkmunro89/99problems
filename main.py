@@ -31,7 +31,7 @@ def loop(init,apar,simu,caml,subs,g):
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
-    mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
+    scl0=1.;mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n)); f_1 = np.zeros(m+1)
@@ -54,7 +54,10 @@ def loop(init,apar,simu,caml,subs,g):
         ts0=time.time()
         if k > 0: f_1 = f_k.copy(); df_1 = df_k.copy()
         [f_k,df_k] = simu(n,m,x_k,aux,0); tot=tot+1
-        v_k=np.maximum(np.amax(f_k[1:]*c_s),np.amax(np.absolute(f_k[1:]*(1-c_s))))
+        if k == 0: scl0=f_k[0]
+        f_k[0]=f_k[0]/scl0; df_k[0]=df_k[0]/scl0
+        v_k=np.maximum(np.amax(f_k[1:]*c_s),0.)
+        if 0 in c_s: v_k=np.maximum(np.amax(np.absolute(f_k[1:]*(1-c_s))),v_k)
         ts1=time.time(); ts=ts1-ts0
 #
         tf0=time.time()
@@ -64,7 +67,8 @@ def loop(init,apar,simu,caml,subs,g):
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if cont:
-                    mov=mov*1.1
+                    mov=mov*1.2
+                    mov=np.minimum(mov,mov0)
                     enfc.par_add(f_k[0],v_k,k)
                 else:
                     mov=stub.set_mov(0.5,x_l,x_u)
@@ -94,26 +98,29 @@ def loop(init,apar,simu,caml,subs,g):
             else: 
                 test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if test: enfc.par_add(f_k[0],v_k,k)
-        v_k=np.maximum(np.amax(f_k[1:]*c_s),np.amax(np.absolute(f_k[1:]*(1-c_s))))
         tf1=time.time(); tf=tf1-tf0
 #
         ti=time.time()
         if not str(test).strip(): itr=str(cont)[0]
         else: itr=str(test)[0]
-        h.append(list(f_k)); bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
+        tmp=f_k.copy(); tmp[0]=tmp[0]*scl0; h.append(list(tmp))
+        bdd=np.count_nonzero(x_k-x_l<1e-3)/n+np.count_nonzero(x_u-x_k<1e-3)/n
         bdd=bdd-np.count_nonzero(x_u-x_l<1e-3)/n
         ubd=np.where(x_k-x_l>1e-3,np.where(x_u-x_k>1e-3,1,0),0)
         kkt=np.linalg.norm((df_k[0] + np.dot(x_d,df_k[1:]))*ubd,np.inf)
+#
+        v_k=np.amax(f_k[1:]*c_s)
+        if 0 in c_s: v_k=np.maximum(np.amax(np.absolute(f_k[1:]*(1-c_s))),v_k)
 #
         if k == 0: ti=to0
         else: 
             d_xi=np.linalg.norm(x_k-x_0,np.inf); d_xe=np.linalg.norm(x_k-x_0)
             d_f0=abs((f_k[0]-f_1[0])/f_k[0])
         log.write('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e\n'%\
-            (k,itr,inn,f_k[0],v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0)); log.flush()
+            (k,itr,inn,f_k[0]*scl0,v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0)); log.flush()
         if not g > 0:
             print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
-                (k,itr,inn,f_k[0],v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0))#,flush=True)
+                (k,itr,inn,f_k[0]*scl0,v_k,bdd,np.amax(mov),kkt,d_xi,d_xe,ts,to,ti-to0))#,flush=True)
 #
         if k>1 and cont:
             if d_xi<cnv[0] and d_xe<cnv[1] and d_f0<cnv[2] and kkt<cnv[3] and v_k<cnv[4]:
@@ -150,6 +157,9 @@ def loop(init,apar,simu,caml,subs,g):
 #
         k=k+1
 #
+    f_k[0]=f_k[0]*scl0
+    df_k[0]=df_k[0]*scl0
+#
     np.savetxt('x_str.log',x_k)
     np.savetxt('d_str.log',x_d)
     [f_k,_] = simu(n,m,x_k,aux,g)
@@ -168,6 +178,8 @@ def fdck(simu,n,m,x_k,aux,g):
     df = np.zeros((m + 1, n), dtype=float)
 #
     [f0,df0] = simu(n,m,x_k,aux,g)
+    scl0=f0[0]
+    f0[0]=f0[0]/scl0; df0[0]=df0[0]/scl0
 #
     dx=1e-6
 #
@@ -181,6 +193,7 @@ def fdck(simu,n,m,x_k,aux,g):
         x0 = x_k[i]
         x_k[i] += dx
         [fd,_] = simu(n,m,x_k,aux,g)
+        fd[0]=fd[0]/scl0
         x_k[i] = x0
         df[:, i] = (fd - f0) / dx
         print("%10d "%i,end="")
