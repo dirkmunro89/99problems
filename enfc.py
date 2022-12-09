@@ -9,15 +9,15 @@ class Enfc:
 #
     def __init__(self):
         self.pf = []
-        self.sgma = 25e-2#9e-1
-        self.gama = 1e-1#5
+        self.sgma = 1e-1
+        self.gama = 0e0
         self.beta = 1.-self.gama
 #
     def con_pas(self,g_1,g_k,q_k,c_x):
         gama=self.gama
         f_k = g_k[0]; f_1 = g_1[0]
         # if feasible descent
-        if f_k < f_1 and max(g_k[1:]) < 1e-6: return True
+        if f_k < f_1 and max(g_k[1:]) < 1e-3: return True
         # if conservative
         else:
             if np.any( (np.where(np.amax(c_x,axis=1) > 0.,1,0)) * (np.where(q_k < g_k, 1, 0))):
@@ -26,7 +26,7 @@ class Enfc:
 #
     def gcm_pas(self,g_k,q_k):
         # if conservative
-        if np.any(np.where(q_k + 1e-7 < g_k, 1, 0)):
+        if np.any(np.where(q_k < g_k, 1, 0)):
             return False
         return True
 #
@@ -34,7 +34,7 @@ class Enfc:
         beta=self.beta; gama=self.gama
         sgma=self.sgma; pf=self.pf
         # check if acceptable to filter
-        if f_k+gama*max(v_k,0.)<min([p[0] for p in pf]) or v_k<beta*max(min([p[1] for p in pf]),0.):
+        if f_k+gama*v_k<min([p[0] for p in pf]) or v_k<beta*max(min([p[1] for p in pf]),0.):
             df = f_1 - f_k # actual descent
             dq = f_1 - p_k # descent in approximation function
             if df < sgma*dq and dq > 0.: # approx has descended / predicted a descent, 
