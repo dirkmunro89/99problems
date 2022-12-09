@@ -10,7 +10,7 @@ class Enfc:
     def __init__(self):
         self.pf = []
         self.sgma = 1e-1
-        self.gama = 0e0
+        self.gama = 1e-1
         self.beta = 1.-self.gama
 #
     def con_pas(self,g_1,g_k,q_k,c_x):
@@ -38,7 +38,7 @@ class Enfc:
             df = f_1 - f_k # actual descent
             dq = f_1 - p_k # descent in approximation function
             if df < sgma*dq and dq > 0.: # approx has descended / predicted a descent, 
-            #but decrease in actual obj is less than 1% of it; then something not cool, 
+            #but decrease in actual obj is less than 10% of it; then something not cool, 
             # (very non conservative) we restore, and try again
                 return False
             else: return True
