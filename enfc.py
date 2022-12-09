@@ -9,8 +9,9 @@ class Enfc:
 #
     def __init__(self):
         self.pf = []
-        self.sgma = 1e-1
-        self.gama = 1e-1
+        self.sgma = 1e-2
+        self.gama = 1e-4
+        self.kapa = 1e-4
         self.beta = 1.-self.gama
 #
     def con_pas(self,g_1,g_k,q_k,c_x):
@@ -31,13 +32,16 @@ class Enfc:
         return True
 #
     def par_pas(self,f_1,f_k,v_k,p_k):
-        beta=self.beta; gama=self.gama
-        sgma=self.sgma; pf=self.pf
+        sgma=self.sgma
+        gama=self.gama
+        kapa=self.kapa
+        beta=self.beta
+        pf=self.pf
         # check if acceptable to filter
         if f_k+gama*v_k<min([p[0] for p in pf]) or v_k<beta*max(min([p[1] for p in pf]),0.):
             df = f_1 - f_k # actual descent
             dq = f_1 - p_k # descent in approximation function
-            if df < sgma*dq and dq > 0.: # approx has descended / predicted a descent, 
+            if df < sgma*dq and dq > kapa*v_k**2.: # approx has descended / predicted a descent, 
             #but decrease in actual obj is less than 10% of it; then something not cool, 
             # (very non conservative) we restore, and try again
                 return False
