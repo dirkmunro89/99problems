@@ -222,8 +222,8 @@ if __name__ == "__main__":
 #   1 to do one standard run with a random start (test of mult start)
 #   X to do X random multi-starts
 #
-    gmx=2
-    pus=2
+    gmx=0
+    pus=0
     fdc=0
 #
     if fdc:         #check finite differences

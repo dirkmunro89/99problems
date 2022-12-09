@@ -11,12 +11,12 @@ from subs.t2dual import t2d as subs
 #
 def apar(n):
 #   
-    mov=5e-1*np.ones(n,dtype=float)
+    mov=1e-1*np.ones(n,dtype=float)
     asf=[0.7,1.2]
 #
     enf='c-a'
 #
-    kmx=1000
+    kmx=5000
     cnv=[1e-2,1e0,1e0,1e0,1e0]
 #       
     return mov, asf, enf, kmx, cnv
