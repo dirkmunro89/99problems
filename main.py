@@ -222,8 +222,8 @@ if __name__ == "__main__":
 #   1 to do one standard run with a random start (test of mult start)
 #   X to do X random multi-starts
 #
-    gmx=0
-    pus=0
+    gmx=2
+    pus=2
     fdc=0
 #
     if fdc:         #check finite differences
@@ -246,16 +246,15 @@ if __name__ == "__main__":
             glog.write('%4d%3s%10d%10d%14.3e%9.0e\n'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
             print('%4d%3s%10d%10d%14.3e%9.0e'%(g, nopt, k_s, t_s, f_s, v_s))#,flush=True)
             g=g+1
-        print("See solution %d"%gopt)
-        glog.write("See solution %d\n"%gopt)
         for r in res:
             (k_s,t_s,f_s,v_s)=r
             if (f_s-fopt)/fopt < 1e-2 and v_s<1e-3: fnd=fnd+1
-        print("Found %d times with %d iterations spent in total, "%(fnd,ktot)+\
-                "consisting of %d system evaluations: "%(stot)+\
-                " %.1f evaluations per (probably) optimal solution\n"%(stot/fnd))
-        glog.write("Found %d times with %d iterations spent in total, "%(fnd,ktot) +\
-                "consisting of %d system evaluations: "%(stot)+\
-                " %.1f evaluations per (probably) )optimal solution\n"%(stot/fnd))
-        glog.close()
+        print("Solution %5d, f=%7.3e, found %6d time(s)."%(gopt,fopt,fnd))
+        print("%12d iterations spent in total, with"%(ktot))
+        print("%12d system evaluations,"%(stot))
+        print("%12.0f per (probably) optimal solution."%(stot/fnd))
+        glog.write("Solution %5d, f=%7.3e, found %6d time(s).\n"%(gopt,fopt,fnd))
+        glog.write("%12d iterations spent in total, with\n"%(ktot))
+        glog.write("%12d system evaluations,\n"%(stot))
+        glog.write("%12.0f per (probably) optimal solution.\n"%(stot/fnd))
 #
