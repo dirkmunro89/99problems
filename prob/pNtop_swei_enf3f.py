@@ -14,16 +14,17 @@ def apar(n):
     mov=1e-1*np.ones(n,dtype=float)
     asf=[0.7,1.2]
 #
-    enf='t-r'
+    enf='c-a'
 #
     kmx=1000
+#   inf(dX), Euc(dX), dF/F, inf(KKT), viol.
     cnv=[1e-2,1e0,1e0,1e0,1e0]
-#       
+#
     return mov, asf, enf, kmx, cnv
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=-0e0*(df_k)/np.maximum(x_k,1e-6)
+    c_x=2e0*np.absolute(df_k)/np.maximum(x_k,1e-6)
     c_x[1:]=0e0
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
@@ -39,9 +40,9 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 def init(g):
 #
     mm=3
-    nelx=2*20*mm
+    nelx=20*mm
     nely=20*mm
-    v_l = 0.2
+    v_l = 0.1
     v_0 = 1.0
     v_u = 1.0
 #
@@ -62,14 +63,13 @@ def init(g):
     ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
     fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-2,ndof-1]))
-    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
-
+#
     # Set load
     frc=[(1,0)]
 #
     pen = 3.0
     qen = 1.0
-    muc = 0.0
+    muc = 0e0
     Emin = 1e-9; Emax=1.0
     gv = -1.
 #

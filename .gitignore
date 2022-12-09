@@ -23,6 +23,7 @@ __pycache__/
 trsh/
 ibm/
 resu/
+*_old/
 
 .Python
 build/

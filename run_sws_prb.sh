@@ -1,5 +1,14 @@
 #!/bin/bash
-nams="2a 2b 2c 2d 2e 2f 2g"
+
+nams="3a 3b 3c 3d 3e 3f 3g"
+for n in $nams; do
+    name="Ntop_swei_enf"$n
+    python main.py $name
+    gnuplot -e "xi=120;yi=60" topomake.p
+    mv topology.eps ./resu/${name}_topo.eps
+    mv history.log ./resu/${name}_hist.log
+done
+nams="4a 4b 4c 4d 4e 4f 4g"
 for n in $nams; do
     name="Ntop_swei_enf"$n
     python main.py $name
@@ -15,15 +24,7 @@ for n in $nams; do
     mv topology.eps ./resu/${name}_topo.eps
     mv history.log ./resu/${name}_hist.log
 done
-nams="1aa 1bb 1cc 1dd 1ee 1ff 1gg"
-for n in $nams; do
-    name="Ntop_swei_enf"$n
-    python main.py $name
-    gnuplot -e "xi=120;yi=60" topomake.p
-    mv topology.eps ./resu/${name}_topo.eps
-    mv history.log ./resu/${name}_hist.log
-done
-nams="2aa 2bb 2cc 2dd 2ee 2ff 2gg"
+nams="2a 2b 2c 2d 2e 2f 2g"
 for n in $nams; do
     name="Ntop_swei_enf"$n
     python main.py $name

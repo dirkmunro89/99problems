@@ -67,7 +67,7 @@ def loop(init,apar,simu,caml,subs,g):
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if cont:
-                    mov=mov*1.2
+                    mov=mov*1.1
                     mov=np.minimum(mov,mov0)
                     enfc.par_add(f_k[0],v_k,k)
                 else:
@@ -234,7 +234,7 @@ if __name__ == "__main__":
     elif gmx == 1:  #one multi-start (debugging)
         h=loop(init,apar,simu,caml,subs,0)
     elif gmx>1:     #multi-starts
-        fopt=1e8; gopt=0; ktot=0; stot=0; fnd=0
+        fopt=1e16; gopt=0; ktot=0; stot=0; fnd=0
         res = Parallel(n_jobs=pus)(delayed(loop)(init,apar,simu,caml,subs,g) for g in range(1,gmx+1))
         glog = open('global.log','w'); g=1
         for r in res:
@@ -252,8 +252,10 @@ if __name__ == "__main__":
             (k_s,t_s,f_s,v_s)=r
             if (f_s-fopt)/fopt < 1e-2 and v_s<1e-3: fnd=fnd+1
         print("Found %d times with %d iterations spent in total, "%(fnd,ktot)+\
-            "consisting of %d system evaluations\n"%(stot))
+                "consisting of %d system evaluations: "%(stot)+\
+                " %.1f evaluations per (probably) optimal solution\n"%(stot/fnd))
         glog.write("Found %d times with %d iterations spent in total, "%(fnd,ktot) +\
-            "consisting of %d system evaluations\n"%(stot))
+                "consisting of %d system evaluations: "%(stot)+\
+                " %.1f evaluations per (probably) )optimal solution\n"%(stot/fnd))
         glog.close()
 #
