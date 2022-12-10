@@ -67,8 +67,7 @@ def loop(init,apar,simu,caml,subs,g):
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if cont:
-                    mov=mov*1.2
-                    mov=np.minimum(mov,mov0)
+                    mov=mov*1.2; mov=np.minimum(mov,mov0)
                     enfc.par_add(f_k[0],v_k,k)
                 else:
                     mov=stub.set_mov(0.7,x_l,x_u)

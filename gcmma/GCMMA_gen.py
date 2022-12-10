@@ -58,7 +58,7 @@ def main():
     xmax = np.reshape(x_u,(n,1))#10*eeen
     low = xmin.copy()
     upp = xmax.copy()
-    move = 0.0
+    move = 0.1
     c = 1000*eeem
     d = eeem.copy()
     a0 = 1
@@ -175,39 +175,6 @@ def setup_logger(logfile):
     with open(logfile, 'w'): pass
     # Return logger
     return logger
-
-# Beam function 1
-def beam1(xval):
-    nx = 5
-    eeen = np.ones((nx,1))
-    c1 = 0.0624
-    c2 = 1
-    aaa = np.array([[61.0, 37.0, 19.0, 7.0, 1.0]]).T
-    xval2 = xval*xval
-    xval3 = xval2*xval
-    xinv3 = eeen/xval3
-    f0val = c1*np.dot(eeen.T,xval)
-    fval = np.dot(aaa.T,xinv3)-c2
-    return f0val,fval
-
-# Beam function 2
-def beam2(xval):
-    nx = 5
-    eeen = np.ones((nx,1))
-    c1 = 0.0624
-    c2 = 1
-    aaa = np.array([[61.0, 37.0, 19.0, 7.0, 1.0]]).T
-    xval2 = xval*xval
-    xval3 = xval2*xval
-    xval4 = xval2*xval2
-    xinv3 = eeen/xval3
-    xinv4 = eeen/xval4
-    f0val = c1*np.dot(eeen.T,xval).item()
-    df0dx = c1*eeen
-    fval = np.dot(aaa.T,xinv3).item()-c2
-    dfdx = -3*(aaa*xinv4).T
-    return f0val,df0dx,fval,dfdx
-
 
 ########################################################################################################
 ### RUN MAIN FUNCTION                                                                                ###

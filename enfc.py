@@ -18,7 +18,7 @@ class Enfc:
         gama=self.gama
         f_k = g_k[0]; f_1 = g_1[0]
         # if feasible descent
-        if f_k < f_1 and np.amax(g_k[1:]) < 1e-4: return True
+        if f_k < f_1 and np.amax(g_k[1:]) < 1e-6: return True
         # if conservative
         else:
             if np.any( (np.where(np.amax(c_x,axis=1) > 0.,1,0)) * (np.where(q_k < g_k, 1, 0))):
@@ -42,7 +42,7 @@ class Enfc:
             df = f_1 - f_k # actual descent
             dq = f_1 - p_k # descent in approximation function
             if df < sgma*dq and dq > kapa*v_k**2.: # approx has descended / predicted a descent, 
-            #but decrease in actual obj is less than 10% of it; then something not cool, 
+            #but decrease in actual obj is less than 1% of it; then something not cool, 
             # (very non conservative) we restore, and try again
                 return False
             else: return True

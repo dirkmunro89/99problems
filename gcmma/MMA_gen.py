@@ -63,7 +63,7 @@ def main():
     a0 = 1
     a = zerom.copy()
     outeriter = 0
-    maxoutit = 10
+    maxoutit = 1000
     kkttol = 1e-12 # not used
     simuc = 0
     print(('%4s%3s%8s%11s%8s%5s%12s%8s%11s%6s%9s%9s')%\
