@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 #
 def t2d(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
-    bds=[[1e-6,1e6] for i in range(m)]; tup_bds=tuple(bds)
+    bds=[[0e0,1e6] for i in range(m)]; tup_bds=tuple(bds)
     sol=minimize(qpq_dual,x_d,args=(n,m,x_k,g,dg,d_l,d_u, c_x[0], c_x[1:]), \
         jac=dqpq_dual,method='L-BFGS-B',bounds=tup_bds, options={'disp':False})
 #

@@ -91,7 +91,7 @@ def main():
         ubd=np.where(xval-xmin>1e-3,np.where(xmax-xval>1e-3,1,0),0)
         mykktnorm=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd,np.inf)
         print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
-            (outeriter,'N',innerit,f0val,fval,bdd,move,mykktnorm,np.linalg.norm(xval-xold1,np.inf),\
+            (outeriter,'N',innerit,f0val*1.221e9,fval,bdd,move,mykktnorm,np.linalg.norm(xval-xold1,np.inf),\
             np.linalg.norm(xval-xold1),0,0,0))
         hist.append([f0val,fval])
         outit += 1
@@ -110,10 +110,10 @@ def main():
         # While the approximations are non-conservative (conserv=0), repeated inner iterations are made:
         innerit = 0
         if conserv == 0:
-            while conserv == 0 and innerit <= 15:
+            while conserv == 0 and innerit < 30:
                 innerit += 1
                 print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
-                    (outeriter,'N',innerit,f0valnew,fvalnew,bdd,move,mykktnorm,\
+                    (outeriter,'N',innerit,f0valnew*1.221e9,fvalnew,bdd,move,mykktnorm,\
                     np.linalg.norm(xmma-xold1,np.inf),\
                     np.linalg.norm(xmma-xold1),0,0,0))
                 hist.append([f0val,fval])
@@ -128,6 +128,7 @@ def main():
                 f0valnew,fvalnew = wrapper1(n,xmma,aux); simuc = simuc + 1
                 # It is checked if the approximations have become conservative:
                 conserv = concheck(m,epsimin,f0app,f0valnew,fapp,fvalnew)
+            if innerit == 30: break
         # Some vectors are updated:
         xold2 = xold1.copy()
         xold1 = xval.copy()
@@ -141,8 +142,9 @@ def main():
         outvector1 = np.array([outeriter, innerit, f0val, fval])
         outvector2 = xval.flatten()
 #
+        np.savetxt('x_str.log',xval)
         f0norm=abs((f0val-f0valold)/f0val)
-        if np.linalg.norm(xval-xold1,np.inf)<1e-2:
+        if np.linalg.norm(xval-xold1,np.inf)<1e-3:
             break
     #
     print('Iteration counter ', outeriter)
