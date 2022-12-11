@@ -34,7 +34,7 @@ def loop(init,apar,simu,caml,subs,g):
     scl0=1.;mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k)
-    L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m,n)); f_1 = np.zeros(m+1)
+    L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m+1,n)); f_1 = np.zeros(m+1)
 #
     if g == -9: 
         fdck(simu,n,m,x_k,aux,0)
@@ -81,7 +81,7 @@ def loop(init,apar,simu,caml,subs,g):
                     if test: enfc.par_add(f_k[0],v_k,k)
                 else:
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
-                    c_x[:]=stub.set_crv(2.,f_k,q_k)
+                    c_x[:]=stub.set_crv(10.,f_k,q_k)
         elif enf == 'gcm':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:

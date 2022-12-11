@@ -29,7 +29,7 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     if k>2:
         mov=np.where((x_k-x_1)*(x_1-x_2) <= 0., mov*asf[0], mov*asf[1])
 #
-    mov=np.minimum(np.maximum(mov,1e-6),.1)
+    mov=np.minimum(np.maximum(mov,0.5e-3),.1)
 #
     L=L_k
     U=U_k

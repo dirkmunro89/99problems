@@ -23,8 +23,10 @@ def apar(n):
 #
 def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
-    c_x=2e0*np.absolute(df_k)/np.maximum(x_k,1e-6)
-    c_x[1:]=0e0
+    c_x=np.ones_like(df_k)
+    if k > 0:
+        sph = 2.*(f_1 - f_k - np.dot(df_k,(x_1-x_k)))/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
+        for j in range(len(f_k)): c_x[j]=sph[j]
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
 #
