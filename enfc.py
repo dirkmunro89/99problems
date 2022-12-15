@@ -52,7 +52,8 @@ class Enfc:
         pf=self.pf
         pf.append((f_k,v_k,k)); pf=sorted(pf,key=lambda x:-x[0]); tmp=[]
         for p in pf:
-            if f_k >= p[0] or v_k >= p[1]: tmp.append(p)
+#           if f_k >= p[0] or v_k >= p[1]: 
+            tmp.append(p)
         self.pf=tmp
 #
     def par_plt(self):
