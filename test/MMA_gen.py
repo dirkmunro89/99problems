@@ -42,6 +42,8 @@ from MMA_swei_wrap import init, wrapper1, wrapper2
 ### MAIN FUNCTION                                                                                    ###
 ########################################################################################################
 
+scl0=3.084408825070688
+
 def main():
     #################################################################################################
     [n,m,x_l,x_u,x_k,c_s,aux]=init(-1); m = 1
@@ -71,6 +73,8 @@ def main():
     # Calculate function values and gradients of the objective and constraints functions
     if outeriter == 0:
         f0val,df0dx,fval,dfdx = wrapper2(n,xval,aux); simuc = simuc + 1
+        f0val=f0val/scl0
+        df0dx=df0dx/scl0
         innerit = 0
         outvector1 = np.array([outeriter, innerit, f0val, fval])
         outvector2 = xval.flatten()
@@ -85,9 +89,9 @@ def main():
         ubd=np.where(xval-xmin>1e-3,np.where(xmax-xval>1e-3,1,0),0)
         mykktnorm=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd,np.inf)
         print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
-            (outeriter,'N',innerit,f0val,fval,bdd,move,mykktnorm,np.linalg.norm(xval-xold1,np.inf),\
+            (outeriter,'N',innerit,f0val*scl0,fval,bdd,move,mykktnorm,np.linalg.norm(xval-xold1,np.inf),\
             np.linalg.norm(xval-xold1),0,0,0))
-        hist.append([f0val,fval])
+        hist.append([f0val*scl0,fval])
         outit += 1
         outeriter += 1
         # The MMA subproblem is solved at the point xval:
@@ -100,6 +104,8 @@ def main():
         # Re-calculate function values and gradients of the objective and constraints functions
         f0valold=f0val
         f0val,df0dx,fval,dfdx = wrapper2(n,xval,aux); simuc = simuc + 1
+        f0val=f0val/scl0
+        df0dx=df0dx/scl0
         # The residual vector of the KKT conditions is calculated
         residu,kktnorm,residumax = \
             kktcheck(m,n,xmma,ymma,zmma,lam,xsi,eta,mu,zet,s,xmin,xmax,df0dx,fval,dfdx,a0,a,c,d)

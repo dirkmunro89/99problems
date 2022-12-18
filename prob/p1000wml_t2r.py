@@ -37,7 +37,7 @@ def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #   T2R
     c_x=np.absolute(2e0*df_k/x_k)
 #
-    c_x[0]=0e0*np.ones_like(x_k)
+    c_x[0]=1e-6*np.ones_like(x_k)
 #
     d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
     d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)

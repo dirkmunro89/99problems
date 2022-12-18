@@ -10,7 +10,7 @@ def test():
     f=main('1000wml_t2r_t2d')
 #
     assert pytest.approx(f0_ref, abs=1e-3) == f[-1][0]
-    assert pytest.approx(37, abs=0.) == len(f)
+    assert pytest.approx(36, abs=0.) == len(f)
 #
     f=main('1000wml_t2r_t2e')
 #
