@@ -64,7 +64,7 @@ def init(g):
 #
     ft = 1
     rmin = 1.1*mm
-    dext=0
+    dext=int(np.ceil(rmin))
     felx = nelx+dext
     fely = nely+2*dext
 #
