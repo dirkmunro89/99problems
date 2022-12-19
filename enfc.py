@@ -18,7 +18,7 @@ class Enfc:
         gama=self.gama
         f_k = g_k[0]; f_1 = g_1[0]
         # if feasible descent
-        if f_k + f_k*1e-4 < f_1 and np.amax(g_k[1:]) < 1e-6: return True
+        if f_k < f_1 and np.amax(g_k[1:]) < 1e-6: return True
         # if conservative
         else:
             if np.any(np.where(q_k + 1e-6 < g_k,1,0)):
