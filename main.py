@@ -224,7 +224,7 @@ def fdck(simu,n,m,x_k,aux,g):
         mrr=max(mrr,err)
     print("")
 #        
-    print("Maximum absolute error %7.0e at function %d and variable %d"%(mrr,mj,mi))
+    print("Maximum absolute error %7.0e at constraint function %d and variable %d"%(mrr,mj,mi))
 #
 def main(prob):
 #

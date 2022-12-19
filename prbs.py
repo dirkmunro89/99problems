@@ -73,6 +73,30 @@ def mods(prob):
         from prob.pDunny_11 import simu
         from prob.pDunny_11 import caml
         from prob.pDunny_11 import subs
+    elif prob == 'Dunny_12':
+        from prob.pDunny_12 import init
+        from prob.pDunny_12 import apar
+        from prob.pDunny_12 import simu
+        from prob.pDunny_12 import caml
+        from prob.pDunny_12 import subs
+    elif prob == 'Dunny_13':
+        from prob.pDunny_13 import init
+        from prob.pDunny_13 import apar
+        from prob.pDunny_13 import simu
+        from prob.pDunny_13 import caml
+        from prob.pDunny_13 import subs
+    elif prob == 'Dunny_14':
+        from prob.pDunny_14 import init
+        from prob.pDunny_14 import apar
+        from prob.pDunny_14 import simu
+        from prob.pDunny_14 import caml
+        from prob.pDunny_14 import subs
+    elif prob == 'Dunny_15':
+        from prob.pDunny_15 import init
+        from prob.pDunny_15 import apar
+        from prob.pDunny_15 import simu
+        from prob.pDunny_15 import caml
+        from prob.pDunny_15 import subs
     else:
         print('Running user defined from temp.py ...')
         from temp import init

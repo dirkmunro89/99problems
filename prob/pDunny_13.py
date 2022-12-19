@@ -42,14 +42,14 @@ def init(g):
     x_l[-4:] = -1.
     x_u[-4:] = 1.
 #
-    x_k[-4] = 1e-6
-    x_k[-3] = 1e-6
-    x_k[-2] = 1e-6
-    x_k[-1] = 1e-6
+    x_k[-4] = 0e-6
+    x_k[-3] = 0e-6
+    x_k[-2] = 0e-6
+    x_k[-1] = 1e6
 #   x_k[-4:]=np.array([-0.82075593, -0.33162381,  0.45697361,  0.08695103])
 #
-#   tmp=np.load('./glob_4.npz')
-#   x_k[:] = tmp['x_i']
+    tmp=np.load('./prob/pDunny_13_g/glob_10.npz')
+    x_k[:] = tmp['x_i']
 #
 #   Last constraint is the quaternion norm (equality)
     c_s = np.ones(m,dtype=int)
@@ -144,7 +144,7 @@ def simu(n,m,x,aux,g):
 #
 def apar(n):
 #
-    mov=0.05*np.ones(n)
+    mov=0.1*np.ones(n)
     asf=[0.7,1.1]
 #
     enf='none'

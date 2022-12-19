@@ -1,0 +1,12 @@
+   1  T        10        11     2.321e-01   -3e-10
+   2  T        11        12     1.631e-01    8e-07
+   3  T         8         9     9.615e-02    6e-07
+   4  F        25        26     1.517e-01    0e+00
+   5  F        22        23     1.774e-01    1e-08
+   6  F         5         6     2.065e-01   -2e-09
+   7  F        10        11     1.773e-01    8e-08
+   8  F        15        16     1.153e-01    5e-07
+   9  T        45        46     8.289e-02    7e-07
+  10  F        12        13     1.416e-01    5e-07
+See solution 9
+Found 1 times with 163 iterations spent in total, consisting of 173 system evaluations
