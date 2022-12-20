@@ -66,12 +66,15 @@ def main():
     maxoutit = 1000
     kkttol = 1e-12 # not used
     simuc = 0
+    fscl=1.
     print(('%4s%3s%8s%11s%8s%5s%12s%8s%11s%6s%9s%9s')%\
         ('k', 'l', 'Obj', 'Vio', 'Bou', 'ML', '|KKT|', '|dX|', '||dX||', 'T_s', 'T_o', 'T_t'))
     # Calculate function values and gradients of the objective and constraints functions
     if outeriter == 0:
         f0val,df0dx,fval,dfdx = wrapper2(n,xval,aux); simuc = simuc + 1
         innerit = 0
+        fscl=f0val
+        f0val=f0val/fscl; df0dx=df0dx/fscl
         outvector1 = np.array([outeriter, innerit, f0val, fval])
         outvector2 = xval.flatten()
     # The iterations starts
@@ -85,8 +88,8 @@ def main():
         ubd=np.where(xval-xmin>1e-3,np.where(xmax-xval>1e-3,1,0),0)
         mykktnorm=np.linalg.norm((df0dx + np.dot(dfdx.T,lam))*ubd,np.inf)
         print('%4d%3s%2d%12.3e%8.0e%6.2f%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e%9.1e'%\
-            (outeriter,'N',innerit,f0val,fval,bdd,move,mykktnorm,np.linalg.norm(xval-xold1,np.inf),\
-            np.linalg.norm(xval-xold1),0,0,0))
+            (outeriter,'N',innerit,f0val*fscl,fval,bdd,move,mykktnorm,\
+            np.linalg.norm(xval-xold1,np.inf),np.linalg.norm(xval-xold1),0,0,0))
         hist.append([f0val,fval])
         outit += 1
         outeriter += 1
@@ -100,6 +103,7 @@ def main():
         # Re-calculate function values and gradients of the objective and constraints functions
         f0valold=f0val
         f0val,df0dx,fval,dfdx = wrapper2(n,xval,aux); simuc = simuc + 1
+        f0val=f0val/fscl; df0dx=df0dx/fscl
         # The residual vector of the KKT conditions is calculated
         residu,kktnorm,residumax = \
             kktcheck(m,n,xmma,ymma,zmma,lam,xsi,eta,mu,zet,s,xmin,xmax,df0dx,fval,dfdx,a0,a,c,d)
