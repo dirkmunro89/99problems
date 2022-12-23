@@ -2,6 +2,8 @@
 
 Do `make install` to setup Python virtual environment. Activate the virtual environment with `source venv/bin/activate`. Do `pytest test` to run verification examples. Further documentation to follow.
 
+(Do python setup.py install of CPLEX Python after activation of environment.)
+
 Adapted and developed from work done with [artofscience](https://github.com/artofscience); in particular, linear programming and adaptive move-limits on self-weight topology optimisation.
 
 The MMA and GCMMA is taken from [arjendeetman](https://github.com/arjendeetman/GCMMA-MMA-Python), November 2022. It is stated to be faithful reproduction of the Matlab codes kindly made available by [Svanberg](http://www.smoptit.se/) (which can of course itself be tested). We test our pure dual implementation of the 2002 MMA subproblem and asymptote adaptation against it. The GCMMA implementation is tested in the same way. The 1987 MMA implementation is tested against the iteration histories provided in [literature](https://onlinelibrary.wiley.com/doi/abs/10.1002/nme.1620240207).
