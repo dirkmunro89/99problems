@@ -58,7 +58,7 @@ def main():
     xmax = np.reshape(x_u,(n,1))#10*eeen
     low = xmin.copy()
     upp = xmax.copy()
-    move = 0.0
+    move = 0.1
     c = 1000*eeem
     d = eeem.copy()
     a0 = 1

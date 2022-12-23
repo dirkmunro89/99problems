@@ -14,10 +14,7 @@ def t2d(n,m,x_k,x_d,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
     x=x_dual(d, n, m, x_k, g, dg, d_l, d_u, c_x[0], c_x[1:])
 #
-#   tmp=-np.dot(dg,x-x_k)-np.dot(c_x/2.,(x-x_k)**2.)
     q_k = g+np.dot(dg,x-x_k)+np.dot(c_x/2.,(x-x_k)**2.)
-#   dq=g[0]-q_k[0]
-#   print(dq)
 #
     return x,d,q_k
 #

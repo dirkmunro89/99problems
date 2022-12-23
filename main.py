@@ -126,15 +126,15 @@ def loop(init,apar,simu,caml,subs,g):
                 log.write('Termination on Convergence criteria\n')
                 if not g > 0: print('Termination on Convergence criteria')
                 break
-        if k>1 and enf=='t-r' and inn>30:
+        if k>1 and enf=='t-r' and inn>15:
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
-        if k>1 and enf=='c-a' and inn>30:
+        if k>1 and enf=='c-a' and inn>15:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
-        if k>1 and enf=='gcm' and inn>30:
+        if k>1 and enf=='gcm' and inn>15:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
