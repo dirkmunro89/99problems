@@ -54,7 +54,7 @@ def loop(init,apar,simu,caml,subs,g):
         ts0=time.time()
         if k > 0: f_1 = f_k.copy(); df_1 = df_k.copy()
         [f_k,df_k] = simu(n,m,x_k,aux,0); tot=tot+1
-        if k == 0: scl0=f_k[0]
+        if k == 0 and abs(f_k[0]) > 1e-6: scl0=f_k[0]
         f_k[0]=f_k[0]/scl0; df_k[0]=df_k[0]/scl0
         v_k=np.maximum(np.amax(f_k[1:]*c_s),0.)
         if 0 in c_s: v_k=np.maximum(np.amax(np.absolute(f_k[1:]*(1-c_s))),v_k)
