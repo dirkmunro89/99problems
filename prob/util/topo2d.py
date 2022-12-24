@@ -7,7 +7,7 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 import cvxopt; import cvxopt.cholmod
 #
-from prob.util.para2d import para2d
+#from prob.util.para2d import para2d
 #
 def topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fixed,force,pen,qen,muc,Emin,Emax,gv,g):
 #
