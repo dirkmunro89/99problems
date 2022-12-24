@@ -82,6 +82,15 @@ def loop(init,apar,simu,caml,subs,g):
                 else:
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
                     c_x[:]=stub.set_crv(10.,f_k,q_k)
+        elif enf == 'f-c':
+            if k == 0: enfc.par_add(f_k[0],v_k,k)
+            else:
+                cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
+                if cont:
+                    enfc.par_add(f_k[0],v_k,k)
+                else:
+                    [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
+                    c_x[:]=stub.set_crv(10.,f_k,q_k)
         elif enf == 'gcm':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
@@ -134,6 +143,10 @@ def loop(init,apar,simu,caml,subs,g):
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
+        if k>1 and enf=='f-c' and inn>15:
+            log.write('Enforced Termination; excessive conservatism\n')
+            if not g > 0: print('Enforced Termination; excessive conservatism')
+            break
         if k>1 and enf=='gcm' and inn>15:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
@@ -143,7 +156,7 @@ def loop(init,apar,simu,caml,subs,g):
         if cont:
             [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,f_k,df_k,f_1,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
             mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
-            if enf == 't-r' or enf == 'c-a' or enf == 'gcm': 
+            if enf == 't-r' or enf == 'c-a' or enf == 'gcm' or enf == 'f-c': 
                 stub=Stub(x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
         else: inn=inn+1; k=k-1
 #
@@ -159,8 +172,6 @@ def loop(init,apar,simu,caml,subs,g):
     f_k[0]=f_k[0]*scl0
     df_k[0]=df_k[0]*scl0
 #
-    np.savetxt('x_str.log',x_k)
-    np.savetxt('d_str.log',x_d)
     [f_k,_] = simu(n,m,x_k,aux,g)
     if g > 0: 
         np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k); print("... exit %d"%g)
@@ -170,6 +181,8 @@ def loop(init,apar,simu,caml,subs,g):
         log.write('Total number of system evaluations: %d\n'%tot); log.close()
         print('Total number of system evaluations: %d\n'%tot)
         enfc.par_plt(); enfc.cnv_plt(h)
+        np.savetxt('x_str.log',x_k)
+        np.savetxt('d_str.log',x_d)
         return h
 #
 def fdck(simu,n,m,x_k,aux,g):
