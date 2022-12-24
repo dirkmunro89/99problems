@@ -55,8 +55,8 @@ def t2ml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     c_x=np.ones_like(df_k)*1e-6
 #
     if k<=1:
-        L = x_k-0.1*(x_u-x_l)
-        U = x_k+0.1*(x_u-x_l)
+        L = x_k-0.5*(x_u-x_l)
+        U = x_k+0.5*(x_u-x_l)
     else:
         osc=(x_k-x_1)*(x_1-x_2)
         fac=np.ones_like(x_k)
@@ -102,8 +102,8 @@ def mma(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     c_x=np.zeros_like(df_k)
 #
     if k<=1:
-        L = x_k-0.1*(x_u-x_l)
-        U = x_k+0.1*(x_u-x_l)
+        L = x_k-0.5*(x_u-x_l)
+        U = x_k+0.5*(x_u-x_l)
     else:
         osc=(x_k-x_1)*(x_1-x_2)
         fac=np.ones_like(x_k)
@@ -133,8 +133,8 @@ def gcm(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
         c_x[j]=np.maximum(c_x[j],1e-6)/(x_u-x_l)
 #
     if k<=1:
-        L = x_k-0.1*(x_u-x_l)
-        U = x_k+0.1*(x_u-x_l)
+        L = x_k-0.5*(x_u-x_l)
+        U = x_k+0.5*(x_u-x_l)
     else:
         osc=(x_k-x_1)*(x_1-x_2)
         fac=np.ones_like(x_k)
