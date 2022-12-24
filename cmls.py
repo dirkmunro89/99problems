@@ -1,6 +1,21 @@
 #
 import numpy as np
 #
+def t2al(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+#
+    c_x=np.ones_like(df_k)*1e-6
+    c_x[0]=2e0*np.absolute(df_k[0])/np.maximum(x_k,1e-6)
+#
+    c_x[0]=np.maximum(c_x[0],1e-6)
+#
+    L=L_k
+    U=U_k
+#
+    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
+    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
+#
+    return c_x,mov,L,U,d_l,d_u
+#
 def t2rl(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=np.ones_like(df_k)*1e-6
@@ -22,7 +37,8 @@ def t2sl(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     if k > 0:
         sph = 2.*(f_1 - f_k - np.dot(df_k,(x_1-x_k)))/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
         c_x[0]=sph[0]
-#       for j in range(len(f_k)): c_x[j]=sph[j]
+    else:
+        c_x[0]=np.ones_like(df_k[0])
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
 #
@@ -39,8 +55,8 @@ def t2ml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     c_x=np.ones_like(df_k)*1e-6
 #
     if k<=1:
-        L = x_k-0.5*(x_u-x_l)
-        U = x_k+0.5*(x_u-x_l)
+        L = x_k-0.1*(x_u-x_l)
+        U = x_k+0.1*(x_u-x_l)
     else:
         osc=(x_k-x_1)*(x_1-x_2)
         fac=np.ones_like(x_k)
@@ -86,8 +102,8 @@ def mma(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
     c_x=np.zeros_like(df_k)
 #
     if k<=1:
-        L = x_k-0.5*(x_u-x_l)
-        U = x_k+0.5*(x_u-x_l)
+        L = x_k-0.1*(x_u-x_l)
+        U = x_k+0.1*(x_u-x_l)
     else:
         osc=(x_k-x_1)*(x_1-x_2)
         fac=np.ones_like(x_k)
@@ -117,8 +133,8 @@ def gcm(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
         c_x[j]=np.maximum(c_x[j],1e-6)/(x_u-x_l)
 #
     if k<=1:
-        L = x_k-0.5*(x_u-x_l)
-        U = x_k+0.5*(x_u-x_l)
+        L = x_k-0.1*(x_u-x_l)
+        U = x_k+0.1*(x_u-x_l)
     else:
         osc=(x_k-x_1)*(x_1-x_2)
         fac=np.ones_like(x_k)
