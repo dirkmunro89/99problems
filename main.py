@@ -159,8 +159,6 @@ def loop(init,apar,simu,caml,subs,g):
     f_k[0]=f_k[0]*scl0
     df_k[0]=df_k[0]*scl0
 #
-    np.savetxt('x_str.log',x_k)
-    np.savetxt('d_str.log',x_d)
     [f_k,_] = simu(n,m,x_k,aux,g)
     if g > 0: 
         np.savez_compressed('glob_%d.npz'%g, x_i=x_i, x_k=x_k, f_k=f_k); print("... exit %d"%g)
@@ -170,6 +168,8 @@ def loop(init,apar,simu,caml,subs,g):
         log.write('Total number of system evaluations: %d\n'%tot); log.close()
         print('Total number of system evaluations: %d\n'%tot)
         enfc.par_plt(); enfc.cnv_plt(h)
+        np.savetxt('x_str.log',x_k)
+        np.savetxt('d_str.log',x_d)
         return h
 #
 def fdck(simu,n,m,x_k,aux,g):
@@ -221,8 +221,8 @@ if __name__ == "__main__":
 #   1 to do one standard run with a random start (test of mult start)
 #   X to do X random multi-starts
 #
-    gmx=0
-    pus=0
+    gmx=1000
+    pus=96
     fdc=0
 #
     if fdc:         #check finite differences
