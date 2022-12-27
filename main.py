@@ -81,7 +81,7 @@ def loop(init,apar,simu,caml,subs,g):
                     if test: enfc.par_add(f_k[0],v_k,k)
                 else:
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
-                    c_x[:]=stub.set_crv(10.,f_k,q_k)
+                    c_x[:]=stub.set_crv(5.,f_k,q_k)
         elif enf == 'f-c':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
@@ -90,7 +90,7 @@ def loop(init,apar,simu,caml,subs,g):
                     enfc.par_add(f_k[0],v_k,k)
                 else:
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
-                    c_x[:]=stub.set_crv(10.,f_k,q_k)
+                    c_x[:]=stub.set_crv(5.,f_k,q_k)
         elif enf == 'gcm':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:

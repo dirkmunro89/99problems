@@ -9,9 +9,9 @@ class Enfc:
 #
     def __init__(self):
         self.pf = []
-        self.sgma = 1e-2
-        self.gama = 1e-4
-        self.kapa = 1e-4
+        self.sgma = 1e-3
+        self.gama = 1e-6
+        self.kapa = 1e-6
         self.beta = 1.-self.gama
 #
     def con_pas(self,g_1,g_k,q_k,c_x):
