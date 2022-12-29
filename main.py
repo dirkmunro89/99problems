@@ -68,44 +68,28 @@ def loop(init,apar,simu,caml,subs,g):
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if cont:
                     mov=mov*1.2; mov=np.minimum(mov,mov0)
-                    enfc.par_add(f_k[0],v_k,k)
                 else:
                     mov=stub.set_mov(0.7,x_l,x_u)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'c-a':
-            if k == 0: enfc.par_add(f_k[0],v_k,k)
-            else:
+            if k > 0: 
                 cont=enfc.con_pas(f_1,f_k,q_k,c_x)
-                if cont:
-                    test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
-                    if test: enfc.par_add(f_k[0],v_k,k)
-                else:
+                if not cont:
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
                     c_x[:]=stub.set_crv(5.,f_k,q_k)
         elif enf == 'f-c':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
-                if cont:
-                    enfc.par_add(f_k[0],v_k,k)
-                else:
+                if not cont:
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
                     c_x[:]=stub.set_crv(5.,f_k,q_k)
         elif enf == 'gcm':
-            if k == 0: enfc.par_add(f_k[0],v_k,k)
-            else:
+            if k > 0: 
                 cont=enfc.gcm_pas(f_k,q_k)
-                if cont:
-                    test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
-                    if test: enfc.par_add(f_k[0],v_k,k)
-                else:
+                if not cont:
                     c_x[:]=stub.set_rho(c_x,f_k,q_k,x_k,x_0,L_k,U_k,x_u,x_l)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
-        else:
-            if k == 0: enfc.par_add(f_k[0],v_k,k)
-            else: 
-                test=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
-                if test: enfc.par_add(f_k[0],v_k,k)
         tf1=time.time(); tf=tf1-tf0
 #
         ti=time.time()
@@ -180,7 +164,6 @@ def loop(init,apar,simu,caml,subs,g):
     else: 
         log.write('Total number of system evaluations: %d\n'%tot); log.close()
         print('Total number of system evaluations: %d\n'%tot)
-        enfc.par_plt(); enfc.cnv_plt(h)
         np.savetxt('x_str.log',x_k)
         np.savetxt('d_str.log',x_d)
         return h
