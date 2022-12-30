@@ -113,13 +113,13 @@ def topo2d_simu(n,m,x,aux,vis):
         tmp=np.flip(x.reshape((nelx,nely)).T,0)
         tmp2=np.append(np.flip(tmp,1),tmp,axis=1)
         np.savetxt("topology.dat",tmp2,fmt='%14.7f')
-    else:
-        if vis > 0:
-            fig,ax = plt.subplots()
-            im = ax.imshow(-x.reshape((nelx,nely)).T, cmap='gray',\
-            interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
-            plt.savefig('topo_%d.eps'%vis)
-            plt.close()
+#   else:
+#       if vis > 0:
+#           fig,ax = plt.subplots()
+#           im = ax.imshow(-x.reshape((nelx,nely)).T, cmap='gray',\
+#           interpolation='none',norm=colors.Normalize(vmin=-1,vmax=0))
+#           plt.savefig('topo_%d.eps'%vis)
+#           plt.close()
 #
     # Setup and solve FE problem
     sK=((KE.flatten()[np.newaxis]).T*(Emin+xPena(muc,pen,xPhys)*(Emax-Emin))).flatten(order='F')
