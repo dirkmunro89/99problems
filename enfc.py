@@ -40,7 +40,7 @@ class Enfc:
         # check if acceptable to filter
         if f_k+gama*v_k<min([p[0] for p in pf]) or v_k<beta*max(min([p[1] for p in pf]),0.):
             df = f_1 - f_k # actual descent
-            dq = f_1 - p_k # descent in approximation function
+            dq = f_1 - p_k # predicted descent
             if df < sgma*dq and dq > kapa*v_k**2.: 
                 return False
             else:

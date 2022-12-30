@@ -3,7 +3,7 @@ import numpy as np
 #
 from prob.grnd.pNtop_swei1 import init
 from prob.grnd.pNtop_swei1 import simu
-from cmls import t2al as caml
+from cmls import t2el as caml
 from subs.t2dual import t2d as subs
 #
 def apar(n):
