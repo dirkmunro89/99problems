@@ -31,6 +31,23 @@ def t2rl(k, x_k, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     return c_x,mov,L,U,d_l,d_u
 #
+def t2cl(k, x_k, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+#
+    c_x=np.zeros_like(df_k)
+    if k>2:
+        sph = 2.*(f_1 - f_k - np.dot(df_k,(x_1-x_k)))/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
+        c_x[0]=np.where((x_k-x_1)*(x_1-x_2) <= 0., sph[0], 0.)
+#
+    c_x[0]=np.maximum(c_x[0],1e-6)
+#
+    L=L_k
+    U=U_k
+#
+    d_l = np.maximum(x_k-mov*(x_u-x_l),x_l)
+    d_u = np.minimum(x_k+mov*(x_u-x_l),x_u)
+#
+    return c_x,mov,L,U,d_l,d_u
+#
 def t2el(k, x_k, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=np.zeros_like(df_k)
