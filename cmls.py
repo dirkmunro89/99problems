@@ -52,7 +52,7 @@ def t2el(k, x_k, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=np.zeros_like(df_k)
     if k > 0:
-        c_x[0]= (df_1[0] - df_k[0])/np.maximum(x_1-x_k,1e-6)
+        c_x[0]= (df_1[0] - df_k[0])/np.maximum(np.absolute(x_1-x_k),1e-6)*np.sign(x_1-x_k)
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
 #
