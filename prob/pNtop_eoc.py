@@ -3,7 +3,7 @@ import numpy as np
 from prob.util.topo2d import topo2d_init
 from prob.util.topo2d import topo2d_simu
 #
-def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=2e0*np.absolute(df_k)/x_k
 #

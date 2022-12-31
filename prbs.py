@@ -117,12 +117,18 @@ def mods(prob):
         from prob.pNtop_swei_duy8 import simu
         from prob.pNtop_swei_duy8 import caml
         from prob.pNtop_swei_duy8 import subs
-    elif 'Ntop_swei' in prob:
+    elif 'Ntop_swei' in prob and 'enf' not in prob: 
         init = importlib.import_module("prob.p"+prob).init
         simu = importlib.import_module("prob.p"+prob).simu
         apar = importlib.import_module("prob.p"+prob).apar
         subs = importlib.import_module("prob.p"+prob).subs
         caml = importlib.import_module("prob.p"+prob).caml
+    elif 'Ntop_swei' in prob and 'enf' in prob: 
+        init = importlib.import_module("p"+prob).init
+        simu = importlib.import_module("p"+prob).simu
+        apar = importlib.import_module("p"+prob).apar
+        subs = importlib.import_module("p"+prob).subs
+        caml = importlib.import_module("p"+prob).caml
     elif prob == 'Ntop_mech_enf1a':
         from prob.pNtop_mech_enf1a import init
         from prob.pNtop_mech_enf1a import apar

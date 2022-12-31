@@ -21,7 +21,7 @@ def apar(n):
 #       
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, f_k, df_k, f_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=np.zeros_like(df_k)
 #
