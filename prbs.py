@@ -123,7 +123,7 @@ def mods(prob):
         apar = importlib.import_module("prob.p"+prob).apar
         subs = importlib.import_module("prob.p"+prob).subs
         caml = importlib.import_module("prob.p"+prob).caml
-    elif 'Ntop_swei' in prob and 'enf' in prob: 
+    elif 'Ntop_swei' in prob and 'enf' in prob: # for tests
         init = importlib.import_module("p"+prob).init
         simu = importlib.import_module("p"+prob).simu
         apar = importlib.import_module("p"+prob).apar
