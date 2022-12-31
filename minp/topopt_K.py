@@ -87,7 +87,7 @@ def K(nelx,nely,rmin,penal):
 	# Remove constrained dofs from matrix and convert to coo
 	K = deleterowcol(K,fixed,fixed)
 	D = K.diagonal()
-	D = cvxopt.spmatrix(1./D, range(fdof), range(fdof))
+	D = cvxopt.spmatrix(D, range(fdof), range(fdof))
 	K=K.tocoo()
 	# Solve system 
 #	K = cvxopt.spmatrix(K.data,K.row.astype(np.int),K.col.astype(np.int)
