@@ -50,16 +50,17 @@ end
 H = sparse(iH,jH,sH);
 Hs = sum(H,2);
 %% INITIALIZE ITERATION
-x = repmat(0.6,nely,nelx);
+x = repmat(0.1,nely,nelx);
 xPhys = x;
 loop = 0;
 change = 1;
+fscl=1;
 %% START ITERATION
-while change > 0.01 && loop < 200
+while change > 0.001 && loop < 2000
   loop = loop + 1;
   %% SELF-WEIGHT LOAD
   Fx=F;
-  gv = -9.81/nelx/nely;
+  gv = -1.;
   bf = 1./4.*[0. gv 0. gv 0. gv 0. gv]';
   for e = 1:nelx*nely
     Fx(edofMat(e,:)) = Fx(edofMat(e,:)) + bf*xPena(0.,1.,xPhys(e));
@@ -72,13 +73,18 @@ while change > 0.01 && loop < 200
   U(freedofs) = K(freedofs,freedofs)\Fx(freedofs);
   %% OBJECTIVE FUNCTION AND SENSITIVITY ANALYSIS
   ce = reshape(sum((U(edofMat)*KE).*U(edofMat),2),nely,nelx);
-  f = sum(sum((Emin+xPhyp*(E0-Emin)).*ce))/360.;
+  f = sum(sum((Emin+xPhyp*(E0-Emin)).*ce));
   df = -(E0-Emin)*dxPhyp.*ce;
-  dv = -ones(nely,nelx)/volfrac/nelx/nely;
   for e = 1:nelx*nely
     df(e) = df(e) + 2.*bf'*U(edofMat(e,:))*dxPena(0.,1.,xPhys(e));
   end
-  df=df/360.;
+  dv = -ones(nely,nelx)/volfrac/nelx/nely;
+  %% SCALING
+  if loop == 1
+    fscl = f;
+  end
+  f=f/fscl;
+  df=df/fscl;
   %% FILTERING/MODIFICATION OF SENSITIVITIES
   if ft == 1
     df(:) = H*(x(:).*df(:))./Hs./max(1e-3,x(:));
@@ -110,8 +116,8 @@ while change > 0.01 && loop < 200
   change = max(abs(xnew(:)-x(:)));
   x=xnew;
   %% PRINT RESULTS
-  fprintf(' It.:%5i Obj.:%11.4f Vol.:%7.3f ch.:%7.3f\n',loop,f, ...
-    mean(xPhys(:)),change);
+  fprintf(' It.:%5i Obj.:%11.4e Vol.:%7.3e ch.:%7.3f\n',loop,f*fscl, ...
+    fval,change);
   %% PLOT DENSITIES
 % fig = figure('visible', 'off');
 % colormap(gray); imagesc(1-xPhys); caxis([0 1]); axis equal; axis off;

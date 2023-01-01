@@ -36,7 +36,7 @@
 n = 60*60;
 m = 1;
 epsimin = 0.0000001;
-xval    = 0.6*ones([n,1]);
+xval    = 0.1*ones([n,1]);
 xold1   = xval;
 xold2   = xval;
 xmin    = zeros([n,1]);

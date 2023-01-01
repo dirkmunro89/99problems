@@ -22,7 +22,7 @@ def apar(n):
 #
     return mov, asf, enf, kmx, cnv
 #
-def caml(k, x_k, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
+def caml(k, x_k, x_d, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, mov):
 #
     c_x=2e0*np.absolute(df_k)/np.maximum(x_k,1e-6)
     c_x[1:]=0e0

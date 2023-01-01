@@ -4,7 +4,7 @@ import vtk
 from vtk.util import numpy_support
 import numpy as np
 #
-def para2d(nelx,nely,x,u,s):
+def para2d(nelx,nely,x,u):
 #
     n_nds=(nelx+1)*(nely+1)
     n_elm=nelx*nely
@@ -45,7 +45,6 @@ def para2d(nelx,nely,x,u,s):
             gon.GetPointIds().SetId(0,c1); gon.GetPointIds().SetId(1,c2)
             gon.GetPointIds().SetId(2,c3); gon.GetPointIds().SetId(3,c4)
             scl.SetTuple1(c,x[c])
-            scl1.SetTuple1(c,s[c])
             cel.InsertNextCell(gon)
             c=c+1; c1=c1+1; c2=c2+1; c3=c3+1; c4=c4+1
         c1=c1+1; c2=c2+1; c3=c3+1; c4=c4+1

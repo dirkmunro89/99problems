@@ -31,7 +31,7 @@ def loop(init,apar,simu,caml,subs,g):
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
-    scl0=1.;mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.ones(m,dtype=float)*1e6
+    scl0=1.;mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.zeros(m,dtype=float)#*1e6
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy()
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k); df_1 = np.zeros((m+1,n))
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m+1,n)); f_1 = np.zeros(m+1)
@@ -138,7 +138,7 @@ def loop(init,apar,simu,caml,subs,g):
 #
         to0=time.time()
         if cont:
-            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,f_k,df_k,f_1,df_1,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
+            [c_x,m_k,L,U,d_l,d_u]=caml(k,x_k,x_d,f_k,df_k,f_1,df_1,x_1,x_2,L_k,U_k,x_l,x_u,asf,mov)
             mov[:]=m_k; L_k[:]=L; U_k[:]=U; inn=0
             if enf == 't-r' or enf == 'c-a' or enf == 'gcm' or enf == 'f-c': 
                 stub=Stub(x_k,x_d,mov,d_l,d_u,f_k,df_k,L_k,U_k,c_x)
