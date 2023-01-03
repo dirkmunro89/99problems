@@ -75,14 +75,14 @@ def loop(init,apar,simu,caml,subs,g):
             if k > 0: 
                 cont=enfc.con_pas(f_1,f_k,q_k,c_x)
                 if not cont:
-                    c_x[:]=stub.set_crv(5.,f_k,q_k)
+                    c_x[:]=stub.set_crv(2.,f_k,q_k)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'f-c':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if not cont:
-                    c_x[:]=stub.set_crv(5.,f_k,q_k)
+                    c_x[:]=stub.set_crv(2.,f_k,q_k)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'gcm':
             if k > 0: 
@@ -119,19 +119,19 @@ def loop(init,apar,simu,caml,subs,g):
                 log.write('Termination on Convergence criteria\n')
                 if not g > 0: print('Termination on Convergence criteria')
                 break
-        if k>1 and enf=='t-r' and inn>15:
+        if k>1 and enf=='t-r' and inn>31:
             log.write('Enforced Termination; excessively reduced trust-region\n')
             if not g > 0: print('Enforced Termination; excessively reduced trust-region')
             break
-        if k>1 and enf=='c-a' and inn>15:
+        if k>1 and enf=='c-a' and inn>31:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
-        if k>1 and enf=='f-c' and inn>15:
+        if k>1 and enf=='f-c' and inn>31:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
-        if k>1 and enf=='gcm' and inn>15:
+        if k>1 and enf=='gcm' and inn>31:
             log.write('Enforced Termination; excessive conservatism\n')
             if not g > 0: print('Enforced Termination; excessive conservatism')
             break
