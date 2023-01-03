@@ -8,7 +8,7 @@ def t2dl(k, x_k, x_d, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, m
     tmp1 = df_k[0] + x_d[0]*df_k[1]
     tmp2= np.where(x_k<1e-6, 0, 1)
     tmp3= np.where(x_k>1-1e-6, 0, 1)
-    L = L_k*0.95 + np.power(tmp1*tmp2*tmp3,2.)*0.05
+    L = L_k*0.9 + np.power(tmp1*tmp2*tmp3,2.)*0.1
 #
     c_x[0] = np.sqrt(L)
     c_x[0]=np.maximum(c_x[0],1e-6)
