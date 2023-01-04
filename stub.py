@@ -23,13 +23,14 @@ class Stub:
         return mov
 #   set new curvatures for old problem, and return them 
 #   (because cont is false, caml update is not done, so curvatures are taken from loop)
-    def set_crv(self,fct,q_k,f_k,f_1,x_k,x_1,df_1):
+    def set_crv(self,fct,q_k,f_k,f_r,x_k,x_r,df_k):
         c_x=self._c_x.copy()
         for j in range(len(f_k)):
             if q_k[j] + 1e-6 < f_k[j]:
-                c_x[j]=np.minimum(2.2*(f_k[j]-f_1[j]-np.dot(df_1[j],(x_k-x_1)))/np.power(x_k-x_1,2.),\
-                    10.*c_x[j])
-                c_x[j]=np.maximum(c_x[j],1e-6)
+#               c_x[j]=np.maximum(c_x[j],1e-6)
+                s=2.*(1.1*f_r[j]-f_k[j]-np.dot(df_k[j],(x_r-x_k)))/np.linalg.norm(x_r-x_k)**2
+#               print('s',s)
+                c_x[j]=np.maximum(c_x[j]*1.1,max(s,1e-6))
 #
         self._c_x = c_x.copy()
         return c_x
