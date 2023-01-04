@@ -32,9 +32,10 @@ def loop(init,apar,simu,caml,subs,g):
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
     scl0=1.;mov0=mov.copy(); k=0; h=[]; d_xi=1; d_xe=1; x_d=np.zeros(m,dtype=float)#*1e6
-    x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy(); x_r=x_k.copy()
+    x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy(); x_r=x_k.copy(); q_r = np.zeros(m+1)
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k); df_1 = np.zeros((m+1,n)); f_r = np.zeros(m+1)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m+1,n)); f_1 = np.zeros(m+1)
+    c_r = c_x.copy()
 #
     if g == -9: 
         fdck(simu,n,m,x_k,aux,0)
@@ -76,15 +77,14 @@ def loop(init,apar,simu,caml,subs,g):
             if k > 0: 
                 cont=enfc.con_pas(f_1,f_k,q_k,c_x)
                 if not cont:
-                    x_r[:]=x_k; f_r[:]=f_k
+                    c_x[:]=stub.set_crv(1.1,q_k,f_k)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
-                    c_x[:]=stub.set_crv(2.,q_k,f_k,f_r,x_k,x_r,df_k)
         elif enf == 'f-c':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if not cont:
-                    c_x[:]=stub.set_crv(2.,q_k,f_k,f_1,x_k,x_0,df_1)
+                    c_x[:]=stub.set_crv(1.1,q_k,f_k)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'gcm':
             if k > 0: 
