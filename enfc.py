@@ -9,9 +9,9 @@ class Enfc:
 #
     def __init__(self):
         self.pf = []
-        self.sgma = 0e0
-        self.gama = 0e0
-        self.kapa = 0e0
+        self.sgma = 0e-2
+        self.gama = 0e-4
+        self.kapa = 0e-4
         self.beta = 1.-self.gama
 #
     def con_pas(self,g_1,g_k,q_k,c_x):
@@ -21,7 +21,7 @@ class Enfc:
         if f_k < f_1 and np.amax(g_k[1:]) < 0.: return True
         # if conservative
         else:
-            if np.any(np.where(q_k < g_k,1,0)):
+            if np.any(np.where(q_k + 1e-6<g_k,1,0)):
                 return False
             return True
 #

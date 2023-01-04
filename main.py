@@ -61,7 +61,8 @@ def loop(init,apar,simu,caml,subs,g):
         ts1=time.time(); ts=ts1-ts0
 #
         tf0=time.time()
-        cont=True; test=' '
+        cont=True
+        test=' '
         if enf == 't-r':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
@@ -75,14 +76,14 @@ def loop(init,apar,simu,caml,subs,g):
             if k > 0: 
                 cont=enfc.con_pas(f_1,f_k,q_k,c_x)
                 if not cont:
-                    c_x[:]=stub.set_crv(2.,f_k,q_k)
+                    c_x[:]=stub.set_crv(2.,q_k,f_k,f_1,x_k,x_0,df_1)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'f-c':
             if k == 0: enfc.par_add(f_k[0],v_k,k)
             else:
                 cont=enfc.par_pas(f_1[0],f_k[0],v_k,q_k[0])
                 if not cont:
-                    c_x[:]=stub.set_crv(2.,f_k,q_k)
+                    c_x[:]=stub.set_crv(2.,q_k,f_k,f_1,x_k,x_0,df_1)
                     [x_k,x_d,d_l,d_u,f_k,df_k,L_k,U_k,c_x]=stub.get()
         elif enf == 'gcm':
             if k > 0: 

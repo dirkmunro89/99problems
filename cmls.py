@@ -74,7 +74,7 @@ def t2sl(k, x_k, x_d, f_k, df_k, f_1, df_1, x_1, x_2, L_k, U_k, x_l, x_u, asf, m
         sph = 2.*(f_1 - f_k - np.dot(df_k,(x_1-x_k)))/np.maximum(np.linalg.norm(x_1-x_k)**2.,1e-6)
         c_x[0]=sph[0]
     else:
-        c_x[0]= np.ones_like(c_x[0])
+        c_x[0]= np.zeros_like(c_x[0])
 #
     c_x[0]=np.maximum(c_x[0],1e-6)
 #
