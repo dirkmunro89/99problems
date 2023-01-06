@@ -2,21 +2,23 @@
 import numpy as np
 from prob.util.topo2d import topo2d_init
 from prob.util.topo2d import topo2d_simu
+from cmls import t2rl as caml
+from subs.t2dual import t2d as subs
 #
 def init(g):
 #
-    mm=6
-    nelx=2*20*mm
-    nely=20*mm
-    v_l = 0.2
-    v_0 = 0.2
-    v_u = 1.0
+    nelx = 180*2
+    nely = 60*2
+    v_l = 0.0
+    v_0 = 0.4
+    v_u = 0.4
 #
     ft = 1
-    rmin = 1.1*mm
-    dext=int(np.ceil(rmin))
+    rmin = 5.4*2
+    dext=0#int(np.ceil(rmin))
     felx = nelx+dext
     fely = nely+2*dext
+    xPadd = -1*np.ones(felx*fely,dtype=float)
 #
     xPadd=np.zeros((felx,fely),dtype=float)
     tmp=-1*np.ones((nelx,nely),dtype=float)#.reshape(nelx,nely)
@@ -24,24 +26,23 @@ def init(g):
     xPadd[nelx-dext:,nely+dext:]=1.
     xPadd[nelx:,nely:nely+dext]=1.
     xPadd=xPadd.flatten()
-#
+# 
     # BC's and support
-    ndof=2*(nelx+1)*(nely+1)
     dofs=np.arange(2*(nelx+1)*(nely+1))
-    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([ndof-1]))
+    fix=np.union1d(dofs[0:2*(nely+1):2],np.array([2*(nelx+1)*(nely+1)-1]))
 
     # Set load
-    frc=[(1,0)]
+    frc=[(1,-1)]
 #
-    pen = 3.0
-    qen = 1.0
-    muc = 0.0
-    Emin = 1e-9; Emax=1.0
-    gv = -1.
+    pen =  3.0
+    qen =  1.0
+    muc =  0.0
+    Emin=1e-9; Emax=1.0
+    gv=0e0#-9.81#/nelx/nely
 #
     n = nelx*nely
     m = 1
-    x_l = np.ones(n,dtype=float)*0e0
+    x_l = np.zeros(n,dtype=float)
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
 #
@@ -53,19 +54,19 @@ def init(g):
 #
 def simu(n,m,x,aux,g):
 #
-    v_l=aux[2]
-    v_u=aux[4]
-#
     f = np.zeros((m + 1), dtype=float)
     df = np.zeros((m + 1, n), dtype=float)
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
+    v_l=aux[2]
+    v_u=aux[4]
+#
     f[0]=c
-    f[1]=-v/n/v_l+1.
+    f[1]=v/n-v_u
 #
     df[0][:] = dc
-    df[1][:] = -dv/n/v_l
+    df[1][:] = dv/n
 #
     return f, df
 #

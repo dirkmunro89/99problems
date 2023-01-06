@@ -5,16 +5,16 @@ from prob.util.topo2d import topo2d_simu
 #
 def init(g):
 #
-    mm=3
+    mm=6
     nelx=2*20*mm
     nely=20*mm
     v_l = 0.2
-    v_0 = 1.0
+    v_0 = 0.2
     v_u = 1.0
 #
     ft = 1
     rmin = 1.1*mm
-    dext=int(np.ceil(rmin))
+    dext=0#int(np.ceil(rmin))
     felx = nelx+dext
     fely = nely+2*dext
 #

@@ -5,7 +5,7 @@ from prob.util.topo2d import topo2d_simu
 #
 def init(g):
 #
-    mm=3
+    mm=6
     nelx=20*mm
     nely=20*mm
     v_l = 0.1
