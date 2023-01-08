@@ -26,7 +26,7 @@ class Stub:
     def set_crv(self,fct,q_k,f_k,f_1,al):
         c_x=self._c_x.copy()
         for j in range(len(f_k)):
-            if q_k[j] < f_k[j] or al==1:
+            if q_k[j] + 1e-6 < f_k[j] or al==1:
                 c_x[j]=np.maximum(c_x[j],1e-6)
                 c_x[j]=np.where(c_x[j]<1e-2, c_x[j]*10., c_x[j]*fct)
 #

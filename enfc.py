@@ -18,10 +18,10 @@ class Enfc:
         gama=self.gama
         f_k = g_k[0]; f_1 = g_1[0]
         # if feasible descent
-        if f_k < f_1 and np.amax(g_k[1:]) < 0.: return True
+        if f_k < f_1 and not np.amax(g_k[1:]) > 0.: return True
         # if conservative
         else:
-            if np.any(np.where(q_k < g_k,1,0)):
+            if np.any(np.where(q_k + 1e-6 < g_k,1,0)):
                 return False
             return True
 #
@@ -38,7 +38,7 @@ class Enfc:
         beta=self.beta
         pf=self.pf
         # check if acceptable to filter
-        if f_k+gama*v_k<min([p[0] for p in pf]) or v_k<beta*max(min([p[1] for p in pf]),0.):
+        if not f_k+gama*v_k>min([p[0] for p in pf]) or not v_k>beta*min([p[1] for p in pf]):
             df = f_1 - f_k # actual descent
             dq = f_1 - p_k # predicted descent
             if df < sgma*dq and dq > kapa*v_k**2.: 
