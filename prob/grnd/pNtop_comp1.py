@@ -63,10 +63,10 @@ def simu(n,m,x,aux,g):
     v_u=aux[4]
 #
     f[0]=c
-    f[1]=v/n-v_u
+    f[1]=v/n/v_u-1.
 #
     df[0][:] = dc
-    df[1][:] = dv/n
+    df[1][:] = dv/n/v_u
 #
     return f, df
 #
