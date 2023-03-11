@@ -7,7 +7,7 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
 params = {'legend.fontsize': 'small',
-          'figure.figsize': (20, 11),
+          'figure.figsize': (25, 6),
          'axes.labelsize': 'small',
          'axes.titlesize':'small',
          'xtick.labelsize':'small',
@@ -268,11 +268,11 @@ def plot(nelx,nely,x_k,b_k,Gx,Gy,H,Hs,ovrh,k):
 #
 #   Subplots
 #
-    fig,axs = plt.subplots(2,3)
+    fig,axs = plt.subplots(2,4)
 #   major_xticks = np.array(major_xticks)
 #   major_yticks = np.array(major_yticks)
     for j in range(2):
-        for i in range(3):
+        for i in range(4):
             axs[j,i].arrow(0,0,b_k[0]/bag*nelx/10.,b_k[1]/bag*nely/10,color='magenta',head_width=1.*nelx/20.)
             axs[j,i].grid()
 #           if nelx < 11 and nely < 11:
@@ -335,11 +335,36 @@ def plot(nelx,nely,x_k,b_k,Gx,Gy,H,Hs,ovrh,k):
 #   t = np.linspace(0., 1., num=8, endpoint=True)
     plt.colorbar(im, ax=axs[1,2])#, ticks=t)
 #
+#   interior
+#
+    rmin=2.
+    tmp=np.power(x_f,1.)*(1e-3/(mag+1e-3))
+    axs[0,3].set_title(r'Interior $ \mu = \rho {\epsilon}/ \left( \| \nabla \rho \| + \epsilon \right) $ %f (%f)'%(np.sum(tmp),(2*nelx/4-2*rmin)*(2*nely/8-2*rmin)))
+    im = axs[0,3].imshow(tmp.reshape((nely,nelx)), cmap='gray_r', origin='lower',\
+    interpolation='none',extent=(-nelx/2,nelx/2,-nely/2,nely/2),vmin=np.amin(tmp),vmax=np.amax(tmp))
+    plt.colorbar(im, ax=axs[0,3])
+#
+#   Cost of surface
+#
+#    [cst,_]=cost(nng)*mag
+#
+    pen=2.
+    icst= (2.-4.*pen)*tmp**2. + (4.*pen-1.)*tmp
+    axs[1,3].set_title(r'Cost (positive scalar) per volume density e.g. $ C_V[\mu] = \ldots $')
+    cmap = plt.cm.rainbow
+#   norm = colors.BoundaryNorm(np.arange(0, 180, 5), cmap.N)
+    im = axs[1,3].imshow(icst.reshape((nely,nelx)), origin='lower',\
+    extent=(-nelx/2,nelx/2,-nely/2,nely/2), cmap=cmap)#, vmin=0,vmax=1)
+#   t = np.linspace(0., 1., num=8, endpoint=True)
+    plt.colorbar(im, ax=axs[1,3])#, ticks=t)
+#
 #   stop
 #
     plt.figtext(0.015, 0.025, r'Sum E-norm of spatial gradient (surface area) $ \int_V \| \nabla \rho \| d V = $ %.1f'%(np.sum(mag)), fontsize=13)
-    plt.figtext(0.315, 0.025, r'Sum E-norm overhanging spatial gradient (overhanging s.area) $ \int_O \| \nabla \rho \| d V = $  %.1f'%(np.sum(ovr)), fontsize=13)
-    plt.figtext(0.7, 0.025, r'Cost, function of angle w.r.t. b-direct. ... $ \int_V C[\theta] \| \nabla \rho \| d V =  $  %.1f'%(np.sum(cst)), fontsize=13)
+    plt.figtext(0.27, 0.025, r'Sum E-norm overhanging spatial gradient (overhanging s.area) $ \int_O \| \nabla \rho \| d V = $  %.1f'%(np.sum(ovr)), fontsize=13)
+    plt.figtext(0.6, 0.025, r'Cost, function of angle w.r.t. b-direct. ... $ \int_V C[\theta] \| \nabla \rho \| d V =  $  %.1f'%(np.sum(cst)), fontsize=13)
+#
+    plt.figtext(0.85, 0.025, r'Volume cost ... $ \int_V C_V[\mu] d V =  $  %.1f'%(np.sum(icst)), fontsize=13)
 #
     fig.tight_layout(pad=4)
     plt.savefig('./png/topo_%03d.png'%k, dpi=99)#, dpi=199)
