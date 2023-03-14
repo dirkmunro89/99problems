@@ -2,15 +2,16 @@
 import numpy as np
 from prob.util.ropo2d import topo2d_init
 from prob.util.ropo2d import topo2d_simu
-from cmls import t2rl as caml
-from subs.t2dual import t2d as subs
+#
+from prob.util.cost2d import cost2d_simu
+from prob.util.cost2d import plot
 #
 def init(g):
 #
-    nelx = 60*1
-    nely = 60*1
+    nelx = 90#0#0*1
+    nely = 30#30#0*1
     v_l = 0.0
-    v_0 = 0.25
+    v_0 = 1.
     v_u = 0.25
 #
     ft = 1
@@ -50,11 +51,30 @@ def init(g):
     Emin=1e-9; Emax=1.0
     gv=0e0#-9.81#/nelx/nely
 #
-    n = nelx*nely
-    m = 1
-    x_l = np.zeros(n,dtype=float)
+    n = nelx*nely + 2
+    m = 2
+    x_l = np.zeros(n,dtype=float)+1e-3
     x_u = np.ones(n,dtype=float)
     x_k = v_0*np.ones(n,dtype=float)
+#
+    x_l[-2] = 0.
+    x_l[-1] = 1.
+    x_u[-2] = 0.
+    x_u[-1] = 1.
+    x_k[-2] = 0.
+    x_k[-1] = 1.
+#
+#   x_l[-2] = -1.
+#   x_l[-1] = -1.
+#   x_u[-2] = 1.
+#   x_u[-1] = 1.
+#   x_k[-2] = 0.1
+#   x_k[-1] = 1.
+#
+#
+#   matrices for spatial gradients
+#
+#   [Gx,Gy] = grad_init(nelx,nely,2.) # put into aux
 #
     aux=topo2d_init(nelx,nely,v_l,v_0,v_u,ft,rmin,felx,fely,xPadd,fix,frc,pen,qen,muc,Emin,Emax,gv,g)
 #
@@ -67,16 +87,50 @@ def simu(n,m,x,aux,g):
     f = np.zeros((m + 1), dtype=float)
     df = np.zeros((m + 1, n), dtype=float)
 #
-    [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
+    [nelx,nely,_,_,_,_,rmin,_,_,_,_,_,_,_,_,_,\
+        _,_,H,Hs,Gx,Gy,_,_,_,_,_,_,_,_]=aux
+#
+    x_k=np.zeros(nelx*nely,dtype=float)
+    x_k[:]=x[:nelx*nely]
+    b_k=x[-2:]
+#
+    [c,dc,v,dv]=topo2d_simu(nelx*nely,m,x_k,aux,g)
 #
     v_l=aux[2]
     v_u=aux[4]
 #
-    f[0]=c
-    f[1]=v/n/v_u-1.
+    f[0]=v/n
+    f[1]=c/7.289e0/1.-1.
 #
-    df[0][:] = dc
-    df[1][:] = dv/n/v_u
+    df[0][:nelx*nely] = dv/n
+    df[1][:nelx*nely] = dc/7.289e0/1.
+#
+#   cost
+#
+    ovrh = np.cos(np.pi/180.*50.)
+#
+    [srf, dsrfdb, dsrfdx, vol, dvoldx]=cost2d_simu(x_k, b_k, Gx, Gy, H, Hs)
+#
+#   f[1] = c/7.289e+00 - 1.
+#   df[1][:nelx*nely] = dc/7.289e+00
+#
+    f[0] = srf#/143.
+    df[0][:nelx*nely] = dsrfdx#/143.
+    df[0][-2:] = dsrfdb#/143.
+#
+    f[2]=-v/n/0.355+1e0*-1e6
+    df[2][:nelx*nely]=-dv/n/0.355
+
+#
+#   f[0] = v#/2121.
+#   df[0][:nelx*nely] = dv#/2121.
+#   df[0][-2:] = 0.
+#
+#   some plots
+#
+    itr=aux[-1]
+    plot(nelx,nely,x_k,b_k,Gx,Gy,H,Hs,ovrh,itr)
+    aux[-1]=aux[-1]+1
 #
     return f, df
 #

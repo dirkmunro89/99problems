@@ -1,8 +1,8 @@
 #
 import numpy as np
 #
-from prob.grnd.pNtop_cost2 import init
-from prob.grnd.pNtop_cost2 import simu
+from prob.grnd.pNtop_comp2 import init
+from prob.grnd.pNtop_comp2 import simu
 from cmls import mma as caml
 from subs.mma02dual import mma02 as subs
 #
