@@ -4,7 +4,8 @@ from scipy.optimize import minimize
 #
 def t2d(n,m,x_k,x_d_k,d_l,d_u,g,dg,L,U,c_x,c_s):
 #
-    ddL=np.maximum(np.absolute(c_x[0] + np.dot(x_d_k,c_x[1:])),1e-6)
+    ddL=np.maximum((c_x[0] + np.dot(x_d_k,c_x[1:])),1e-6)
+#   ddL=np.maximum(np.absolute(c_x[0] + np.dot(x_d_k,c_x[1:])),1e-6)
 #
     bds=[[0e0*c_s[i]-1e6*(1-c_s[i]),1e6] for i in range(m)]; tup_bds=tuple(bds)
     sol=minimize(qp_dual,x_d_k.copy(),args=(n,m,x_k,g,dg,d_l,d_u,ddL), \

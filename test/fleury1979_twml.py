@@ -15,7 +15,7 @@ def test():
     f=main('1000wml_t2r_t2e')
 #
     assert pytest.approx(f0_ref, abs=1e-3) == f[-1][0]
-    assert pytest.approx(39, abs=0.) == len(f)
+    assert pytest.approx(23, abs=0.) == len(f)
 #
 if __name__ == "__main__":
     test()

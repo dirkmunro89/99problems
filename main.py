@@ -31,7 +31,7 @@ def loop(init,apar,simu,caml,subs,g):
 #
     x_k[:] = np.maximum(np.minimum(x_k,x_u),x_l)
 #
-    scl0=1.;mov0=mov.copy(); k=0; h=[]; d_xi=1; t_xi=1; d_xe=1; x_d=np.zeros(m,dtype=float)#*1e6
+    scl0=1.;mov0=mov.copy(); k=0; h=[]; d_xi=1; t_xi=1; d_xe=1; x_d=np.zeros(m,dtype=float)#*0e0
     x_i=x_k.copy(); x_0=x_k.copy(); x_1=x_k.copy(); x_2=x_k.copy(); x_r=x_k.copy(); q_r = np.zeros(m+1)
     L_k=np.zeros_like(x_k); U_k=np.zeros_like(x_k); df_1 = np.zeros((m+1,n)); f_r = np.zeros(m+1)
     L=np.zeros_like(x_k); U=np.zeros_like(x_k); c_x=np.zeros((m+1,n)); f_1 = np.zeros(m+1)

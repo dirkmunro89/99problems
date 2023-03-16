@@ -17,7 +17,7 @@ def apar(n):
     enf='gcm'
 #
     kmx=8
-    cnv=[1e-1,1e-1,1e-4,1e-4,1e-4]
+    cnv=[1e-12,1e-1,1e-16,1e-4,1e-4]
 #
     return mov, asf, enf, kmx, cnv
 #
@@ -111,11 +111,11 @@ def simu(n,m,x,aux,g):
 #
     [c,dc,v,dv]=topo2d_simu(n,m,x,aux,g)
 #
-    f[0]=c/360#0
+    f[0]=c/360
 #   f[1]=v/n/v_u-1.
     f[1]=-v/n/v_l+1.
 #
-    df[0][:] = dc/360#0
+    df[0][:] = dc/360
 #   df[1][:] = dv/n/v_u
     df[1][:] = -dv/n/v_l
 #
